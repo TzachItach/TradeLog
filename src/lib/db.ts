@@ -1,16 +1,22 @@
 import { supabase, DEMO_MODE } from './supabase';
 import type { Account, Trade, Strategy } from '../types';
 
-// ─── LOAD ALL USER DATA ────────────────────────────────────────
+// לוג שגיאות Supabase בצורה ברורה
+function logErr(fn: string, error: { message: string; code?: string } | null) {
+  if (error) console.error(`[DB] ${fn}:`, error.message, error.code ?? '');
+}
+
+// ─── LOAD ────────────────────────────────────────────────────
 export async function loadUserData(userId: string): Promise<{
-  accounts: Account[];
-  strategies: Strategy[];
-  trades: Trade[];
+  accounts: Account[]; strategies: Strategy[]; trades: Trade[];
 }> {
   if (DEMO_MODE || !supabase) return { accounts: [], strategies: [], trades: [] };
 
-  // וודא שיש profile — צור אם חסר
-  await supabase.from('profiles').upsert({ id: userId }, { onConflict: 'id' });
+  // צור profile אם לא קיים (fallback על המקרה שה-trigger לא רץ)
+  const { error: pe } = await supabase
+    .from('profiles')
+    .upsert({ id: userId }, { onConflict: 'id' });
+  if (pe) logErr('profiles.upsert', pe);
 
   const [accRes, stratRes, tradeRes] = await Promise.all([
     supabase.from('accounts').select('*').eq('user_id', userId).order('created_at'),
@@ -18,9 +24,9 @@ export async function loadUserData(userId: string): Promise<{
     supabase.from('trades').select('*').eq('user_id', userId).order('trade_date', { ascending: false }),
   ]);
 
-  if (accRes.error) console.warn('accounts error:', accRes.error.message);
-  if (stratRes.error) console.warn('strategies error:', stratRes.error.message);
-  if (tradeRes.error) console.warn('trades error:', tradeRes.error.message);
+  logErr('accounts.select', accRes.error);
+  logErr('strategies.select', stratRes.error);
+  logErr('trades.select', tradeRes.error);
 
   const accounts: Account[] = (accRes.data ?? []).map((r) => ({
     id: r.id, user_id: r.user_id, name: r.name,
@@ -35,10 +41,7 @@ export async function loadUserData(userId: string): Promise<{
     is_active: r.is_active ?? true,
     fields: (r.strategy_fields ?? [])
       .sort((a: { sort_order: number }, b: { sort_order: number }) => a.sort_order - b.sort_order)
-      .map((f: {
-        id: string; strategy_id: string; field_type: string;
-        label: string; placeholder?: string; is_required: boolean; sort_order: number;
-      }) => ({
+      .map((f: { id: string; strategy_id: string; field_type: string; label: string; placeholder?: string; is_required: boolean; sort_order: number }) => ({
         id: f.id, strategy_id: f.strategy_id,
         field_type: f.field_type as 'checkbox' | 'text' | 'select' | 'tag',
         label: f.label, placeholder: f.placeholder,
@@ -56,61 +59,63 @@ export async function loadUserData(userId: string): Promise<{
     source: r.source ?? 'manual',
   }));
 
+  console.log(`[DB] Loaded: ${accounts.length} accounts, ${strategies.length} strategies, ${trades.length} trades`);
   return { accounts, strategies, trades };
 }
 
-// ─── ACCOUNTS ─────────────────────────────────────────────────
+// ─── ACCOUNTS ────────────────────────────────────────────────
 export async function dbSaveAccount(account: Account, userId: string) {
   if (DEMO_MODE || !supabase) return;
   const { error } = await supabase.from('accounts').upsert({
     id: account.id, user_id: userId, name: account.name,
     account_type: account.account_type, broker: account.broker,
-    initial_balance: account.initial_balance, currency: account.currency,
-    is_active: account.is_active,
+    initial_balance: account.initial_balance,
+    currency: account.currency, is_active: account.is_active,
   });
-  if (error) console.warn('dbSaveAccount:', error.message);
+  logErr('accounts.upsert', error);
 }
 
 export async function dbDeleteAccount(id: string) {
   if (DEMO_MODE || !supabase) return;
-  await supabase.from('accounts').delete().eq('id', id);
+  const { error } = await supabase.from('accounts').delete().eq('id', id);
+  logErr('accounts.delete', error);
 }
 
-// ─── STRATEGIES ───────────────────────────────────────────────
+// ─── STRATEGIES ──────────────────────────────────────────────
 export async function dbSaveStrategy(strategy: Strategy, userId: string) {
   if (DEMO_MODE || !supabase) return;
 
   const { error: se } = await supabase.from('strategies').upsert({
     id: strategy.id, user_id: userId, name: strategy.name,
-    description: strategy.description ?? '', color: strategy.color, is_active: strategy.is_active,
+    description: strategy.description ?? '', color: strategy.color,
+    is_active: strategy.is_active,
   });
-  if (se) { console.warn('dbSaveStrategy:', se.message); return; }
+  logErr('strategies.upsert', se);
+  if (se) return;
 
+  // מחק שדות ישנים וכנס מחדש
   await supabase.from('strategy_fields').delete().eq('strategy_id', strategy.id);
 
   if (strategy.fields.length > 0) {
     const { error: fe } = await supabase.from('strategy_fields').insert(
       strategy.fields.map((f, i) => ({
-        id: f.id,
-        strategy_id: strategy.id,
-        user_id: userId,
-        field_type: f.field_type,
-        label: f.label,
+        id: f.id, strategy_id: strategy.id, user_id: userId,
+        field_type: f.field_type, label: f.label,
         placeholder: f.placeholder ?? null,
-        is_required: f.is_required,
-        sort_order: f.sort_order ?? i + 1,
+        is_required: f.is_required, sort_order: f.sort_order ?? i + 1,
       }))
     );
-    if (fe) console.warn('dbSaveStrategy fields:', fe.message);
+    logErr('strategy_fields.insert', fe);
   }
 }
 
 export async function dbDeleteStrategy(id: string) {
   if (DEMO_MODE || !supabase) return;
-  await supabase.from('strategies').delete().eq('id', id);
+  const { error } = await supabase.from('strategies').delete().eq('id', id);
+  logErr('strategies.delete', error);
 }
 
-// ─── TRADES ───────────────────────────────────────────────────
+// ─── TRADES ──────────────────────────────────────────────────
 export async function dbSaveTrade(trade: Trade, userId: string) {
   if (DEMO_MODE || !supabase) return;
   const { error } = await supabase.from('trades').upsert({
@@ -121,23 +126,24 @@ export async function dbSaveTrade(trade: Trade, userId: string) {
     stop_loss_pts: trade.stop_loss_pts ?? null,
     take_profit_pts: trade.take_profit_pts ?? null,
     htf_pd_array: trade.htf_pd_array ?? null,
-    psychology: trade.psychology ?? null,
-    notes: trade.notes ?? null,
+    psychology: trade.psychology ?? null, notes: trade.notes ?? null,
     confirmations: trade.confirmations ?? {},
     field_values: trade.field_values ?? {},
     source: trade.source ?? 'manual', status: 'complete',
   });
-  if (error) console.warn('dbSaveTrade:', error.message);
+  logErr('trades.upsert', error);
 }
 
 export async function dbDeleteTrade(id: string) {
   if (DEMO_MODE || !supabase) return;
-  await supabase.from('trades').delete().eq('id', id);
+  const { error } = await supabase.from('trades').delete().eq('id', id);
+  logErr('trades.delete', error);
 }
 
-// ─── SEED NEW USER ────────────────────────────────────────────
+// ─── SEED ────────────────────────────────────────────────────
 export async function dbSeedNewUser(userId: string, account: Account, strategies: Strategy[]) {
   if (DEMO_MODE || !supabase) return;
   await dbSaveAccount(account, userId);
   for (const s of strategies) await dbSaveStrategy(s, userId);
+  console.log('[DB] New user seeded ✓');
 }
