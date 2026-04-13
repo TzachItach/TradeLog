@@ -51,6 +51,14 @@ function AuthListener({ onReady }: { onReady: () => void }) {
     // בדיקה חד-פעמית של session קיים (לאחר OAuth redirect / רענון)
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
+        // נקה נתוני demo שאולי נשמרו ב-localStorage
+        useStore.setState({
+          trades: [],
+          accounts: [],
+          strategies: [],
+          selectedAccount: 'all',
+          isDemo: false,
+        });
         setUser({
           id: session.user.id,
           email: session.user.email ?? '',
@@ -58,13 +66,20 @@ function AuthListener({ onReady }: { onReady: () => void }) {
         });
         navigate('/dashboard', { replace: true });
       }
-      // סיימנו לבדוק — מותר לרנדר את הדף
       onReady();
     });
 
     // הקשב לשינויים עתידיים (login / logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
+        // נקה נתוני demo בכל התחברות
+        useStore.setState({
+          trades: [],
+          accounts: [],
+          strategies: [],
+          selectedAccount: 'all',
+          isDemo: false,
+        });
         setUser({
           id: session.user.id,
           email: session.user.email ?? '',
@@ -83,7 +98,7 @@ function AuthListener({ onReady }: { onReady: () => void }) {
 }
 
 function AppEffects() {
-  const { lang, fontSize, highContrast, grayscale, readableFont, loadDemoData, accounts } = useStore();
+  const { lang, fontSize, highContrast, grayscale, readableFont, loadDemoData } = useStore();
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -107,7 +122,8 @@ function AppEffects() {
   }, [readableFont]);
 
   useEffect(() => {
-    if (DEMO_MODE && accounts.length === 0) {
+    // טען demo data רק במצב demo — לעולם לא למשתמש אמיתי
+    if (DEMO_MODE) {
       loadDemoData();
     }
   }, []);
