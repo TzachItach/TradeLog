@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { useT } from '../i18n';
 import { signOut, DEMO_MODE } from '../lib/supabase';
+import BrokerImport from '../components/BrokerImport';
 import type { Account, Strategy, StrategyField } from '../types';
 
 const COLORS = ['#4a7dff', '#00c896', '#ff9f43', '#ff3355', '#a855f7', '#06b6d4', '#f59e0b', '#ec4899'];
@@ -410,6 +411,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const [accForm, setAccForm] = useState<'new' | string | null>(null);
   const [stratForm, setStratForm] = useState<'new' | string | null>(null);
+  const [showImport, setShowImport] = useState(false);
 
   const handleLogout = async () => {
     if (!window.confirm(lang === 'he' ? 'האם אתה בטוח שברצונך להתנתק?' : 'Are you sure you want to log out?')) return;
@@ -518,8 +520,42 @@ export default function Settings() {
         )}
       </div>
 
-      {/* חיבורי ברוקר */}
-      <BrokerSection lang={lang} accounts={accounts} user={user} />
+      {/* ייבוא CSV */}
+      <div className="settings-section">
+        <div className="section-title">{lang === 'he' ? 'ייבוא עסקאות מברוקר' : 'Import Trades from Broker'}</div>
+
+        {[
+          { name: 'Tradovate', desc: lang === 'he' ? 'Activity → Trade History → Export CSV' : 'Activity → Trade History → Export CSV' },
+          { name: 'TopstepX',  desc: lang === 'he' ? 'Reports → Trading Activity → Export' : 'Reports → Trading Activity → Export' },
+        ].map((b) => (
+          <div key={b.name} className="list-card">
+            <div className="list-card-info">
+              <div className="list-card-name">{b.name}</div>
+              <div className="list-card-meta">{b.desc}</div>
+            </div>
+            <button
+              className="btn btn-primary"
+              style={{ padding: '6px 14px', fontSize: '.82rem', whiteSpace: 'nowrap' }}
+              onClick={() => setShowImport(true)}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17,8 12,3 7,8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              {lang === 'he' ? 'ייבא CSV' : 'Import CSV'}
+            </button>
+          </div>
+        ))}
+
+        <div style={{ marginTop: 10, padding: '8px 12px', background: 'var(--s2)', borderRadius: 7, fontSize: '.74rem', color: 'var(--t3)', lineHeight: 1.7 }}>
+          {lang === 'he'
+            ? '💡 ייבוא CSV מונע כפילויות אוטומטית — ניתן לייבא מספר פעמים בבטחה'
+            : '💡 CSV import prevents duplicates automatically — safe to import multiple times'}
+        </div>
+      </div>
+
+      {showImport && <BrokerImport onClose={() => setShowImport(false)} />}
 
       {/* פרופיל + התנתקות */}
       <div className="settings-section">
