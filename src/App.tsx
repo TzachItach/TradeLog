@@ -11,7 +11,7 @@ import Auth from './pages/Auth';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 
-function LoadingScreen() {
+function LoadingScreen({ text }: { text?: string }) {
   return (
     <div style={{
       minHeight: '100vh', background: '#060910',
@@ -24,35 +24,45 @@ function LoadingScreen() {
         </svg>
       </div>
       <div style={{ color: '#5b8fff', fontSize: '.9rem', fontWeight: 600, fontFamily: 'system-ui' }}>TradeLog</div>
-      <div style={{ color: '#545e80', fontSize: '.78rem', fontFamily: 'system-ui' }}>מאמת...</div>
+      <div style={{ color: '#545e80', fontSize: '.78rem', fontFamily: 'system-ui' }}>{text ?? 'מאמת...'}</div>
+      {/* Spinner */}
+      <div style={{
+        width: 20, height: 20, border: '2px solid #222840',
+        borderTopColor: '#5b8fff', borderRadius: '50%',
+        animation: 'spin 0.8s linear infinite',
+      }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
 
 function AuthListener({ onReady }: { onReady: () => void }) {
-  const { initRealUser } = useStore();
+  const { initRealUser, setUser } = useStore();
   const navigate = useNavigate();
 
-  const handleUser = (u: { id: string; email?: string; user_metadata?: Record<string, string> }) => {
+  const handleUser = async (u: { id: string; email?: string; user_metadata?: Record<string, string> }) => {
     const name = u.user_metadata?.full_name ?? u.email ?? 'User';
     const email = u.email ?? '';
-    initRealUser(u.id, name, email);
+    // initRealUser הוא async — טוען מ-Supabase
+    await initRealUser(u.id, name, email);
     navigate('/dashboard', { replace: true });
   };
 
   useEffect(() => {
     if (DEMO_MODE || !supabase) { onReady(); return; }
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) handleUser(session.user as Parameters<typeof handleUser>[0]);
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        await handleUser(session.user as Parameters<typeof handleUser>[0]);
+      }
       onReady();
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        handleUser(session.user as Parameters<typeof handleUser>[0]);
+        await handleUser(session.user as Parameters<typeof handleUser>[0]);
       } else {
-        useStore.getState().setUser(null);
+        setUser(null);
       }
     });
 
@@ -73,16 +83,16 @@ function AppEffects() {
   useEffect(() => { document.documentElement.style.fontSize = `${fontSize}%`; }, [fontSize]);
 
   useEffect(() => {
-    document.body.classList.toggle('light', !darkMode);
-  }, [darkMode]);
-
-  useEffect(() => {
     document.body.style.filter = grayscale ? 'grayscale(100%)' : highContrast ? 'contrast(160%)' : '';
   }, [grayscale, highContrast]);
 
   useEffect(() => {
     document.documentElement.classList.toggle('readable-font', readableFont);
   }, [readableFont]);
+
+  useEffect(() => {
+    document.body.classList.toggle('light', !darkMode);
+  }, [darkMode]);
 
   useEffect(() => {
     if (DEMO_MODE) loadDemoData();
@@ -92,8 +102,10 @@ function AppEffects() {
 }
 
 function ProtectedRoute({ children, ready }: { children: React.ReactNode; ready: boolean }) {
-  const { user } = useStore();
-  if (!DEMO_MODE && !ready) return <LoadingScreen />;
+  const { user, dataLoading } = useStore();
+
+  if (!DEMO_MODE && !ready) return <LoadingScreen text="מאמת..." />;
+  if (!DEMO_MODE && dataLoading) return <LoadingScreen text="טוען נתונים..." />;
   if (!DEMO_MODE && !user) return <Navigate to="/auth" replace />;
   return <>{children}</>;
 }
