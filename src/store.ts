@@ -59,6 +59,7 @@ export function createDefaultAccount(): Account {
 
 interface AppState {
   isDemo: boolean;
+  lastUserId: string | null;
   user: { id: string; email?: string; name?: string } | null;
   accounts: Account[];
   trades: Trade[];
@@ -74,6 +75,7 @@ interface AppState {
   grayscale: boolean;
   readableFont: boolean;
   sidebarCollapsed: boolean;
+  darkMode: boolean;
 
   setDemo: (v: boolean) => void;
   setUser: (u: AppState['user']) => void;
@@ -83,6 +85,7 @@ interface AppState {
   setModal: (m: ModalState | null) => void;
   setActiveView: (v: string) => void;
   setSidebarCollapsed: (v: boolean) => void;
+  setDarkMode: (v: boolean) => void;
 
   addTrade: (t: Trade) => void;
   updateTrade: (t: Trade) => void;
@@ -102,7 +105,7 @@ interface AppState {
   setReadableFont: (v: boolean) => void;
 
   loadDemoData: () => void;
-  initRealUser: (userId: string) => void;
+  initRealUser: (userId: string, name: string, email: string) => void;
   getFilteredTrades: () => Trade[];
   getStats: () => {
     totalPnL: number; winRate: number; totalTrades: number;
@@ -116,6 +119,7 @@ export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
       isDemo: true,
+      lastUserId: null,
       user: null,
       accounts: [],
       trades: [],
@@ -131,6 +135,7 @@ export const useStore = create<AppState>()(
       grayscale: false,
       readableFont: false,
       sidebarCollapsed: false,
+      darkMode: true,
 
       setDemo: (v) => set({ isDemo: v }),
       setUser: (u) => set({ user: u }),
@@ -140,6 +145,7 @@ export const useStore = create<AppState>()(
       setModal: (m) => set({ modal: m }),
       setActiveView: (v) => set({ activeView: v }),
       setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
+      setDarkMode: (v) => set({ darkMode: v }),
 
       addTrade: (t) => set((s) => ({ trades: [...s.trades, t] })),
       updateTrade: (t) => set((s) => ({ trades: s.trades.map((x) => (x.id === t.id ? t : x)) })),
@@ -169,23 +175,31 @@ export const useStore = create<AppState>()(
           trades: MOCK_TRADES,
           strategies: MOCK_STRATEGIES,
           isDemo: true,
+          lastUserId: null,
           user: { id: 'demo', name: 'Demo User', email: 'demo@tradelog.app' },
         }),
 
-      initRealUser: (userId: string) => {
+      initRealUser: (userId, name, email) => {
         const current = get();
-        // משתמש חוזר — אל תיגע בנתונים שלו
-        if (!current.isDemo && current.user?.id === userId) return;
-        // משתמש חדש — אתחל עם ברירות מחדל
+
+        // אותו משתמש — התנתק וחזר — שמור הכל, רק עדכן פרטי user
+        if (current.lastUserId === userId) {
+          set({
+            user: { id: userId, name, email },
+            isDemo: false,
+          });
+          return;
+        }
+
+        // משתמש חדש לגמרי — אתחל עם ברירות מחדל
         set({
           isDemo: false,
+          lastUserId: userId,
+          user: { id: userId, name, email },
           trades: [],
           selectedAccount: 'all',
-          accounts: current.isDemo ? [createDefaultAccount()] : current.accounts,
-          strategies:
-            current.isDemo || current.strategies.length === 0
-              ? createDefaultStrategies()
-              : current.strategies,
+          accounts: [createDefaultAccount()],
+          strategies: createDefaultStrategies(),
         });
       },
 
@@ -225,11 +239,13 @@ export const useStore = create<AppState>()(
         grayscale: s.grayscale,
         readableFont: s.readableFont,
         sidebarCollapsed: s.sidebarCollapsed,
+        darkMode: s.darkMode,
         accounts: s.accounts,
         trades: s.trades,
         strategies: s.strategies,
         selectedAccount: s.selectedAccount,
         isDemo: s.isDemo,
+        lastUserId: s.lastUserId,
         user: s.user,
       }),
     },
