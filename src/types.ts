@@ -1,0 +1,97 @@
+export type Language = 'he' | 'en';
+export type TradeDirection = 'long' | 'short';
+export type AccountType = 'personal' | 'prop_firm' | 'demo';
+export type BrokerName = 'manual' | 'tradovate' | 'topstepx';
+export type FieldType = 'checkbox' | 'text' | 'select' | 'tag';
+export type TradeSource = 'manual' | 'auto';
+
+export interface Account {
+  id: string;
+  user_id?: string;
+  name: string;
+  account_type: AccountType;
+  broker: BrokerName;
+  initial_balance: number;
+  currency: string;
+  is_active: boolean;
+}
+
+export interface StrategyField {
+  id: string;
+  strategy_id: string;
+  field_type: FieldType;
+  label: string;
+  placeholder?: string;
+  options?: string[];
+  is_required: boolean;
+  sort_order: number;
+}
+
+export interface Strategy {
+  id: string;
+  user_id?: string;
+  name: string;
+  description?: string;
+  color: string;
+  is_active: boolean;
+  fields: StrategyField[];
+}
+
+export interface Trade {
+  id: string;
+  user_id?: string;
+  account_id: string;
+  strategy_id?: string;
+  symbol: string;
+  direction: TradeDirection;
+  trade_date: string;
+  pnl: number;
+  size?: number;
+  stop_loss_pts?: number;
+  take_profit_pts?: number;
+  htf_pd_array?: string;
+  psychology?: string;
+  notes?: string;
+  confirmations: Record<string, boolean>;
+  field_values: Record<string, unknown>;
+  source: TradeSource;
+  media?: TradeMedia[];
+}
+
+export interface TradeMedia {
+  id: string;
+  trade_id: string;
+  storage_path: string;
+  label?: string;
+}
+
+export interface DayStats {
+  dateStr: string;
+  trades: Trade[];
+  totalPnL: number;
+  wins: number;
+  losses: number;
+}
+
+export interface AppStats {
+  totalPnL: number;
+  winRate: number;
+  totalTrades: number;
+  avgWin: number;
+  avgLoss: number;
+  profitFactor: number;
+}
+
+export type ModalState =
+  | { type: 'new'; date?: string }
+  | { type: 'edit'; tradeId: string }
+  | { type: 'account'; accountId?: string }
+  | { type: 'strategy'; strategyId?: string };
+
+export interface BrokerConnection {
+  id: string;
+  account_id: string;
+  broker: BrokerName;
+  is_active: boolean;
+  last_synced_at?: string;
+}
