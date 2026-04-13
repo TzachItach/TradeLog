@@ -11,89 +11,75 @@ import Auth from './pages/Auth';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 
-function LoadingScreen({ text }: { text?: string }) {
+/* מסך טעינה קצר — רק לבדיקת session ראשונית */
+function SplashScreen() {
   return (
     <div style={{
       minHeight: '100vh', background: '#060910',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      flexDirection: 'column', gap: 16,
+      flexDirection: 'column', gap: 14,
     }}>
       <div style={{ width: 44, height: 44, borderRadius: 10, background: '#5b8fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
           <polyline points="3,17 9,11 13,15 21,6" />
         </svg>
       </div>
-      <div style={{ color: '#5b8fff', fontSize: '.9rem', fontWeight: 600, fontFamily: 'system-ui' }}>TradeLog</div>
-      <div style={{ color: '#545e80', fontSize: '.78rem', fontFamily: 'system-ui' }}>{text ?? 'טוען...'}</div>
-      <div style={{ width: 20, height: 20, border: '2px solid #222840', borderTopColor: '#5b8fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ color: '#5b8fff', fontSize: '.9rem', fontWeight: 700, fontFamily: 'system-ui' }}>TradeLog</div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div style={{ width: 18, height: 18, border: '2px solid #222840', borderTopColor: '#5b8fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>
   );
 }
 
-function AuthListener({ onReady }: { onReady: () => void }) {
-  const { initRealUser, setUser } = useStore();
+function AuthListener({ onReady }: { onReady: (hasUser: boolean) => void }) {
+  const { setUser, loadDataInBackground } = useStore();
   const navigate = useNavigate();
   const handledRef = useRef(false);
-  const readyCalledRef = useRef(false);
 
-  const markReady = () => {
-    if (!readyCalledRef.current) {
-      readyCalledRef.current = true;
-      onReady();
-    }
-  };
-
-  const handleUser = async (u: { id: string; email?: string; user_metadata?: Record<string, string> }) => {
+  const handleUser = (u: { id: string; email?: string; user_metadata?: Record<string, string> }) => {
     if (handledRef.current) return;
     handledRef.current = true;
+
     const name = u.user_metadata?.full_name ?? u.email ?? 'User';
     const email = u.email ?? '';
-    try {
-      await initRealUser(u.id, name, email);
-    } catch (e) {
-      console.error('initRealUser failed:', e);
-    }
-    markReady();
+
+    // 1. עדכן user מיד — פתח את האפליקציה
+    setUser({ id: u.id, name, email });
+    onReady(true);
     navigate('/dashboard', { replace: true });
+
+    // 2. טען נתונים מ-Supabase ברקע — בלי לחסום
+    loadDataInBackground(u.id, name, email);
   };
 
   useEffect(() => {
-    if (DEMO_MODE || !supabase) { markReady(); return; }
+    if (DEMO_MODE || !supabase) { onReady(false); return; }
 
-    // timeout — אם Supabase לא עונה תוך 4 שניות, המשך לדף ההתחברות
-    const fallbackTimer = setTimeout(() => {
-      console.warn('Auth check timed out — redirecting to login');
-      markReady();
-    }, 4000);
+    // timeout קצר — 3 שניות לבדיקת session בלבד
+    const timer = setTimeout(() => { onReady(false); }, 3000);
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      clearTimeout(fallbackTimer);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      clearTimeout(timer);
       if (session?.user) {
-        await handleUser(session.user as Parameters<typeof handleUser>[0]);
+        handleUser(session.user as Parameters<typeof handleUser>[0]);
       } else {
-        markReady();
+        onReady(false);
       }
-    }).catch(() => {
-      clearTimeout(fallbackTimer);
-      markReady();
-    });
+    }).catch(() => { clearTimeout(timer); onReady(false); });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        clearTimeout(fallbackTimer);
-        await handleUser(session.user as Parameters<typeof handleUser>[0]);
+        clearTimeout(timer);
+        handleUser(session.user as Parameters<typeof handleUser>[0]);
+        onReady(true);
       } else {
         handledRef.current = false;
         setUser(null);
-        markReady();
+        onReady(false);
       }
     });
 
-    return () => {
-      clearTimeout(fallbackTimer);
-      subscription.unsubscribe();
-    };
+    return () => { clearTimeout(timer); subscription.unsubscribe(); };
   }, []);
 
   return null;
@@ -128,35 +114,34 @@ function AppEffects() {
   return null;
 }
 
-function ProtectedRoute({ children, ready }: { children: React.ReactNode; ready: boolean }) {
-  const { user, dataLoading } = useStore();
+function ProtectedRoute({ children, ready, hasUser }: { children: React.ReactNode; ready: boolean; hasUser: boolean }) {
+  const { user } = useStore();
+  const isLoggedIn = hasUser || !!user;
 
-  // עדיין בודק session
-  if (!DEMO_MODE && !ready) return <LoadingScreen text="מאמת..." />;
+  // עדיין בודק session — הצג splash קצר
+  if (!DEMO_MODE && !ready) return <SplashScreen />;
 
-  // יש session, טוען נתונים מ-Supabase
-  if (!DEMO_MODE && dataLoading) return <LoadingScreen text="טוען נתונים..." />;
+  // אין משתמש — עבור להתחברות
+  if (!DEMO_MODE && !isLoggedIn) return <Navigate to="/auth" replace />;
 
-  // אין session — עבור להתחברות
-  if (!DEMO_MODE && !user) return <Navigate to="/auth" replace />;
-
+  // יש משתמש — פתח מיד (נתונים יטענו ברקע)
   return <>{children}</>;
 }
 
 export default function App() {
-  // במצב demo — מיד מוכן. במצב Supabase — ממתין לבדיקת session
-  const [authReady, setAuthReady] = useState(DEMO_MODE);
+  const [ready, setReady] = useState(DEMO_MODE);
+  const [hasUser, setHasUser] = useState(false);
 
   return (
     <BrowserRouter>
       <AppEffects />
-      <AuthListener onReady={() => setAuthReady(true)} />
+      <AuthListener onReady={(u) => { setReady(true); setHasUser(u); }} />
       <Routes>
         <Route path="/auth" element={<Auth />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/dashboard/*" element={
-          <ProtectedRoute ready={authReady}>
+          <ProtectedRoute ready={ready} hasUser={hasUser}>
             <Layout />
           </ProtectedRoute>
         }>
