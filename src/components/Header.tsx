@@ -1,9 +1,11 @@
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { useT } from '../i18n';
 
 export default function Header() {
   const { lang, setLang, accounts, selectedAccount, setSelectedAccount, setModal, user, sidebarCollapsed, setSidebarCollapsed } = useStore();
   const T = useT(lang);
+  const navigate = useNavigate();
 
   const initials = user?.name
     ? user.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
@@ -11,6 +13,7 @@ export default function Header() {
 
   return (
     <header className="header">
+      {/* המבורגר — מובייל בלבד */}
       <button
         className="btn btn-icon hamburger-btn"
         onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -23,6 +26,24 @@ export default function Header() {
         </svg>
       </button>
 
+      {/* לוגו — מובייל בלבד, דסקטופ מוסתר (הלוגו בסיידבר) */}
+      <div
+        className="header-logo"
+        onClick={() => navigate('/dashboard')}
+        title={T.appName}
+      >
+        <div style={{
+          width: 26, height: 26, borderRadius: 7, background: 'var(--b)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+            <polyline points="3,17 9,11 13,15 21,6" />
+          </svg>
+        </div>
+        <span style={{ fontWeight: 700, fontSize: '.92rem', color: 'var(--b)' }}>{T.appName}</span>
+      </div>
+
+      {/* טאבי חשבונות */}
       <div className="account-tabs">
         <div
           className={"account-tab" + (selectedAccount === 'all' ? ' active' : '')}
@@ -50,10 +71,7 @@ export default function Header() {
           {lang === 'he' ? 'EN' : 'עב'}
         </button>
 
-        <button
-          className="btn btn-primary"
-          onClick={() => setModal({ type: 'new' })}
-        >
+        <button className="btn btn-primary" onClick={() => setModal({ type: 'new' })}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
           </svg>
