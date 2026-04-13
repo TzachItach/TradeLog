@@ -434,16 +434,59 @@ input[type=checkbox] { accent-color: var(--b); cursor: pointer; }
 .toast.error   { border-color: rgba(255,51,85,.4); }
 @keyframes slideUp { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 /* ── Responsive ── */
+
+/* המבורגר — מוסתר בדסקטופ */
+.hamburger-btn { display: none; }
+.sidebar-close-btn { display: none; }
+.sidebar-backdrop { display: none; }
+
 @media (max-width: 768px) {
-  .sidebar { position: fixed; inset-block: 0; inset-inline-start: 0; transform: translateX(-100%); transition: transform .2s; }
+  /* הסיידבר הופך ל-overlay */
+  .sidebar {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    transform: translateX(-100%);
+    transition: transform .22s ease;
+    z-index: 200;
+    width: 220px !important;
+  }
   [dir=rtl] .sidebar { transform: translateX(100%); }
-  .sidebar.mobile-open { transform: translateX(0); }
+  .sidebar.mobile-open { transform: translateX(0) !important; }
+
+  /* Backdrop כהה מאחורי הסיידבר */
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    z-index: 199;
+    backdrop-filter: blur(2px);
+  }
+
+  /* כפתורי מובייל */
+  .hamburger-btn { display: flex !important; }
+  .sidebar-close-btn { display: flex !important; }
+  .nav-label { opacity: 1 !important; width: auto !important; }
+  .logo-text { opacity: 1 !important; width: auto !important; }
+
+  /* פורמים */
   .form-grid { grid-template-columns: 1fr; }
   .form-grid .s2 { grid-column: 1; }
   .report-cards { grid-template-columns: 1fr; }
   .stats-bar { grid-template-columns: repeat(3, 1fr); }
+
+  /* הסתר טקסט "עסקה חדשה" — השאר רק ה + */
+  .new-trade-label { display: none; }
+
+  /* Header */
+  .header { padding: 0 12px; gap: 8px; }
+  .page-content { padding: 14px; }
 }
+
 @media (max-width: 480px) {
   .stats-bar { grid-template-columns: repeat(2, 1fr); }
   .account-tabs { display: none; }
+  .modal-box { padding: 16px; }
+  .cb-grid { grid-template-columns: 1fr; }
 }
