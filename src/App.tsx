@@ -24,7 +24,7 @@ function LoadingScreen({ text }: { text?: string }) {
         </svg>
       </div>
       <div style={{ color: '#5b8fff', fontSize: '.9rem', fontWeight: 600, fontFamily: 'system-ui' }}>TradeLog</div>
-      <div style={{ color: '#545e80', fontSize: '.78rem', fontFamily: 'system-ui' }}>{text ?? 'מאמת...'}</div>
+      <div style={{ color: '#545e80', fontSize: '.78rem', fontFamily: 'system-ui' }}>{text ?? 'טוען...'}</div>
       <div style={{ width: 20, height: 20, border: '2px solid #222840', borderTopColor: '#5b8fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
@@ -34,8 +34,15 @@ function LoadingScreen({ text }: { text?: string }) {
 function AuthListener({ onReady }: { onReady: () => void }) {
   const { initRealUser, setUser } = useStore();
   const navigate = useNavigate();
-  // מניעת double-init כשגם getSession וגם onAuthStateChange מופעלים
   const handledRef = useRef(false);
+  const readyCalledRef = useRef(false);
+
+  const markReady = () => {
+    if (!readyCalledRef.current) {
+      readyCalledRef.current = true;
+      onReady();
+    }
+  };
 
   const handleUser = async (u: { id: string; email?: string; user_metadata?: Record<string, string> }) => {
     if (handledRef.current) return;
@@ -47,32 +54,46 @@ function AuthListener({ onReady }: { onReady: () => void }) {
     } catch (e) {
       console.error('initRealUser failed:', e);
     }
+    markReady();
     navigate('/dashboard', { replace: true });
   };
 
   useEffect(() => {
-    if (DEMO_MODE || !supabase) { onReady(); return; }
+    if (DEMO_MODE || !supabase) { markReady(); return; }
 
-    // בדיקת session קיים
+    // timeout — אם Supabase לא עונה תוך 4 שניות, המשך לדף ההתחברות
+    const fallbackTimer = setTimeout(() => {
+      console.warn('Auth check timed out — redirecting to login');
+      markReady();
+    }, 4000);
+
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      clearTimeout(fallbackTimer);
       if (session?.user) {
         await handleUser(session.user as Parameters<typeof handleUser>[0]);
+      } else {
+        markReady();
       }
-      onReady();
-    }).catch(() => onReady()); // גם אם נכשל — המשך
+    }).catch(() => {
+      clearTimeout(fallbackTimer);
+      markReady();
+    });
 
-    // הקשב לשינויים עתידיים
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
+        clearTimeout(fallbackTimer);
         await handleUser(session.user as Parameters<typeof handleUser>[0]);
-        onReady();
       } else {
         handledRef.current = false;
         setUser(null);
+        markReady();
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(fallbackTimer);
+      subscription.unsubscribe();
+    };
   }, []);
 
   return null;
@@ -110,13 +131,20 @@ function AppEffects() {
 function ProtectedRoute({ children, ready }: { children: React.ReactNode; ready: boolean }) {
   const { user, dataLoading } = useStore();
 
+  // עדיין בודק session
   if (!DEMO_MODE && !ready) return <LoadingScreen text="מאמת..." />;
+
+  // יש session, טוען נתונים מ-Supabase
   if (!DEMO_MODE && dataLoading) return <LoadingScreen text="טוען נתונים..." />;
+
+  // אין session — עבור להתחברות
   if (!DEMO_MODE && !user) return <Navigate to="/auth" replace />;
+
   return <>{children}</>;
 }
 
 export default function App() {
+  // במצב demo — מיד מוכן. במצב Supabase — ממתין לבדיקת session
   const [authReady, setAuthReady] = useState(DEMO_MODE);
 
   return (
