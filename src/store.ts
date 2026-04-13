@@ -1,7 +1,61 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Account, Trade, Strategy, Language, ModalState } from './types';
-import { MOCK_ACCOUNTS, MOCK_TRADES, MOCK_STRATEGIES } from './mockData';
+import { MOCK_ACCOUNTS, MOCK_TRADES, MOCK_STRATEGIES, TURTLE_SOUP_CHECKBOXES } from './mockData';
+
+const STRAT_ID = 's-turtle-soup';
+
+export function createDefaultStrategies(): Strategy[] {
+  return [
+    {
+      id: STRAT_ID,
+      name: 'Turtle Soup',
+      description: 'ICT Turtle Soup Setup',
+      color: '#4a7dff',
+      is_active: true,
+      fields: [
+        ...TURTLE_SOUP_CHECKBOXES.map((label, i) => ({
+          id: `f-ts-cb-${i}`,
+          strategy_id: STRAT_ID,
+          field_type: 'checkbox' as const,
+          label,
+          is_required: false,
+          sort_order: i + 1,
+        })),
+        {
+          id: 'f-ts-htf',
+          strategy_id: STRAT_ID,
+          field_type: 'text' as const,
+          label: 'HTF PD Array',
+          placeholder: 'e.g. 4H FVG / 1D OB',
+          is_required: false,
+          sort_order: 11,
+        },
+        {
+          id: 'f-ts-psy',
+          strategy_id: STRAT_ID,
+          field_type: 'text' as const,
+          label: 'Psychology',
+          placeholder: 'Focus, emotions...',
+          is_required: false,
+          sort_order: 12,
+        },
+      ],
+    },
+  ];
+}
+
+export function createDefaultAccount(): Account {
+  return {
+    id: 'a-default',
+    name: 'חשבון אישי',
+    account_type: 'personal',
+    broker: 'manual',
+    initial_balance: 0,
+    currency: 'USD',
+    is_active: true,
+  };
+}
 
 interface AppState {
   isDemo: boolean;
@@ -48,6 +102,7 @@ interface AppState {
   setReadableFont: (v: boolean) => void;
 
   loadDemoData: () => void;
+  initRealUser: (userId: string) => void;
   getFilteredTrades: () => Trade[];
   getStats: () => {
     totalPnL: number; winRate: number; totalTrades: number;
@@ -76,7 +131,6 @@ export const useStore = create<AppState>()(
       grayscale: false,
       readableFont: false,
       sidebarCollapsed: false,
-      authChecked: false,
 
       setDemo: (v) => set({ isDemo: v }),
       setUser: (u) => set({ user: u }),
@@ -86,7 +140,6 @@ export const useStore = create<AppState>()(
       setModal: (m) => set({ modal: m }),
       setActiveView: (v) => set({ activeView: v }),
       setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
-      setAuthChecked: (v: boolean) => set({ authChecked: v }),
 
       addTrade: (t) => set((s) => ({ trades: [...s.trades, t] })),
       updateTrade: (t) => set((s) => ({ trades: s.trades.map((x) => (x.id === t.id ? t : x)) })),
@@ -118,6 +171,23 @@ export const useStore = create<AppState>()(
           isDemo: true,
           user: { id: 'demo', name: 'Demo User', email: 'demo@tradelog.app' },
         }),
+
+      initRealUser: (userId: string) => {
+        const current = get();
+        // משתמש חוזר — אל תיגע בנתונים שלו
+        if (!current.isDemo && current.user?.id === userId) return;
+        // משתמש חדש — אתחל עם ברירות מחדל
+        set({
+          isDemo: false,
+          trades: [],
+          selectedAccount: 'all',
+          accounts: current.isDemo ? [createDefaultAccount()] : current.accounts,
+          strategies:
+            current.isDemo || current.strategies.length === 0
+              ? createDefaultStrategies()
+              : current.strategies,
+        });
+      },
 
       getFilteredTrades: () => {
         const { trades, selectedAccount } = get();
