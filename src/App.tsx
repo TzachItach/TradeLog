@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useStore } from './store';
-import { DEMO_MODE } from './lib/supabase';
+import { supabase, DEMO_MODE } from './lib/supabase';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import TradesList from './pages/TradesList';
@@ -11,8 +11,48 @@ import Auth from './pages/Auth';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 
+function AuthListener() {
+  const { setUser } = useStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (DEMO_MODE || !supabase) return;
+
+    // בדוק session קיים (לאחר רענון דף)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email ?? '',
+          name: session.user.user_metadata?.full_name ?? session.user.email ?? 'User',
+        });
+        navigate('/dashboard', { replace: true });
+      }
+    });
+
+    // הקשב לכל שינוי auth — login, logout, token refresh
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email ?? '',
+          name: session.user.user_metadata?.full_name ?? session.user.email ?? 'User',
+        });
+        navigate('/dashboard', { replace: true });
+      } else {
+        setUser(null);
+        navigate('/auth', { replace: true });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return null;
+}
+
 function AppEffects() {
-  const { lang, fontSize, highContrast, grayscale, readableFont, loadDemoData, isDemo, accounts } = useStore();
+  const { lang, fontSize, highContrast, grayscale, readableFont, loadDemoData, accounts } = useStore();
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -54,6 +94,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AppEffects />
+      <AuthListener />
       <Routes>
         <Route path="/auth" element={<Auth />} />
         <Route path="/terms" element={<Terms />} />
