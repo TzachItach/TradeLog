@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useStore } from './store';
 import { supabase, DEMO_MODE } from './lib/supabase';
@@ -25,12 +25,7 @@ function LoadingScreen({ text }: { text?: string }) {
       </div>
       <div style={{ color: '#5b8fff', fontSize: '.9rem', fontWeight: 600, fontFamily: 'system-ui' }}>TradeLog</div>
       <div style={{ color: '#545e80', fontSize: '.78rem', fontFamily: 'system-ui' }}>{text ?? 'מאמת...'}</div>
-      {/* Spinner */}
-      <div style={{
-        width: 20, height: 20, border: '2px solid #222840',
-        borderTopColor: '#5b8fff', borderRadius: '50%',
-        animation: 'spin 0.8s linear infinite',
-      }} />
+      <div style={{ width: 20, height: 20, border: '2px solid #222840', borderTopColor: '#5b8fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
@@ -39,29 +34,40 @@ function LoadingScreen({ text }: { text?: string }) {
 function AuthListener({ onReady }: { onReady: () => void }) {
   const { initRealUser, setUser } = useStore();
   const navigate = useNavigate();
+  // מניעת double-init כשגם getSession וגם onAuthStateChange מופעלים
+  const handledRef = useRef(false);
 
   const handleUser = async (u: { id: string; email?: string; user_metadata?: Record<string, string> }) => {
+    if (handledRef.current) return;
+    handledRef.current = true;
     const name = u.user_metadata?.full_name ?? u.email ?? 'User';
     const email = u.email ?? '';
-    // initRealUser הוא async — טוען מ-Supabase
-    await initRealUser(u.id, name, email);
+    try {
+      await initRealUser(u.id, name, email);
+    } catch (e) {
+      console.error('initRealUser failed:', e);
+    }
     navigate('/dashboard', { replace: true });
   };
 
   useEffect(() => {
     if (DEMO_MODE || !supabase) { onReady(); return; }
 
+    // בדיקת session קיים
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         await handleUser(session.user as Parameters<typeof handleUser>[0]);
       }
       onReady();
-    });
+    }).catch(() => onReady()); // גם אם נכשל — המשך
 
+    // הקשב לשינויים עתידיים
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         await handleUser(session.user as Parameters<typeof handleUser>[0]);
+        onReady();
       } else {
+        handledRef.current = false;
         setUser(null);
       }
     });
