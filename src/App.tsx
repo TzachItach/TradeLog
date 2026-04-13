@@ -14,17 +14,17 @@ import Privacy from './pages/Privacy';
 function LoadingScreen() {
   return (
     <div style={{
-      minHeight: '100vh', background: '#080b13',
+      minHeight: '100vh', background: '#060910',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       flexDirection: 'column', gap: 16,
     }}>
-      <div style={{ width: 44, height: 44, borderRadius: 10, background: '#4a7dff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: 44, height: 44, borderRadius: 10, background: '#5b8fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
           <polyline points="3,17 9,11 13,15 21,6" />
         </svg>
       </div>
-      <div style={{ color: '#4a7dff', fontSize: '.9rem', fontWeight: 600, fontFamily: 'system-ui' }}>TradeLog</div>
-      <div style={{ color: '#42475c', fontSize: '.78rem', fontFamily: 'system-ui' }}>מאמת...</div>
+      <div style={{ color: '#5b8fff', fontSize: '.9rem', fontWeight: 600, fontFamily: 'system-ui' }}>TradeLog</div>
+      <div style={{ color: '#545e80', fontSize: '.78rem', fontFamily: 'system-ui' }}>מאמת...</div>
     </div>
   );
 }
