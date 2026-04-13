@@ -126,15 +126,15 @@ function StrategyForm({ strategy, onSave, onCancel, lang }: {
         </div>
       </div>
 
-      {/* Checkboxes */}
-      <div style={{ marginBottom: 18 }}>
+      {/* אישורים (Checkboxes) */}
+      <div style={{ marginBottom: 20 }}>
         <label className="form-label" style={{ marginBottom: 10, display: 'block' }}>
-          {isHe ? 'תיבות סימון (Checkboxes)' : 'Checkboxes'}
+          {isHe ? 'אישורים' : 'Confirmations'}
         </label>
 
         {cbFields.length === 0 && (
-          <div style={{ color: 'var(--t3)', fontSize: '.8rem', padding: '8px 0' }}>
-            {isHe ? 'אין תיבות סימון עדיין' : 'No checkboxes yet'}
+          <div style={{ color: 'var(--t3)', fontSize: '.8rem', padding: '8px 0 12px' }}>
+            {isHe ? 'אין אישורים עדיין — הוסף את הראשון למטה' : 'No confirmations yet — add your first below'}
           </div>
         )}
 
@@ -144,29 +144,30 @@ function StrategyForm({ strategy, onSave, onCancel, lang }: {
             <div style={{ width: 14, height: 14, border: '1.5px solid var(--b)', borderRadius: 3, flexShrink: 0 }} />
             <span style={{ flex: 1, fontSize: '.85rem' }}>{f.label}</span>
             <button className="btn btn-icon" style={{ width: 26, height: 26 }}
-              onClick={() => moveField(f.id, -1)} disabled={i === 0}>↑</button>
+              onClick={() => moveField(f.id, -1)} disabled={i === 0} title={isHe ? 'הזז למעלה' : 'Move up'}>↑</button>
             <button className="btn btn-icon" style={{ width: 26, height: 26 }}
-              onClick={() => moveField(f.id, 1)} disabled={i === cbFields.length - 1}>↓</button>
+              onClick={() => moveField(f.id, 1)} disabled={i === cbFields.length - 1} title={isHe ? 'הזז למטה' : 'Move down'}>↓</button>
             <button className="btn btn-danger" style={{ padding: '3px 9px', fontSize: '.75rem' }}
               onClick={() => removeField(f.id)}>×</button>
           </div>
         ))}
 
-        {/* הוסף checkbox */}
-        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        {/* שורת הוספה */}
+        <div style={{ display: 'flex', gap: 8, marginTop: 10, background: 'var(--s1)', border: '2px dashed var(--bd2)', borderRadius: 8, padding: 10 }}>
           <input
             className="form-input"
-            style={{ flex: 1 }}
-            placeholder={isHe ? 'שם ה-Checkbox החדש...' : 'New checkbox label...'}
+            style={{ flex: 1, background: 'var(--s2)' }}
+            placeholder={isHe ? '✏ כתוב שם האישור ולחץ "הוסף"...' : '✏ Type confirmation name and click "Add"...'}
             value={newCbLabel}
             onChange={(e) => setNewCbLabel(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') { addField('checkbox', newCbLabel); setNewCbLabel(''); }
-            }}
+            onKeyDown={(e) => { if (e.key === 'Enter') { addField('checkbox', newCbLabel); setNewCbLabel(''); } }}
           />
-          <button className="btn btn-primary" style={{ whiteSpace: 'nowrap' }}
-            onClick={() => { addField('checkbox', newCbLabel); setNewCbLabel(''); }}>
-            + {isHe ? 'הוסף' : 'Add'}
+          <button
+            className="btn btn-primary"
+            style={{ whiteSpace: 'nowrap', padding: '8px 18px', fontWeight: 700 }}
+            onClick={() => { addField('checkbox', newCbLabel); setNewCbLabel(''); }}
+          >
+            + {isHe ? 'הוסף אישור' : 'Add confirmation'}
           </button>
         </div>
       </div>
@@ -178,8 +179,8 @@ function StrategyForm({ strategy, onSave, onCancel, lang }: {
         </label>
 
         {txtFields.length === 0 && (
-          <div style={{ color: 'var(--t3)', fontSize: '.8rem', padding: '8px 0' }}>
-            {isHe ? 'אין שדות טקסט עדיין' : 'No text fields yet'}
+          <div style={{ color: 'var(--t3)', fontSize: '.8rem', padding: '8px 0 12px' }}>
+            {isHe ? 'אין שדות טקסט עדיין — הוסף למטה' : 'No text fields yet — add below'}
           </div>
         )}
 
@@ -196,20 +197,21 @@ function StrategyForm({ strategy, onSave, onCancel, lang }: {
           </div>
         ))}
 
-        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        <div style={{ display: 'flex', gap: 8, marginTop: 10, background: 'var(--s1)', border: '2px dashed var(--bd2)', borderRadius: 8, padding: 10 }}>
           <input
             className="form-input"
-            style={{ flex: 1 }}
-            placeholder={isHe ? 'שם שדה הטקסט החדש...' : 'New text field label...'}
+            style={{ flex: 1, background: 'var(--s2)' }}
+            placeholder={isHe ? '✏ כתוב שם השדה ולחץ "הוסף"...' : '✏ Type field name and click "Add"...'}
             value={newTxtLabel}
             onChange={(e) => setNewTxtLabel(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') { addField('text', newTxtLabel); setNewTxtLabel(''); }
-            }}
+            onKeyDown={(e) => { if (e.key === 'Enter') { addField('text', newTxtLabel); setNewTxtLabel(''); } }}
           />
-          <button className="btn btn-primary" style={{ whiteSpace: 'nowrap' }}
-            onClick={() => { addField('text', newTxtLabel); setNewTxtLabel(''); }}>
-            + {isHe ? 'הוסף' : 'Add'}
+          <button
+            className="btn btn-primary"
+            style={{ whiteSpace: 'nowrap', padding: '8px 18px', fontWeight: 700 }}
+            onClick={() => { addField('text', newTxtLabel); setNewTxtLabel(''); }}
+          >
+            + {isHe ? 'הוסף שדה' : 'Add field'}
           </button>
         </div>
       </div>
