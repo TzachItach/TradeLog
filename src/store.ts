@@ -81,6 +81,7 @@ interface AppState {
 
   loadDemoData: () => void;
   initRealUser: (userId: string, name: string, email: string) => Promise<void>;
+  loadDataInBackground: (userId: string, name: string, email: string) => void;
   getFilteredTrades: () => Trade[];
   getStats: () => { totalPnL: number; winRate: number; totalTrades: number; avgWin: number; avgLoss: number; profitFactor: number };
 }
@@ -209,13 +210,31 @@ export const useStore = create<AppState>()(
         } catch (err) {
           clearTimeout(timeout);
           console.error('initRealUser error:', err);
-          // פתח עם ברירות מחדל אם Supabase נכשל
           const defAccount = createDefaultAccount();
           const defStrategies = createDefaultStrategies();
           set({ accounts: [defAccount], strategies: defStrategies, trades: [], lastUserId: userId, selectedAccount: 'all' });
         } finally {
           set({ dataLoading: false });
         }
+      },
+
+      // טעינת נתונים ברקע — לא חוסם את הממשק
+      loadDataInBackground: (userId, name, email) => {
+        set({ user: { id: userId, name, email }, isDemo: false });
+        loadUserData(userId).then(({ accounts, strategies, trades }) => {
+          const isNewUser = accounts.length === 0 && strategies.length === 0;
+          if (isNewUser) {
+            const defAccount = createDefaultAccount();
+            const defStrategies = createDefaultStrategies();
+            dbSeedNewUser(userId, defAccount, defStrategies);
+            set({ accounts: [defAccount], strategies: defStrategies, trades: [], lastUserId: userId });
+          } else {
+            set({ accounts, strategies, trades, lastUserId: userId });
+          }
+        }).catch((err) => {
+          console.warn('Background load failed, using cache:', err);
+          // נשאר עם הנתונים מה-localStorage
+        });
       },
 
       getFilteredTrades: () => {
