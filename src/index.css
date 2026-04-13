@@ -490,3 +490,39 @@ input[type=checkbox] { accent-color: var(--b); cursor: pointer; }
   .modal-box { padding: 16px; }
   .cb-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Light Mode ── */
+body.light {
+  --bg:    #f0f2f8;
+  --s1:    #ffffff;
+  --s2:    #f5f7fc;
+  --s3:    #ebeef7;
+  --bd:    #dde2f0;
+  --bd2:   #c8cedf;
+  --t1:    #0d1126;
+  --t2:    #3d4666;
+  --t3:    #8890aa;
+  --g:     #00a87c;
+  --r:     #e8203c;
+  --b:     #2f6fe8;
+  --o:     #d4820a;
+  --g-bg:  rgba(0,168,124,.09);
+  --g-bd:  rgba(0,168,124,.35);
+  --r-bg:  rgba(232,32,60,.07);
+  --r-bd:  rgba(232,32,60,.32);
+  --b-bg:  rgba(47,111,232,.09);
+  --b-bd:  rgba(47,111,232,.35);
+}
+body.light .sidebar         { box-shadow: 2px 0 12px rgba(0,0,0,.06); }
+body.light .header          { box-shadow: 0 1px 8px rgba(0,0,0,.06); }
+body.light .modal-overlay   { background: rgba(60,70,100,.55); }
+body.light .cal-wrap        { box-shadow: 0 2px 12px rgba(0,0,0,.05); }
+body.light .stat-card       { box-shadow: 0 1px 6px rgba(0,0,0,.04); }
+body.light .settings-section{ box-shadow: 0 1px 6px rgba(0,0,0,.04); }
+body.light .table-wrap      { box-shadow: 0 1px 6px rgba(0,0,0,.04); }
+body.light .logo-text       { color: #2f6fe8; }
+body.light .logo-icon       { background: #2f6fe8; }
+body.light .new-btn,
+body.light .btn-primary     { background: #2f6fe8; }
+body.light .auth-card       { box-shadow: 0 8px 32px rgba(0,0,0,.1); }
+body.light .access-panel    { box-shadow: 0 2px 10px rgba(0,0,0,.08); }
