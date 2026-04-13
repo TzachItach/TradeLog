@@ -13,7 +13,7 @@ function AccountForm({ account, onSave, onCancel, lang }: {
 }) {
   const T = useT(lang as 'he' | 'en');
   const [form, setForm] = useState<Account>(account ?? {
-    id: `a-${Date.now()}`, name: '', account_type: 'personal',
+    id: crypto.randomUUID(), name: '', account_type: 'personal',
     broker: 'manual', initial_balance: 0, currency: 'USD', is_active: true,
   });
   const s = <K extends keyof Account>(k: K, v: Account[K]) => setForm((f) => ({ ...f, [k]: v }));
@@ -68,7 +68,7 @@ function StrategyForm({ strategy, onSave, onCancel, lang }: {
   const isHe = lang === 'he';
 
   const [form, setForm] = useState<Strategy>(strategy ?? {
-    id: `s-${Date.now()}`, name: '', description: '', color: '#4a7dff', is_active: true, fields: [],
+    id: crypto.randomUUID(), name: '', description: '', color: '#4a7dff', is_active: true, fields: [],
   });
   const [newCbLabel, setNewCbLabel] = useState('');
   const [newTxtLabel, setNewTxtLabel] = useState('');
@@ -79,7 +79,7 @@ function StrategyForm({ strategy, onSave, onCancel, lang }: {
   const addField = (type: 'checkbox' | 'text', label: string) => {
     if (!label.trim()) return;
     const newField: StrategyField = {
-      id: `f-${Date.now()}`,
+      id: crypto.randomUUID(),
       strategy_id: form.id,
       field_type: type,
       label: label.trim(),
