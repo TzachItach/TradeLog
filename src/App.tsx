@@ -18,10 +18,7 @@ function LoadingScreen() {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       flexDirection: 'column', gap: 16,
     }}>
-      <div style={{
-        width: 44, height: 44, borderRadius: 10, background: '#4a7dff',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
+      <div style={{ width: 44, height: 44, borderRadius: 10, background: '#4a7dff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
           <polyline points="3,17 9,11 13,15 21,6" />
         </svg>
@@ -33,18 +30,13 @@ function LoadingScreen() {
 }
 
 function AuthListener({ onReady }: { onReady: () => void }) {
-  const { setUser, initRealUser } = useStore();
+  const { initRealUser } = useStore();
   const navigate = useNavigate();
 
-  const handleSession = (supabaseUser: { id: string; email?: string; user_metadata?: Record<string, string> }) => {
-    const appUser = {
-      id: supabaseUser.id,
-      email: supabaseUser.email ?? '',
-      name: supabaseUser.user_metadata?.full_name ?? supabaseUser.email ?? 'User',
-    };
-    // מאתחל נתוני משתמש — שומר נתונים קיימים, מנקה demo
-    initRealUser(supabaseUser.id);
-    setUser(appUser);
+  const handleUser = (u: { id: string; email?: string; user_metadata?: Record<string, string> }) => {
+    const name = u.user_metadata?.full_name ?? u.email ?? 'User';
+    const email = u.email ?? '';
+    initRealUser(u.id, name, email);
     navigate('/dashboard', { replace: true });
   };
 
@@ -52,15 +44,15 @@ function AuthListener({ onReady }: { onReady: () => void }) {
     if (DEMO_MODE || !supabase) { onReady(); return; }
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) handleSession(session.user as Parameters<typeof handleSession>[0]);
+      if (session?.user) handleUser(session.user as Parameters<typeof handleUser>[0]);
       onReady();
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        handleSession(session.user as Parameters<typeof handleSession>[0]);
+        handleUser(session.user as Parameters<typeof handleUser>[0]);
       } else {
-        setUser(null);
+        useStore.getState().setUser(null);
       }
     });
 
