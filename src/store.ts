@@ -7,28 +7,27 @@ import {
   dbSaveTrade, dbDeleteTrade, dbSaveStrategy, dbDeleteStrategy, dbSeedNewUser,
 } from './lib/db';
 
-const STRAT_ID = 's-turtle-soup';
-
 export function createDefaultStrategies(): Strategy[] {
+  const stratId = crypto.randomUUID();
   return [{
-    id: STRAT_ID,
+    id: stratId,
     name: 'Turtle Soup',
     description: 'ICT Turtle Soup Setup',
     color: '#5b8fff',
     is_active: true,
     fields: [
       ...TURTLE_SOUP_CHECKBOXES.map((label, i) => ({
-        id: `f-ts-cb-${i}`, strategy_id: STRAT_ID,
+        id: crypto.randomUUID(), strategy_id: stratId,
         field_type: 'checkbox' as const, label, is_required: false, sort_order: i + 1,
       })),
-      { id: 'f-ts-htf', strategy_id: STRAT_ID, field_type: 'text' as const, label: 'HTF PD Array', placeholder: 'e.g. 4H FVG / 1D OB', is_required: false, sort_order: 11 },
-      { id: 'f-ts-psy', strategy_id: STRAT_ID, field_type: 'text' as const, label: 'Psychology', placeholder: 'Focus, emotions...', is_required: false, sort_order: 12 },
+      { id: crypto.randomUUID(), strategy_id: stratId, field_type: 'text' as const, label: 'HTF PD Array', placeholder: 'e.g. 4H FVG / 1D OB', is_required: false, sort_order: 11 },
+      { id: crypto.randomUUID(), strategy_id: stratId, field_type: 'text' as const, label: 'Psychology', placeholder: 'Focus, emotions...', is_required: false, sort_order: 12 },
     ],
   }];
 }
 
 export function createDefaultAccount(): Account {
-  return { id: 'a-default', name: 'חשבון אישי', account_type: 'personal', broker: 'manual', initial_balance: 0, currency: 'USD', is_active: true };
+  return { id: crypto.randomUUID(), name: 'חשבון אישי', account_type: 'personal', broker: 'manual', initial_balance: 0, currency: 'USD', is_active: true };
 }
 
 interface AppState {
