@@ -63,7 +63,7 @@ function AuthListener({ onReady }: { onReady: () => void }) {
 }
 
 function AppEffects() {
-  const { lang, fontSize, highContrast, grayscale, readableFont, loadDemoData } = useStore();
+  const { lang, fontSize, highContrast, grayscale, readableFont, loadDemoData, darkMode } = useStore();
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -71,6 +71,10 @@ function AppEffects() {
   }, [lang]);
 
   useEffect(() => { document.documentElement.style.fontSize = `${fontSize}%`; }, [fontSize]);
+
+  useEffect(() => {
+    document.body.classList.toggle('light', !darkMode);
+  }, [darkMode]);
 
   useEffect(() => {
     document.body.style.filter = grayscale ? 'grayscale(100%)' : highContrast ? 'contrast(160%)' : '';
