@@ -69,7 +69,7 @@ export default function TradeModal() {
     if (existingTrade) {
       updateTrade({ ...form, id: existingTrade.id });
     } else {
-      addTrade({ ...form, id: `t-${Date.now()}`, pnl: Number(form.pnl) || 0 });
+      addTrade({ ...form, id: crypto.randomUUID(), pnl: Number(form.pnl) || 0 });
     }
     setModal(null);
   };
