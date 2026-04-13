@@ -440,6 +440,21 @@ input[type=checkbox] { accent-color: var(--b); cursor: pointer; }
 .sidebar-close-btn { display: none; }
 .sidebar-backdrop { display: none; }
 
+/* לוגו בהדר — מוסתר בדסקטופ (מופיע בסיידבר), גלוי במובייל */
+.header-logo {
+  display: none;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  flex-shrink: 0;
+  user-select: none;
+}
+.header-logo:hover { opacity: .82; }
+
+/* לוגו סיידבר — קליקבילי */
+.sidebar-logo { cursor: pointer; }
+.sidebar-logo:hover { opacity: .85; }
+
 @media (max-width: 768px) {
   /* הסיידבר הופך ל-overlay */
   .sidebar {
@@ -467,6 +482,7 @@ input[type=checkbox] { accent-color: var(--b); cursor: pointer; }
   /* כפתורי מובייל */
   .hamburger-btn { display: flex !important; }
   .sidebar-close-btn { display: flex !important; }
+  .header-logo { display: flex !important; }
   .nav-label { opacity: 1 !important; width: auto !important; }
   .logo-text { opacity: 1 !important; width: auto !important; }
 
