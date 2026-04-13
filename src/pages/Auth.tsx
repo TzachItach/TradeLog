@@ -60,10 +60,6 @@ export default function Auth() {
               <GoogleIcon />
               {T.loginWith} {T.google}
             </button>
-            <button className="btn-oauth" onClick={signInWithApple}>
-              <AppleIcon />
-              {T.loginWith} {T.apple}
-            </button>
             <div className="auth-divider">{T.orContinueWith}</div>
           </>
         ) : (
