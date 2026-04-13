@@ -94,6 +94,10 @@ export default function TradeModal() {
       onClick={(e) => { if (e.target === overlayRef.current) setModal(null); }}
     >
       <div className="modal-box" dir={lang === 'he' ? 'rtl' : 'ltr'}>
+        {/* ידית גרירה — מובייל בלבד */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--bd2)' }} />
+        </div>
         <div className="modal-head">
           <span className="modal-title">{isNew ? T.addTrade : T.editTrade}</span>
           <button className="btn-close" onClick={() => setModal(null)}>×</button>
