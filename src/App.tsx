@@ -11,7 +11,6 @@ import Auth from './pages/Auth';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 
-// מסך טעינה בזמן בדיקת session
 function LoadingScreen() {
   return (
     <div style={{
@@ -27,65 +26,39 @@ function LoadingScreen() {
           <polyline points="3,17 9,11 13,15 21,6" />
         </svg>
       </div>
-      <div style={{ color: '#4a7dff', fontSize: '.9rem', fontWeight: 600, fontFamily: 'system-ui' }}>
-        TradeLog
-      </div>
-      <div style={{ color: '#42475c', fontSize: '.78rem', fontFamily: 'system-ui' }}>
-        מאמת...
-      </div>
+      <div style={{ color: '#4a7dff', fontSize: '.9rem', fontWeight: 600, fontFamily: 'system-ui' }}>TradeLog</div>
+      <div style={{ color: '#42475c', fontSize: '.78rem', fontFamily: 'system-ui' }}>מאמת...</div>
     </div>
   );
 }
 
 function AuthListener({ onReady }: { onReady: () => void }) {
-  const { setUser } = useStore();
+  const { setUser, initRealUser } = useStore();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // מצב Demo — אין צורך בבדיקת session
-    if (DEMO_MODE || !supabase) {
-      onReady();
-      return;
-    }
+  const handleSession = (supabaseUser: { id: string; email?: string; user_metadata?: Record<string, string> }) => {
+    const appUser = {
+      id: supabaseUser.id,
+      email: supabaseUser.email ?? '',
+      name: supabaseUser.user_metadata?.full_name ?? supabaseUser.email ?? 'User',
+    };
+    // מאתחל נתוני משתמש — שומר נתונים קיימים, מנקה demo
+    initRealUser(supabaseUser.id);
+    setUser(appUser);
+    navigate('/dashboard', { replace: true });
+  };
 
-    // בדיקה חד-פעמית של session קיים (לאחר OAuth redirect / רענון)
+  useEffect(() => {
+    if (DEMO_MODE || !supabase) { onReady(); return; }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        // נקה נתוני demo שאולי נשמרו ב-localStorage
-        useStore.setState({
-          trades: [],
-          accounts: [],
-          strategies: [],
-          selectedAccount: 'all',
-          isDemo: false,
-        });
-        setUser({
-          id: session.user.id,
-          email: session.user.email ?? '',
-          name: session.user.user_metadata?.full_name ?? session.user.email ?? 'User',
-        });
-        navigate('/dashboard', { replace: true });
-      }
+      if (session?.user) handleSession(session.user as Parameters<typeof handleSession>[0]);
       onReady();
     });
 
-    // הקשב לשינויים עתידיים (login / logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        // נקה נתוני demo בכל התחברות
-        useStore.setState({
-          trades: [],
-          accounts: [],
-          strategies: [],
-          selectedAccount: 'all',
-          isDemo: false,
-        });
-        setUser({
-          id: session.user.id,
-          email: session.user.email ?? '',
-          name: session.user.user_metadata?.full_name ?? session.user.email ?? 'User',
-        });
-        navigate('/dashboard', { replace: true });
+        handleSession(session.user as Parameters<typeof handleSession>[0]);
       } else {
         setUser(null);
       }
@@ -105,16 +78,10 @@ function AppEffects() {
     document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
   }, [lang]);
 
-  useEffect(() => {
-    document.documentElement.style.fontSize = `${fontSize}%`;
-  }, [fontSize]);
+  useEffect(() => { document.documentElement.style.fontSize = `${fontSize}%`; }, [fontSize]);
 
   useEffect(() => {
-    document.body.style.filter = grayscale
-      ? 'grayscale(100%)'
-      : highContrast
-      ? 'contrast(160%)'
-      : '';
+    document.body.style.filter = grayscale ? 'grayscale(100%)' : highContrast ? 'contrast(160%)' : '';
   }, [grayscale, highContrast]);
 
   useEffect(() => {
@@ -122,10 +89,7 @@ function AppEffects() {
   }, [readableFont]);
 
   useEffect(() => {
-    // טען demo data רק במצב demo — לעולם לא למשתמש אמיתי
-    if (DEMO_MODE) {
-      loadDemoData();
-    }
+    if (DEMO_MODE) loadDemoData();
   }, []);
 
   return null;
@@ -133,13 +97,8 @@ function AppEffects() {
 
 function ProtectedRoute({ children, ready }: { children: React.ReactNode; ready: boolean }) {
   const { user } = useStore();
-
-  // עדיין בודק session — אל תפנה לשום מקום
   if (!DEMO_MODE && !ready) return <LoadingScreen />;
-
-  // בדיקה הסתיימה — אין משתמש
   if (!DEMO_MODE && !user) return <Navigate to="/auth" replace />;
-
   return <>{children}</>;
 }
 
@@ -154,14 +113,11 @@ export default function App() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
-        <Route
-          path="/dashboard/*"
-          element={
-            <ProtectedRoute ready={authReady}>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
+        <Route path="/dashboard/*" element={
+          <ProtectedRoute ready={authReady}>
+            <Layout />
+          </ProtectedRoute>
+        }>
           <Route index element={<Dashboard />} />
           <Route path="trades" element={<TradesList />} />
           <Route path="reports" element={<Reports />} />
