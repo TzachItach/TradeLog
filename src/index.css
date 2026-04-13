@@ -2,25 +2,25 @@
    TradeLog — Global Styles  |  Dark fintech theme, RTL-first
 ================================================================ */
 :root {
-  --bg:    #080b13;
-  --s1:    #0e1119;
-  --s2:    #141720;
-  --s3:    #1b1f2c;
-  --bd:    #1e2233;
-  --bd2:   #252b3a;
-  --t1:    #dde3f2;
-  --t2:    #7a82a0;
-  --t3:    #42475c;
-  --g:     #00c896;
-  --r:     #ff3355;
-  --b:     #4a7dff;
-  --o:     #ff9f43;
-  --g-bg:  rgba(0,200,150,.07);
-  --g-bd:  rgba(0,200,150,.35);
-  --r-bg:  rgba(255,51,85,.07);
-  --r-bd:  rgba(255,51,85,.35);
-  --b-bg:  rgba(74,125,255,.12);
-  --b-bd:  rgba(74,125,255,.4);
+  --bg:    #060910;
+  --s1:    #0c0f1a;
+  --s2:    #111422;
+  --s3:    #181c2e;
+  --bd:    #222840;
+  --bd2:   #2c3350;
+  --t1:    #f0f4ff;
+  --t2:    #9aa5cc;
+  --t3:    #545e80;
+  --g:     #00e0a8;
+  --r:     #ff4060;
+  --b:     #5b8fff;
+  --o:     #ffaa44;
+  --g-bg:  rgba(0,224,168,.08);
+  --g-bd:  rgba(0,224,168,.38);
+  --r-bg:  rgba(255,64,96,.08);
+  --r-bd:  rgba(255,64,96,.38);
+  --b-bg:  rgba(91,143,255,.13);
+  --b-bd:  rgba(91,143,255,.42);
   --mono:  'Courier New', 'Lucida Console', monospace;
   --sans:  system-ui, -apple-system, 'Segoe UI', sans-serif;
   --rad:   10px;
@@ -171,15 +171,15 @@ button, input, select, textarea { font-family: inherit; }
   transition: opacity .1s; display: block;
 }
 .trade-badge:hover { opacity: .78; }
-.trade-badge.pos { background: rgba(0,200,150,.14); color: var(--g); border-color: rgba(0,200,150,.2); }
-.trade-badge.neg { background: rgba(255,51,85,.14); color: var(--r); border-color: rgba(255,51,85,.2); }
+.trade-badge.pos { background: rgba(0,224,168,.15); color: var(--g); border-color: rgba(0,224,168,.22); }
+.trade-badge.neg { background: rgba(255,64,96,.15); color: var(--r); border-color: rgba(255,51,85,.2); }
 .more-badge {
   font-size: .61rem; padding: 2px 7px; border-radius: 10px;
   background: var(--b-bg); color: var(--b); border: 1px solid var(--b-bd);
   cursor: pointer; display: inline-flex; align-items: center;
   font-family: var(--mono); margin-top: 1px; width: fit-content;
 }
-.more-badge:hover { background: rgba(74,125,255,.22); }
+.more-badge:hover { background: rgba(91,143,255,.24); }
 .cell-add {
   position: absolute; inset: 0; display: flex; align-items: center;
   justify-content: center; opacity: 0; transition: opacity .15s;
@@ -238,8 +238,8 @@ textarea.form-input { resize: vertical; min-height: 76px; }
   font-weight: 700; font-size: .82rem; transition: all .12s;
   background: var(--s2); color: var(--t2);
 }
-.dir-btn.long-on  { background: rgba(0,200,150,.17); color: var(--g); border-color: rgba(0,200,150,.4); }
-.dir-btn.short-on { background: rgba(255,51,85,.17);  color: var(--r); border-color: rgba(255,51,85,.4); }
+.dir-btn.long-on  { background: rgba(0,224,168,.18); color: var(--g); border-color: rgba(0,200,150,.4); }
+.dir-btn.short-on { background: rgba(255,64,96,.18);  color: var(--r); border-color: rgba(255,51,85,.4); }
 /* Checkboxes */
 .cb-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
@@ -250,7 +250,7 @@ textarea.form-input { resize: vertical; min-height: 76px; }
   border-radius: 4px; cursor: pointer; font-size: .76rem; color: var(--t2);
   transition: background .1s; user-select: none;
 }
-.cb-item:hover { background: rgba(255,255,255,.04); }
+.cb-item:hover { background: rgba(255,255,255,.06); }
 .cb-item.on { color: var(--t1); }
 .cb-box {
   width: 15px; height: 15px; border-radius: 3px; flex-shrink: 0;
@@ -298,10 +298,10 @@ textarea.form-input { resize: vertical; min-height: 76px; }
 }
 .btn-icon:hover { border-color: var(--b); color: var(--b); }
 .btn-danger {
-  background: rgba(255,51,85,.13); color: var(--r);
-  border: 1px solid rgba(255,51,85,.28); padding: 6px 14px; font-size: .82rem;
+  background: rgba(255,64,96,.15); color: var(--r);
+  border: 1px solid rgba(255,64,96,.30); padding: 6px 14px; font-size: .82rem;
 }
-.btn-danger:hover { background: rgba(255,51,85,.22); }
+.btn-danger:hover { background: rgba(255,64,96,.24); }
 .btn-lang {
   background: var(--s2); border: 1px solid var(--bd2); color: var(--t2);
   padding: 4px 11px; border-radius: 16px; font-size: .78rem; font-weight: 700;
@@ -335,14 +335,14 @@ textarea.form-input { resize: vertical; min-height: 76px; }
 .data-table th:hover { color: var(--t2); }
 .data-table td { padding: 10px 14px; font-size: .84rem; border-bottom: 1px solid var(--bd); vertical-align: middle; }
 .data-table tr:last-child td { border-bottom: none; }
-.data-table tr:hover td { background: rgba(255,255,255,.018); }
+.data-table tr:hover td { background: rgba(255,255,255,.03); }
 .data-table td:first-child, .data-table th:first-child { padding-inline-start: 18px; }
 .mono-cell { font-family: var(--mono); font-weight: 700; }
 .pnl-pos { color: var(--g); }
 .pnl-neg { color: var(--r); }
 .dir-badge { display: inline-flex; align-items: center; gap: 3px; font-size: .72rem; padding: 2px 8px; border-radius: 10px; }
-.dir-badge.long  { background: rgba(0,200,150,.12);  color: var(--g); }
-.dir-badge.short { background: rgba(255,51,85,.12); color: var(--r); }
+.dir-badge.long  { background: rgba(0,224,168,.14);  color: var(--g); }
+.dir-badge.short { background: rgba(255,64,96,.14); color: var(--r); }
 /* ── Filters ── */
 .filters-row { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
 .filter-inp {
@@ -365,7 +365,7 @@ textarea.form-input { resize: vertical; min-height: 76px; }
 .list-card-actions { display: flex; gap: 8px; flex-shrink: 0; }
 .color-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .badge-status { font-size: .72rem; padding: 3px 9px; border-radius: 10px; display: inline-flex; align-items: center; gap: 5px; }
-.badge-ok   { background: rgba(0,200,150,.12); color: var(--g); }
+.badge-ok   { background: rgba(0,224,168,.14); color: var(--g); }
 .badge-info { background: var(--b-bg);          color: var(--b); }
 /* Report cards */
 .report-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
@@ -395,7 +395,7 @@ textarea.form-input { resize: vertical; min-height: 76px; }
   cursor: pointer; font-size: .9rem; font-weight: 600; font-family: inherit;
   transition: all .12s;
 }
-.btn-demo:hover { background: rgba(74,125,255,.22); }
+.btn-demo:hover { background: rgba(91,143,255,.24); }
 /* ── Legal ── */
 .legal-wrap { max-width: 740px; margin: 0 auto; }
 .legal-title { font-size: 1.55rem; font-weight: 700; margin-bottom: 6px; }
