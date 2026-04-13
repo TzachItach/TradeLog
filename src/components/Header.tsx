@@ -2,7 +2,7 @@ import { useStore } from '../store';
 import { useT } from '../i18n';
 
 export default function Header() {
-  const { lang, setLang, accounts, selectedAccount, setSelectedAccount, setModal, user } = useStore();
+  const { lang, setLang, accounts, selectedAccount, setSelectedAccount, setModal, user, sidebarCollapsed, setSidebarCollapsed } = useStore();
   const T = useT(lang);
 
   const initials = user?.name
@@ -11,9 +11,21 @@ export default function Header() {
 
   return (
     <header className="header">
+      <button
+        className="btn btn-icon hamburger-btn"
+        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+        aria-label="תפריט"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+
       <div className="account-tabs">
         <div
-          className={`account-tab${selectedAccount === 'all' ? ' active' : ''}`}
+          className={"account-tab" + (selectedAccount === 'all' ? ' active' : '')}
           onClick={() => setSelectedAccount('all')}
         >
           {T.allAccounts}
@@ -21,7 +33,7 @@ export default function Header() {
         {accounts.filter((a) => a.is_active).map((acc) => (
           <div
             key={acc.id}
-            className={`account-tab${selectedAccount === acc.id ? ' active' : ''}`}
+            className={"account-tab" + (selectedAccount === acc.id ? ' active' : '')}
             onClick={() => setSelectedAccount(acc.id)}
           >
             {acc.name}
@@ -45,7 +57,7 @@ export default function Header() {
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
           </svg>
-          {T.newTrade}
+          <span className="new-trade-label">{T.newTrade}</span>
         </button>
 
         <div className="avatar" title={user?.name ?? 'User'}>{initials}</div>
