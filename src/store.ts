@@ -187,36 +187,33 @@ export const useStore = create<AppState>()(
       initRealUser: async (userId, name, email) => {
         set({ dataLoading: true, isDemo: false, user: { id: userId, name, email } });
 
+        // timeout — אם Supabase לא מגיב תוך 8 שניות, פתח בכל זאת
+        const timeout = setTimeout(() => {
+          console.warn('loadUserData timeout — opening with empty state');
+          set({ dataLoading: false });
+        }, 8000);
+
         try {
           const { accounts, strategies, trades } = await loadUserData(userId);
+          clearTimeout(timeout);
           const isNewUser = accounts.length === 0 && strategies.length === 0;
 
           if (isNewUser) {
-            // משתמש חדש — צור ברירות מחדל ב-Supabase
             const defAccount = createDefaultAccount();
             const defStrategies = createDefaultStrategies();
             await dbSeedNewUser(userId, defAccount, defStrategies);
-            set({
-              accounts: [defAccount],
-              strategies: defStrategies,
-              trades: [],
-              lastUserId: userId,
-              selectedAccount: 'all',
-              dataLoading: false,
-            });
+            set({ accounts: [defAccount], strategies: defStrategies, trades: [], lastUserId: userId, selectedAccount: 'all' });
           } else {
-            // משתמש קיים — טען את כל הנתונים שלו
-            set({
-              accounts,
-              strategies,
-              trades,
-              lastUserId: userId,
-              selectedAccount: 'all',
-              dataLoading: false,
-            });
+            set({ accounts, strategies, trades, lastUserId: userId, selectedAccount: 'all' });
           }
         } catch (err) {
-          console.error('Failed to load user data:', err);
+          clearTimeout(timeout);
+          console.error('initRealUser error:', err);
+          // פתח עם ברירות מחדל אם Supabase נכשל
+          const defAccount = createDefaultAccount();
+          const defStrategies = createDefaultStrategies();
+          set({ accounts: [defAccount], strategies: defStrategies, trades: [], lastUserId: userId, selectedAccount: 'all' });
+        } finally {
           set({ dataLoading: false });
         }
       },
