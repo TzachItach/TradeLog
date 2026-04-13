@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import TradesList from './pages/TradesList';
 import Reports from './pages/Reports';
+import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import Auth from './pages/Auth';
 import Terms from './pages/Terms';
@@ -147,6 +148,7 @@ export default function App() {
         }>
           <Route index element={<Dashboard />} />
           <Route path="trades" element={<TradesList />} />
+          <Route path="analytics" element={<Analytics />} />
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
         </Route>
