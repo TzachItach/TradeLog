@@ -224,6 +224,185 @@ function StrategyForm({ strategy, onSave, onCancel, lang }: {
   );
 }
 
+/* ── ניהול חיבורי ברוקר ── */
+function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Account[]; user: { id: string; email?: string; name?: string } | null }) {
+  const isHe = lang === 'he';
+  const T = useT(lang as 'he' | 'en');
+  const [txConn, setTxConn] = useState<{ [k: string]: boolean }>({});
+  const [topstepKey, setTopstepKey] = useState('');
+  const [showTopstepInput, setShowTopstepInput] = useState(false);
+  const [syncing, setSyncing] = useState<string | null>(null);
+  const [lastSync, setLastSync] = useState<{ [k: string]: string }>({});
+
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+
+  const connectTradovate = (accountId: string) => {
+    const clientId = import.meta.env.VITE_TRADOVATE_CLIENT_ID as string;
+    if (!clientId) {
+      alert(isHe
+        ? 'הגדר VITE_TRADOVATE_CLIENT_ID ב-Vercel Environment Variables'
+        : 'Set VITE_TRADOVATE_CLIENT_ID in Vercel Environment Variables');
+      return;
+    }
+    const redirectUri = encodeURIComponent(
+      `${supabaseUrl}/functions/v1/broker-oauth?broker=tradovate&user_id=${user?.id}&account_id=${accountId}`
+    );
+    window.location.href =
+      `https://live.tradovate.com/oauth?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=trading`;
+  };
+
+  const connectTopstepX = async (accountId: string) => {
+    if (!topstepKey.trim()) return;
+    try {
+      const res = await fetch(
+        `${supabaseUrl}/functions/v1/broker-oauth?broker=topstepx&user_id=${user?.id}&account_id=${accountId}&api_token=${encodeURIComponent(topstepKey)}`
+      );
+      if (res.ok || res.redirected) {
+        setTxConn((c) => ({ ...c, [accountId]: true }));
+        setShowTopstepInput(false);
+        setTopstepKey('');
+        alert(isHe ? 'TopstepX חובר בהצלחה!' : 'TopstepX connected!');
+      }
+    } catch {
+      alert(isHe ? 'שגיאה בחיבור TopstepX' : 'TopstepX connection failed');
+    }
+  };
+
+  const triggerSync = async (broker: 'tradovate' | 'topstepx') => {
+    setSyncing(broker);
+    try {
+      const res = await fetch(`${supabaseUrl}/functions/v1/${broker}-sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      setLastSync((s) => ({ ...s, [broker]: new Date().toLocaleTimeString() }));
+      alert(isHe
+        ? `סנכרון הושלם — ${data.inserted ?? 0} עסקאות חדשות`
+        : `Sync complete — ${data.inserted ?? 0} new trades`);
+    } catch {
+      alert(isHe ? 'שגיאה בסנכרון' : 'Sync failed');
+    } finally {
+      setSyncing(null);
+    }
+  };
+
+  const propAccounts = accounts.filter((a) => a.account_type === 'prop_firm' || a.broker !== 'manual');
+  const allAccounts = accounts.length > 0 ? accounts : [];
+
+  return (
+    <div className="settings-section">
+      <div className="section-title">{T.brokerConnections}</div>
+
+      {/* Tradovate */}
+      <div className="list-card" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="list-card-info">
+            <div className="list-card-name">Tradovate</div>
+            <div className="list-card-meta">Futures & Options · OAuth 2.0</div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {lastSync.tradovate && (
+              <span style={{ fontSize: '.7rem', color: 'var(--t3)' }}>{T.lastSync}: {lastSync.tradovate}</span>
+            )}
+            <button className="btn btn-ghost" style={{ fontSize: '.78rem', padding: '5px 12px' }}
+              onClick={() => triggerSync('tradovate')}
+              disabled={syncing === 'tradovate'}>
+              {syncing === 'tradovate' ? '...' : T.syncNow}
+            </button>
+          </div>
+        </div>
+        <div style={{ borderTop: '1px solid var(--bd)', paddingTop: 10 }}>
+          <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 8 }}>
+            {isHe ? 'בחר חשבון TradeLog לקישור:' : 'Select TradeLog account to link:'}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {allAccounts.map((acc) => (
+              <div key={acc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'var(--s1)', borderRadius: 7, border: '1px solid var(--bd)' }}>
+                <span style={{ fontSize: '.84rem' }}>{acc.name}</span>
+                <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '.76rem' }}
+                  onClick={() => connectTradovate(acc.id)}>
+                  {isHe ? 'התחבר' : 'Connect'} OAuth
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* TopstepX */}
+      <div className="list-card" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10, marginTop: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="list-card-info">
+            <div className="list-card-name">TopstepX</div>
+            <div className="list-card-meta">Funded Trader · API Token</div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {lastSync.topstepx && (
+              <span style={{ fontSize: '.7rem', color: 'var(--t3)' }}>{T.lastSync}: {lastSync.topstepx}</span>
+            )}
+            <button className="btn btn-ghost" style={{ fontSize: '.78rem', padding: '5px 12px' }}
+              onClick={() => triggerSync('topstepx')}
+              disabled={syncing === 'topstepx'}>
+              {syncing === 'topstepx' ? '...' : T.syncNow}
+            </button>
+          </div>
+        </div>
+        <div style={{ borderTop: '1px solid var(--bd)', paddingTop: 10 }}>
+          <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 8 }}>
+            {isHe
+              ? 'TopstepX → Settings → API Key → העתק את ה-Token'
+              : 'TopstepX → Settings → API Key → Copy your Token'}
+          </div>
+          {!showTopstepInput ? (
+            <button className="btn btn-primary" style={{ fontSize: '.8rem', padding: '6px 14px' }}
+              onClick={() => setShowTopstepInput(true)}>
+              + {isHe ? 'הוסף API Token' : 'Add API Token'}
+            </button>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <input
+                className="form-input"
+                type="password"
+                placeholder={isHe ? 'הדבק API Token מ-TopstepX...' : 'Paste API Token from TopstepX...'}
+                value={topstepKey}
+                onChange={(e) => setTopstepKey(e.target.value)}
+              />
+              <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 4 }}>
+                {isHe ? 'קשר לחשבון:' : 'Link to account:'}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {allAccounts.map((acc) => (
+                  <div key={acc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'var(--s1)', borderRadius: 7, border: '1px solid var(--bd)' }}>
+                    <span style={{ fontSize: '.84rem' }}>{acc.name}</span>
+                    <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '.76rem' }}
+                      onClick={() => connectTopstepX(acc.id)}
+                      disabled={!topstepKey.trim()}>
+                      {isHe ? 'חבר' : 'Connect'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button className="btn btn-ghost" onClick={() => { setShowTopstepInput(false); setTopstepKey(''); }}>
+                {T.cancel}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* הסבר */}
+      <div style={{ marginTop: 12, padding: '10px 14px', background: 'var(--b-bg)', border: '1px solid var(--b-bd)', borderRadius: 8, fontSize: '.76rem', color: 'var(--t2)', lineHeight: 1.7 }}>
+        <strong style={{ color: 'var(--b)' }}>{isHe ? 'לפעולה מלאה נדרש:' : 'For full operation:'}</strong>
+        <br />
+        {isHe
+          ? '1. פריסת Edge Functions ב-Supabase (ראה README) · 2. הגדרת TRADOVATE_CLIENT_ID, TRADOVATE_CLIENT_SECRET ב-Supabase Secrets'
+          : '1. Deploy Edge Functions to Supabase (see README) · 2. Set TRADOVATE_CLIENT_ID, TRADOVATE_CLIENT_SECRET in Supabase Secrets'}
+      </div>
+    </div>
+  );
+}
+
 /* ── דף ראשי ── */
 export default function Settings() {
   const { lang, accounts, strategies, user, addAccount, updateAccount, deleteAccount, addStrategy, updateStrategy, deleteStrategy, setUser } = useStore();
@@ -340,26 +519,7 @@ export default function Settings() {
       </div>
 
       {/* חיבורי ברוקר */}
-      <div className="settings-section">
-        <div className="section-title">{T.brokerConnections}</div>
-        {[
-          { name: 'Tradovate', id: 'tradovate', desc: 'Futures & Options' },
-          { name: 'TopstepX',  id: 'topstepx',  desc: 'Funded Trader Program' },
-        ].map((b) => (
-          <div key={b.id} className="list-card">
-            <div className="list-card-info">
-              <div className="list-card-name">{b.name}</div>
-              <div className="list-card-meta">{b.desc}</div>
-            </div>
-            <div className="list-card-actions">
-              <button className="btn btn-primary" style={{ padding: '5px 14px', fontSize: '.8rem' }}
-                onClick={() => alert(lang === 'he' ? 'חיבור ברוקר דורש הגדרת Supabase Edge Functions — ראה README' : 'Broker sync requires Supabase Edge Functions — see README')}>
-                {T.connect}
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <BrokerSection lang={lang} accounts={accounts} user={user} />
 
       {/* פרופיל + התנתקות */}
       <div className="settings-section">
