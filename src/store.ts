@@ -76,6 +76,7 @@ export const useStore = create<AppState>()(
       grayscale: false,
       readableFont: false,
       sidebarCollapsed: false,
+      authChecked: false,
 
       setDemo: (v) => set({ isDemo: v }),
       setUser: (u) => set({ user: u }),
@@ -85,6 +86,7 @@ export const useStore = create<AppState>()(
       setModal: (m) => set({ modal: m }),
       setActiveView: (v) => set({ activeView: v }),
       setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
+      setAuthChecked: (v: boolean) => set({ authChecked: v }),
 
       addTrade: (t) => set((s) => ({ trades: [...s.trades, t] })),
       updateTrade: (t) => set((s) => ({ trades: s.trades.map((x) => (x.id === t.id ? t : x)) })),
