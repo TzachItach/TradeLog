@@ -481,14 +481,81 @@ input[type=checkbox] { accent-color: var(--b); cursor: pointer; }
 
   /* Header */
   .header { padding: 0 12px; gap: 8px; }
-  .page-content { padding: 14px; }
+  .page-content { padding: 12px 10px; }
+
+  /* ── לוח שנה מובייל ── */
+  .cal-wrap { padding: 10px 6px; }
+  .cal-grid { gap: 2px; }
+  .day-headers { gap: 2px; margin-bottom: 2px; }
+  .day-hdr { font-size: .58rem; padding: 3px 0; }
+
+  /* תא יום — גדול יותר, מידע מסודר אנכית */
+  .day-cell {
+    min-height: 70px;
+    padding: 5px 4px;
+    border-radius: 6px;
+    gap: 1px;
+  }
+  .cell-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    min-height: unset;
+  }
+  .cell-daynum {
+    font-size: .78rem;
+    line-height: 1;
+  }
+  /* P&L בולט מתחת למספר היום */
+  .cell-pnl {
+    font-size: .7rem;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  .trade-badge {
+    font-size: .58rem;
+    padding: 1px 3px;
+  }
+  .more-badge {
+    font-size: .56rem;
+    padding: 1px 4px;
+  }
+
+  /* ── מודל מסחר — מסך מלא במובייל ── */
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .modal-box {
+    border-radius: 18px 18px 0 0;
+    max-height: 92vh;
+    max-width: 100%;
+    width: 100%;
+    padding: 20px 16px 32px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  .form-grid { gap: 10px; }
+  .dir-btns { gap: 6px; }
+  .cb-grid { grid-template-columns: 1fr 1fr; gap: 1px; }
+  .modal-actions { flex-wrap: wrap; gap: 8px; }
+  .modal-actions .btn { flex: 1; justify-content: center; min-width: 80px; }
 }
 
 @media (max-width: 480px) {
   .stats-bar { grid-template-columns: repeat(2, 1fr); }
   .account-tabs { display: none; }
-  .modal-box { padding: 16px; }
   .cb-grid { grid-template-columns: 1fr; }
+
+  /* תאים קטנים במיוחד */
+  .day-cell { min-height: 60px; padding: 4px 3px; }
+  .cell-daynum { font-size: .72rem; }
+  .cell-pnl { font-size: .65rem; }
 }
 
 /* ── Light Mode ── */
