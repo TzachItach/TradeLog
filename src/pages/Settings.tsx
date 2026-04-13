@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { useT } from '../i18n';
+import { signOut, DEMO_MODE } from '../lib/supabase';
 import type { Account, Strategy } from '../types';
 
 const COLORS = ['#4a7dff', '#00c896', '#ff9f43', '#ff3355', '#a855f7', '#06b6d4', '#f59e0b', '#ec4899'];
@@ -110,10 +112,18 @@ function StrategyForm({ strategy, onSave, onCancel, lang }: {
 }
 
 export default function Settings() {
-  const { lang, accounts, strategies, addAccount, updateAccount, deleteAccount, addStrategy, updateStrategy, deleteStrategy } = useStore();
+  const { lang, accounts, strategies, user, addAccount, updateAccount, deleteAccount, addStrategy, updateStrategy, deleteStrategy, setUser } = useStore();
   const T = useT(lang);
+  const navigate = useNavigate();
   const [accForm, setAccForm] = useState<'new' | string | null>(null);
   const [stratForm, setStratForm] = useState<'new' | string | null>(null);
+
+  const handleLogout = async () => {
+    if (!window.confirm(lang === 'he' ? 'האם אתה בטוח שברצונך להתנתק?' : 'Are you sure you want to log out?')) return;
+    await signOut();
+    setUser(null);
+    navigate('/auth', { replace: true });
+  };
 
   return (
     <div className="page-content">
@@ -224,6 +234,27 @@ export default function Settings() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Profile & Logout */}
+      <div className="settings-section">
+        <div className="section-title">{lang === 'he' ? 'פרופיל וחשבון' : 'Profile & Account'}</div>
+        <div className="list-card">
+          <div className="list-card-info">
+            <div className="list-card-name">{user?.name ?? 'User'}</div>
+            <div className="list-card-meta">{user?.email ?? ''}</div>
+          </div>
+          {!DEMO_MODE && (
+            <button className="btn btn-danger" onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16,17 21,12 16,7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              {T.logout}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="disclaimer">{T.disclaimer}</div>
