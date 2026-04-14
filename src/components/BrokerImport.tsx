@@ -12,60 +12,143 @@ interface ParsedTrade {
   broker_trade_id: string;
 }
 
-// ── פרסור CSV של Tradovate ──────────────────────────────────
+// ── פרסור P&L של Tradovate: $(110.00) → -110, $470.00 → 470 ──
+function parseTradovatePnL(raw: string): number {
+  if (!raw) return 0;
+  const s = raw.replace(/"/g, '').trim();
+  // פורמט שלילי: $(110.00) או ($110.00)
+  const negMatch = s.match(/\$\(([0-9,]+\.?\d*)\)|\(\$([0-9,]+\.?\d*)\)/);
+  if (negMatch) return -parseFloat((negMatch[1] || negMatch[2]).replace(/,/g, ''));
+  // פורמט חיובי: $470.00 או $2,150.00
+  const posMatch = s.match(/\$([0-9,]+\.?\d*)/);
+  if (posMatch) return parseFloat(posMatch[1].replace(/,/g, ''));
+  // מספר רגיל
+  return parseFloat(s.replace(/,/g, '')) || 0;
+}
+
+// ── נרמול סמל: MNQM6 → MNQ, ESZ24 → ES ──────────────────────
+function normalizeSymbol(raw: string): string {
+  return raw.replace(/[FGHJKMNQUVXZ]\d{1,2}$/, '').toUpperCase().trim();
+}
+
+// ── פרסור CSV של Tradovate Performance ───────────────────────
 function parseTradovateCSV(text: string): ParsedTrade[] {
-  const lines = text.trim().split('\n');
-  if (lines.length < 2) return [];
+  // פצל לשורות תוך שמירה על שדות עם פסיקים בתוך מרכאות
+  const parseCSVLine = (line: string): string[] => {
+    const result: string[] = [];
+    let cur = '', inQ = false;
+    for (const ch of line) {
+      if (ch === '"') { inQ = !inQ; continue; }
+      if (ch === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
+    result.push(cur.trim());
+    return result;
+  };
 
-  // מצא את שורת הכותרות
-  const headerLine = lines.findIndex(l =>
-    l.toLowerCase().includes('contract') || l.toLowerCase().includes('symbol')
-  );
-  if (headerLine < 0) return [];
+  const rawLines = text.trim().split(/\r?\n/);
+  if (rawLines.length < 2) return [];
 
-  const headers = lines[headerLine].split(',').map(h => h.trim().replace(/"/g, '').toLowerCase());
+  const headers = parseCSVLine(rawLines[0]).map(h => h.toLowerCase().replace(/^_/, ''));
+
+  const idx = (keys: string[]) => {
+    for (const k of keys) {
+      const i = headers.findIndex(h => h.includes(k));
+      if (i >= 0) return i;
+    }
+    return -1;
+  };
+
+  const iSymbol       = idx(['symbol']);
+  const iBuyFillId    = idx(['buyfillid']);
+  const iSellFillId   = idx(['sellfillid']);
+  const iQty          = idx(['qty', 'quantity']);
+  const iBuyPrice     = idx(['buyprice']);
+  const iSellPrice    = idx(['sellprice']);
+  const iPnL          = idx(['pnl']);
+  const iBoughtTime   = idx(['boughttimestamp', 'boughttime']);
+  const iSoldTime     = idx(['soldtimestamp', 'soldtime']);
+
+  // בדוק שיש עמודות בסיסיות
+  if (iSymbol < 0 || iPnL < 0 || iBoughtTime < 0) return [];
+
+  // קרא את כל ה-fills
+  interface Fill {
+    symbol: string;
+    buyFillId: string;
+    sellFillId: string;
+    qty: number;
+    buyPrice: number;
+    sellPrice: number;
+    pnl: number;
+    boughtTime: string;
+    soldTime: string;
+    tradeDate: string;
+  }
+
+  const fills: Fill[] = [];
+  for (let i = 1; i < rawLines.length; i++) {
+    const line = rawLines[i].trim();
+    if (!line) continue;
+    const cols = parseCSVLine(line);
+
+    const rawSymbol   = cols[iSymbol] ?? '';
+    const rawBought   = cols[iBoughtTime] ?? '';
+    if (!rawSymbol || !rawBought) continue;
+
+    const d = new Date(rawBought);
+    if (isNaN(d.getTime())) continue;
+    const tradeDate = d.toISOString().split('T')[0];
+
+    fills.push({
+      symbol:     normalizeSymbol(rawSymbol),
+      buyFillId:  cols[iBuyFillId] ?? '',
+      sellFillId: cols[iSellFillId] ?? '',
+      qty:        parseFloat(cols[iQty] ?? '1') || 1,
+      buyPrice:   parseFloat(cols[iBuyPrice] ?? '0') || 0,
+      sellPrice:  parseFloat(cols[iSellPrice] ?? '0') || 0,
+      pnl:        parseTradovatePnL(cols[iPnL] ?? ''),
+      boughtTime: rawBought,
+      soldTime:   cols[iSoldTime] ?? rawBought,
+      tradeDate,
+    });
+  }
+
+  if (!fills.length) return [];
+
+  // ── אחד fills לעסקות לפי buyFillId (כניסה משותפת) ──────────
+  const tradeMap = new Map<string, Fill[]>();
+  for (const fill of fills) {
+    const key = `${fill.symbol}|${fill.buyFillId}`;
+    if (!tradeMap.has(key)) tradeMap.set(key, []);
+    tradeMap.get(key)!.push(fill);
+  }
+
   const trades: ParsedTrade[] = [];
+  for (const [key, group] of tradeMap) {
+    const first = group[0];
+    const totalQty = group.reduce((s, f) => s + f.qty, 0);
+    const totalPnL = group.reduce((s, f) => s + f.pnl, 0);
 
-  for (let i = headerLine + 1; i < lines.length; i++) {
-    const cols = lines[i].split(',').map(c => c.trim().replace(/"/g, ''));
-    if (cols.length < 3 || !cols[0]) continue;
+    // כיוון: buyPrice < sellPrice = long (קנה בזול, מכר ביוקר)
+    const avgBuy  = group.reduce((s, f) => s + f.buyPrice * f.qty, 0) / totalQty;
+    const avgSell = group.reduce((s, f) => s + f.sellPrice * f.qty, 0) / totalQty;
+    const direction: 'long' | 'short' = avgBuy <= avgSell ? 'long' : 'short';
 
-    const get = (keys: string[]) => {
-      for (const k of keys) {
-        const idx = headers.findIndex(h => h.includes(k));
-        if (idx >= 0 && cols[idx]) return cols[idx];
-      }
-      return '';
-    };
+    // broker_trade_id ייחודי לפי buyFillId
+    const brokerId = `tradovate-${first.buyFillId}`;
 
-    const contract = get(['contract', 'symbol', 'instrument']);
-    const side     = get(['side', 'action', 'buy/sell', 'direction']);
-    const qty      = parseFloat(get(['qty', 'quantity', 'size'])) || 1;
-    const pnl      = parseFloat(get(['net', 'pnl', 'profit', 'realized'])) || 0;
-    const dateStr  = get(['date', 'time', 'timestamp', 'tradedate']);
-    const id       = get(['id', 'order', 'fill', 'tradeid']) || `tv-${i}`;
-
-    if (!contract || !dateStr) continue;
-
-    // פרסור תאריך
-    let trade_date = '';
-    try {
-      const d = new Date(dateStr);
-      if (!isNaN(d.getTime())) {
-        trade_date = d.toISOString().split('T')[0];
-      }
-    } catch { continue; }
-    if (!trade_date) continue;
-
-    const direction: 'long' | 'short' = side.toLowerCase().includes('sell') || side.toLowerCase() === 's' ? 'short' : 'long';
-
-    // נרמל שם הסמל (מסיר תאריך אקספיריה)
-    const symbol = contract.replace(/\d{2}[A-Z]\d{2}$/, '').replace(/Z\d+$/, '').toUpperCase() || contract;
+    const entryPrice = direction === 'long' ? avgBuy : avgSell;
+    const exitPrice  = direction === 'long' ? avgSell : avgBuy;
 
     trades.push({
-      symbol, direction, trade_date, pnl, size: qty,
-      notes: `Imported from Tradovate`,
-      broker_trade_id: `tradovate-${id}`,
+      symbol:          first.symbol,
+      direction,
+      trade_date:      first.tradeDate,
+      pnl:             Math.round(totalPnL * 100) / 100,
+      size:            totalQty,
+      notes:           `Entry: ${entryPrice.toFixed(2)} → Exit: ${exitPrice.toFixed(2)} | Imported from Tradovate`,
+      broker_trade_id: brokerId,
     });
   }
 
