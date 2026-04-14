@@ -10,81 +10,141 @@ interface CellData {
   totalPnL: number;
 }
 
+interface WeekSummary {
+  pnl: number;
+  wins: number;
+  losses: number;
+  trades: number;
+  wr: number;
+}
+
 function DayCell({
-  cell,
-  isExpanded,
-  lang,
-  onExpand,
-  onEmpty,
-  onTrade,
+  cell, isExpanded, lang, onExpand, onEmpty, onTrade,
 }: {
-  cell: CellData;
-  isExpanded: boolean;
-  lang: string;
-  onExpand: () => void;
-  onEmpty: () => void;
-  onTrade: (id: string) => void;
+  cell: CellData; isExpanded: boolean; lang: string;
+  onExpand: () => void; onEmpty: () => void; onTrade: (id: string) => void;
 }) {
   const T = useT(lang as 'he' | 'en');
   const { trades, totalPnL, day } = cell;
   const hasTrades = trades.length > 0;
   const isProfit = hasTrades && totalPnL > 0;
   const isLoss = hasTrades && totalPnL < 0;
-
   const today = new Date();
-  const isToday =
-    cell.dateStr ===
-    `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const isToday = cell.dateStr === `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  const wins = trades.filter(t => t.pnl > 0).length;
+  const wr = trades.length > 0 ? Math.round((wins / trades.length) * 100) : 0;
+  const wrColor = wr >= 60 ? 'var(--g)' : wr >= 40 ? 'var(--o)' : 'var(--r)';
+  const wrBg = wr >= 60 ? 'rgba(0,224,168,.18)' : wr >= 40 ? 'rgba(255,170,68,.18)' : 'rgba(255,64,96,.18)';
 
   let cls = 'day-cell';
   if (isProfit) cls += ' profit';
   else if (isLoss) cls += ' loss';
   if (isToday) cls += ' today';
 
-  const visible = isExpanded ? trades : trades.slice(0, 2);
-  const extra = trades.length - 2;
+  const visible = isExpanded ? trades : trades.slice(0, 3);
+  const extra = trades.length - 3;
 
   return (
-    <div
-      className={cls}
-      onClick={() => { if (!hasTrades) onEmpty(); }}
-    >
+    <div className={cls} onClick={() => { if (!hasTrades) onEmpty(); }}>
       <div className="cell-head">
         <span className="cell-daynum">{day}</span>
-        {hasTrades && <span className="cell-pnl">{formatPnL(totalPnL)}</span>}
+        {hasTrades && (
+          <span style={{
+            fontSize: '.58rem', fontWeight: 800, padding: '1px 5px',
+            borderRadius: 10, background: wrBg, color: wrColor,
+            lineHeight: 1.4, flexShrink: 0,
+          }}>{wr}%</span>
+        )}
       </div>
-
+      {hasTrades && (
+        <div style={{
+          fontSize: '.72rem', fontWeight: 800, fontFamily: 'monospace',
+          color: isProfit ? 'var(--g)' : 'var(--r)', lineHeight: 1, marginBottom: 3,
+        }}>{formatPnL(totalPnL)}</div>
+      )}
       <div className="cell-trades">
         {visible.map((tr) => (
-          <div
-            key={tr.id}
-            className={`trade-badge ${tr.pnl >= 0 ? 'pos' : 'neg'}`}
+          <div key={tr.id} className={`trade-badge ${tr.pnl >= 0 ? 'pos' : 'neg'}`}
             onClick={(e) => { e.stopPropagation(); onTrade(tr.id); }}
-          >
-            {tr.symbol} {tr.direction === 'long' ? '▲' : '▼'}
+            style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <span style={{ fontSize: '.56rem', color: tr.pnl >= 0 ? 'var(--g)' : 'var(--r)', opacity: .7 }}>
+              {tr.direction === 'long' ? '▲' : '▼'}
+            </span>
+            <span>{tr.symbol}</span>
           </div>
         ))}
         {!isExpanded && extra > 0 && (
-          <span
-            className="more-badge"
-            onClick={(e) => { e.stopPropagation(); onExpand(); }}
-          >
+          <span className="more-badge" onClick={(e) => { e.stopPropagation(); onExpand(); }}>
             +{extra} {T.more}
           </span>
         )}
-        {isExpanded && trades.length > 2 && (
-          <span
-            className="more-badge"
-            onClick={(e) => { e.stopPropagation(); onExpand(); }}
-          >
-            ▲
-          </span>
+        {isExpanded && trades.length > 3 && (
+          <span className="more-badge" onClick={(e) => { e.stopPropagation(); onExpand(); }}>▲</span>
         )}
       </div>
+      {!hasTrades && <div className="cell-add">+</div>}
+    </div>
+  );
+}
 
-      {!hasTrades && (
-        <div className="cell-add">+</div>
-      )}
+function WeekSummaryCell({ summary, weekNum, lang }: { summary: WeekSummary; weekNum: number; lang: string }) {
+  const isHe = lang === 'he';
+  const hasData = summary.trades > 0;
+  const isProfit = summary.pnl > 0;
+  const wrColor = summary.wr >= 60 ? 'var(--g)' : summary.wr >= 40 ? 'var(--o)' : 'var(--r)';
+  const borderColor = isProfit ? 'rgba(0,224,168,.3)' : 'rgba(255,64,96,.3)';
+  const bgColor = isProfit ? 'rgba(0,224,168,.05)' : 'rgba(255,64,96,.05)';
+
+  if (!hasData) {
+    return (
+      <div style={{
+        borderRadius: 7, border: '1px dashed var(--bd)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        minHeight: 84,
+      }}>
+        <span style={{ fontSize: '.6rem', color: 'var(--t3)' }}>
+          {isHe ? `ש${weekNum}` : `W${weekNum}`}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      borderRadius: 7, border: `1px solid ${borderColor}`,
+      background: bgColor, padding: '6px 5px',
+      display: 'flex', flexDirection: 'column', gap: 3,
+      alignItems: 'center', justifyContent: 'center',
+      minHeight: 84, cursor: 'default',
+    }}>
+      {/* label */}
+      <div style={{ fontSize: '.58rem', color: 'var(--t3)', fontWeight: 700, letterSpacing: '.04em' }}>
+        {isHe ? `ש${weekNum}` : `W${weekNum}`}
+      </div>
+
+      {/* P&L */}
+      <div style={{
+        fontSize: '.72rem', fontWeight: 800, fontFamily: 'monospace',
+        color: isProfit ? 'var(--g)' : 'var(--r)', lineHeight: 1, textAlign: 'center',
+      }}>
+        {formatPnL(summary.pnl)}
+      </div>
+
+      {/* WR pill */}
+      <div style={{
+        fontSize: '.6rem', fontWeight: 800, padding: '1px 6px',
+        borderRadius: 10, background: wrColor + '22', color: wrColor, lineHeight: 1.4,
+      }}>
+        {summary.wr}%
+      </div>
+
+      {/* W/L */}
+      <div style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+        <span style={{ fontSize: '.58rem', color: 'var(--g)', fontWeight: 700 }}>{summary.wins}W</span>
+        <span style={{ fontSize: '.52rem', color: 'var(--t3)' }}>·</span>
+        <span style={{ fontSize: '.58rem', color: 'var(--r)', fontWeight: 700 }}>{summary.losses}L</span>
+      </div>
     </div>
   );
 }
@@ -119,6 +179,33 @@ export default function CalendarView() {
     return result;
   }, [currentYear, currentMonth, firstDay, daysInMonth, tradesByDate]);
 
+  // חשב שורות שבועיות
+  const weeks = useMemo(() => {
+    const rows: (CellData | null)[][] = [];
+    let row: (CellData | null)[] = [];
+    cells.forEach((cell, i) => {
+      row.push(cell);
+      if (row.length === 7) { rows.push(row); row = []; }
+    });
+    if (row.length > 0) {
+      while (row.length < 7) row.push(null);
+      rows.push(row);
+    }
+    return rows;
+  }, [cells]);
+
+  // סיכום שבועי לכל שורה
+  const weekSummaries = useMemo<WeekSummary[]>(() => {
+    return weeks.map(row => {
+      const trades = row.flatMap(c => c?.trades ?? []);
+      const wins = trades.filter(t => t.pnl > 0).length;
+      const losses = trades.filter(t => t.pnl < 0).length;
+      const pnl = trades.reduce((s, t) => s + t.pnl, 0);
+      const wr = trades.length > 0 ? Math.round((wins / trades.length) * 100) : 0;
+      return { pnl, wins, losses, trades: trades.length, wr };
+    });
+  }, [weeks]);
+
   const prevMonth = () => {
     if (currentMonth === 0) setCurrentDate(currentYear - 1, 11);
     else setCurrentDate(currentYear, currentMonth - 1);
@@ -130,6 +217,8 @@ export default function CalendarView() {
     else setCurrentDate(currentYear, currentMonth + 1);
     setExpandedDay(null);
   };
+
+  const isRtl = lang === 'he';
 
   return (
     <div className="cal-wrap">
@@ -146,32 +235,55 @@ export default function CalendarView() {
         </button>
       </div>
 
-      <div className="day-headers">
-        {T.days.map((d) => <div key={d} className="day-hdr">{d}</div>)}
+      {/* כותרות ימים + עמודת סיכום */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr) 52px', gap: 3, marginBottom: 3 }}>
+        {T.days.map((d) => (
+          <div key={d} className="day-hdr">{d}</div>
+        ))}
+        <div className="day-hdr" style={{ textAlign: 'center', color: 'var(--b)' }}>
+          {lang === 'he' ? 'שבוע' : 'Week'}
+        </div>
       </div>
 
-      <div className="cal-grid">
-        {cells.map((cell, i) =>
-          !cell ? (
-            <div key={`e-${i}`} className="day-cell empty" />
-          ) : (
-            <DayCell
-              key={cell.dateStr}
-              cell={cell}
-              isExpanded={expandedDay === cell.dateStr}
+      {/* שורות שבועיות עם סיכום */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {weeks.map((row, wi) => (
+          <div key={wi} style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr) 52px', gap: 3 }}>
+            {row.map((cell, ci) =>
+              !cell ? (
+                <div key={`e-${wi}-${ci}`} className="day-cell empty" />
+              ) : (
+                <DayCell
+                  key={cell.dateStr}
+                  cell={cell}
+                  isExpanded={expandedDay === cell.dateStr}
+                  lang={lang}
+                  onExpand={() => setExpandedDay(expandedDay === cell.dateStr ? null : cell.dateStr)}
+                  onEmpty={() => setModal({ type: 'new', date: cell.dateStr })}
+                  onTrade={(id) => setModal({ type: 'edit', tradeId: id })}
+                />
+              )
+            )}
+            {/* עמודת סיכום שבועי */}
+            <WeekSummaryCell
+              summary={weekSummaries[wi]}
+              weekNum={wi + 1}
               lang={lang}
-              onExpand={() => setExpandedDay(expandedDay === cell.dateStr ? null : cell.dateStr)}
-              onEmpty={() => setModal({ type: 'new', date: cell.dateStr })}
-              onTrade={(id) => setModal({ type: 'edit', tradeId: id })}
             />
-          ),
-        )}
+          </div>
+        ))}
       </div>
 
+      {/* Legend */}
       <div className="cal-legend">
         <div className="leg-item"><div className="leg-dot" style={{ background: 'var(--g)' }} />{T.profit}</div>
         <div className="leg-item"><div className="leg-dot" style={{ background: 'var(--r)' }} />{T.loss}</div>
         <div className="leg-item"><div className="leg-dot" style={{ background: 'var(--b)' }} />{T.today}</div>
+        <div style={{ marginInlineStart: 'auto', display: 'flex', gap: 6 }}>
+          <span style={{ fontSize: '.63rem', padding: '1px 6px', borderRadius: 8, background: 'rgba(0,224,168,.15)', color: 'var(--g)', fontWeight: 700 }}>60%+</span>
+          <span style={{ fontSize: '.63rem', padding: '1px 6px', borderRadius: 8, background: 'rgba(255,170,68,.15)', color: 'var(--o)', fontWeight: 700 }}>40-60%</span>
+          <span style={{ fontSize: '.63rem', padding: '1px 6px', borderRadius: 8, background: 'rgba(255,64,96,.15)', color: 'var(--r)', fontWeight: 700 }}>{'<'}40%</span>
+        </div>
       </div>
     </div>
   );
