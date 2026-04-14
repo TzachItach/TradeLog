@@ -24,17 +24,29 @@ function useCanvas(
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const dpr = window.devicePixelRatio || 1;
-    const W = canvas.offsetWidth;
-    const H = canvas.offsetHeight;
-    if (!W || !H) return;
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, W, H);
-    draw(ctx, W, H);
+
+    const render = () => {
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      const dpr = window.devicePixelRatio || 1;
+      // getBoundingClientRect עובד גם כשה-offsetWidth הוא 0
+      const rect = canvas.getBoundingClientRect();
+      const W = rect.width || canvas.parentElement?.getBoundingClientRect().width || 300;
+      const H = rect.height || canvas.offsetHeight || 220;
+      if (!W || !H) return;
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, W, H);
+      draw(ctx, W, H);
+    };
+
+    render();
+
+    // ResizeObserver — מצייר מחדש כשהגודל משתנה (מעבר בין tabs, סיבוב מובייל)
+    const ro = new ResizeObserver(() => render());
+    ro.observe(canvas);
+    return () => ro.disconnect();
   }, deps);
 }
 
