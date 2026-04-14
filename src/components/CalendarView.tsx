@@ -91,10 +91,10 @@ function DayCell({
 function WeekSummaryCell({ summary, weekNum, lang }: { summary: WeekSummary; weekNum: number; lang: string }) {
   const isHe = lang === 'he';
   const hasData = summary.trades > 0;
-  const isProfit = summary.pnl > 0;
+  const isProfit = summary.pnl >= 0;
   const wrColor = summary.wr >= 60 ? 'var(--g)' : summary.wr >= 40 ? 'var(--o)' : 'var(--r)';
-  const borderColor = isProfit ? 'rgba(0,224,168,.3)' : 'rgba(255,64,96,.3)';
-  const bgColor = isProfit ? 'rgba(0,224,168,.05)' : 'rgba(255,64,96,.05)';
+  const borderColor = isProfit ? 'rgba(0,224,168,.35)' : 'rgba(255,64,96,.35)';
+  const bgColor = isProfit ? 'rgba(0,224,168,.06)' : 'rgba(255,64,96,.06)';
 
   if (!hasData) {
     return (
@@ -103,7 +103,7 @@ function WeekSummaryCell({ summary, weekNum, lang }: { summary: WeekSummary; wee
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         minHeight: 84,
       }}>
-        <span style={{ fontSize: '.6rem', color: 'var(--t3)' }}>
+        <span style={{ fontSize: '.65rem', color: 'var(--t3)', fontWeight: 600 }}>
           {isHe ? `ש${weekNum}` : `W${weekNum}`}
         </span>
       </div>
@@ -112,38 +112,43 @@ function WeekSummaryCell({ summary, weekNum, lang }: { summary: WeekSummary; wee
 
   return (
     <div style={{
-      borderRadius: 7, border: `1px solid ${borderColor}`,
-      background: bgColor, padding: '6px 5px',
-      display: 'flex', flexDirection: 'column', gap: 3,
+      borderRadius: 7, border: `1.5px solid ${borderColor}`,
+      background: bgColor, padding: '7px 6px',
+      display: 'flex', flexDirection: 'column', gap: 4,
       alignItems: 'center', justifyContent: 'center',
       minHeight: 84, cursor: 'default',
     }}>
       {/* label */}
-      <div style={{ fontSize: '.58rem', color: 'var(--t3)', fontWeight: 700, letterSpacing: '.04em' }}>
+      <div style={{
+        fontSize: '.62rem', color: 'var(--t3)', fontWeight: 700,
+        letterSpacing: '.04em', textTransform: 'uppercase',
+      }}>
         {isHe ? `ש${weekNum}` : `W${weekNum}`}
       </div>
 
-      {/* P&L */}
+      {/* P&L — גדול וברור */}
       <div style={{
-        fontSize: '.72rem', fontWeight: 800, fontFamily: 'monospace',
-        color: isProfit ? 'var(--g)' : 'var(--r)', lineHeight: 1, textAlign: 'center',
+        fontSize: '.82rem', fontWeight: 900, fontFamily: 'monospace',
+        color: isProfit ? 'var(--g)' : 'var(--r)', lineHeight: 1,
+        textAlign: 'center', wordBreak: 'break-all',
       }}>
         {formatPnL(summary.pnl)}
       </div>
 
       {/* WR pill */}
       <div style={{
-        fontSize: '.6rem', fontWeight: 800, padding: '1px 6px',
-        borderRadius: 10, background: wrColor + '22', color: wrColor, lineHeight: 1.4,
+        fontSize: '.68rem', fontWeight: 800, padding: '2px 8px',
+        borderRadius: 10, background: wrColor + '22', color: wrColor,
+        lineHeight: 1.4, border: `1px solid ${wrColor}44`,
       }}>
         {summary.wr}%
       </div>
 
       {/* W/L */}
-      <div style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
-        <span style={{ fontSize: '.58rem', color: 'var(--g)', fontWeight: 700 }}>{summary.wins}W</span>
-        <span style={{ fontSize: '.52rem', color: 'var(--t3)' }}>·</span>
-        <span style={{ fontSize: '.58rem', color: 'var(--r)', fontWeight: 700 }}>{summary.losses}L</span>
+      <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+        <span style={{ fontSize: '.66rem', color: 'var(--g)', fontWeight: 700 }}>{summary.wins}W</span>
+        <span style={{ fontSize: '.56rem', color: 'var(--t3)' }}>·</span>
+        <span style={{ fontSize: '.66rem', color: 'var(--r)', fontWeight: 700 }}>{summary.losses}L</span>
       </div>
     </div>
   );
@@ -236,7 +241,7 @@ export default function CalendarView() {
       </div>
 
       {/* כותרות ימים + עמודת סיכום */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr) 52px', gap: 3, marginBottom: 3 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr) 80px', gap: 3, marginBottom: 3 }}>
         {T.days.map((d) => (
           <div key={d} className="day-hdr">{d}</div>
         ))}
@@ -248,7 +253,7 @@ export default function CalendarView() {
       {/* שורות שבועיות עם סיכום */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         {weeks.map((row, wi) => (
-          <div key={wi} style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr) 52px', gap: 3 }}>
+          <div key={wi} style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr) 80px', gap: 3 }}>
             {row.map((cell, ci) =>
               !cell ? (
                 <div key={`e-${wi}-${ci}`} className="day-cell empty" />
