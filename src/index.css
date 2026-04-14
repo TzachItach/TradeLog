@@ -163,12 +163,12 @@ button, input, select, textarea { font-family: inherit; }
 .cell-pnl { font-family: var(--mono); font-size: .73rem; font-weight: 700; line-height: 1; }
 .day-cell.profit .cell-pnl { color: var(--g); }
 .day-cell.loss   .cell-pnl { color: var(--r); }
-.cell-trades { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.cell-trades { display: flex; flex-direction: row; flex-wrap: wrap; gap: 2px; flex: 1; align-content: flex-start; }
 .trade-badge {
-  font-family: var(--mono); font-size: .63rem; padding: 2px 5px;
-  border-radius: 3px; white-space: nowrap; overflow: hidden;
-  text-overflow: ellipsis; cursor: pointer; border: 1px solid transparent;
-  transition: opacity .1s; display: block;
+  font-family: var(--mono); font-size: .6rem; padding: 2px 4px;
+  border-radius: 3px; white-space: nowrap; cursor: pointer;
+  border: 1px solid transparent; transition: opacity .1s;
+  display: inline-flex; align-items: center; gap: 2px;
 }
 .trade-badge:hover { opacity: .78; }
 .trade-badge.pos { background: rgba(0,224,168,.15); color: var(--g); border-color: rgba(0,224,168,.22); }
