@@ -3,6 +3,8 @@ import { useStore } from '../store';
 import { useT } from '../i18n';
 import type { Trade } from '../types';
 import DailySummary from './DailySummary';
+import SymbolPicker from './SymbolPicker';
+import { getPointValue } from '../lib/futures';
 
 const EMPTY_TRADE = (date: string, accountId: string): Omit<Trade, 'id'> => ({
   account_id: accountId,
@@ -96,18 +98,14 @@ export default function TradeModal() {
   const checkboxFields = currentStrategy?.fields.filter(f => f.field_type === 'checkbox') ?? [];
   const isNew = modal?.type === 'new';
 
-  // ── מחשבון R:R ──────────────────────────────────────────
+  // ── מחשבון R:R — ערך נקודה מדויק לפי הסמל ──────────────
   const sl = Number(form.stop_loss_pts) || 0;
   const tp = Number(form.take_profit_pts) || 0;
   const sz = Number(form.size) || 1;
   const rrRatio = sl > 0 && tp > 0 ? (tp / sl) : 0;
-  // נקודת ערך ממוצעת (NQ~$20, ES~$50, CL~$10, GC~$10)
-  const ptValue: Record<string, number> = { NQ: 20, MNQ: 2, ES: 50, MES: 5, CL: 10, GC: 10, SI: 50, YM: 5, RTY: 5 };
-  const symUpper = form.symbol.toUpperCase();
-  const pv = ptValue[symUpper] ?? 20;
-  const estWin  = tp > 0 ? tp * sz * pv : 0;
-  const estLoss = sl > 0 ? sl * sz * pv : 0;
-  // Win rate minimum לפי R:R
+  const pv = getPointValue(form.symbol);
+  const estWin  = tp > 0 && pv > 0 ? tp * sz * pv : 0;
+  const estLoss = sl > 0 && pv > 0 ? sl * sz * pv : 0;
   const minWR = rrRatio > 0 ? Math.round((1 / (1 + rrRatio)) * 100) : 0;
 
   return (
@@ -137,10 +135,13 @@ export default function TradeModal() {
             </div>
 
             {/* Symbol */}
-            <div>
+            <div className="s2">
               <label className="form-label">{T.symbol}</label>
-              <input type="text" className="form-input" placeholder="NQ, ES, CL, GC..."
-                value={form.symbol} onChange={e => set('symbol', e.target.value.toUpperCase())} />
+              <SymbolPicker
+                value={form.symbol}
+                lang={lang}
+                onChange={(sym) => set('symbol', sym)}
+              />
             </div>
 
             {/* Direction */}
@@ -226,9 +227,14 @@ export default function TradeModal() {
                       </div>
                     )}
                   </div>
-                  {form.symbol && !ptValue[symUpper] && (
+                  {pv > 0 && (
                     <div style={{ fontSize: '.65rem', color: 'var(--t3)', marginTop: 6 }}>
-                      {isHe ? `* ערך נקודה ל-${form.symbol} לא ידוע — מחשב לפי $20/נקודה` : `* Point value for ${form.symbol} unknown — using $20/pt`}
+                      {isHe ? `ערך נקודה: $${pv} · ${form.symbol}` : `Point value: $${pv} · ${form.symbol}`}
+                    </div>
+                  )}
+                  {!pv && form.symbol && (
+                    <div style={{ fontSize: '.65rem', color: 'var(--o)', marginTop: 6 }}>
+                      {isHe ? `⚠ ${form.symbol} לא ברשימה — בחר מהרשימה לחישוב מדויק` : `⚠ ${form.symbol} not in list — select from list for accurate calculation`}
                     </div>
                   )}
                 </div>
