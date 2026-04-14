@@ -42,8 +42,8 @@ function DayCell({
   else if (isLoss) cls += ' loss';
   if (isToday) cls += ' today';
 
-  const visible = isExpanded ? trades : trades.slice(0, 3);
-  const extra = trades.length - 3;
+  const visible = isExpanded ? trades : trades.slice(0, 6);
+  const extra = trades.length - 6;
 
   return (
     <div className={cls} onClick={() => { if (!hasTrades) onEmpty(); }}
@@ -81,7 +81,7 @@ function DayCell({
             +{extra} {T.more}
           </span>
         )}
-        {isExpanded && trades.length > 3 && (
+        {isExpanded && trades.length > 6 && (
           <span className="more-badge" onClick={(e) => { e.stopPropagation(); onExpand(); }}>▲</span>
         )}
       </div>
