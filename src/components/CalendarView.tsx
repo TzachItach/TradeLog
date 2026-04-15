@@ -19,9 +19,9 @@ interface WeekSummary {
 }
 
 function DayCell({
-  cell, isExpanded, lang, isSunday, onExpand, onEmpty, onTrade,
+  cell, isExpanded, lang, isSunday, isSaturday, onExpand, onEmpty, onTrade,
 }: {
-  cell: CellData; isExpanded: boolean; lang: string; isSunday?: boolean;
+  cell: CellData; isExpanded: boolean; lang: string; isSunday?: boolean; isSaturday?: boolean;
   onExpand: () => void; onEmpty: () => void; onTrade: (id: string) => void;
 }) {
   const T = useT(lang as 'he' | 'en');
@@ -47,7 +47,7 @@ function DayCell({
 
   return (
     <div className={cls} onClick={() => { if (!hasTrades) onEmpty(); }}
-      style={isSunday ? { opacity: 0.45, fontSize: '.8em' } : undefined}
+      style={(isSunday || isSaturday) ? { opacity: 0.35, fontSize: '.8em' } : undefined}
     >
       <div className="cell-head">
         <span className="cell-daynum">{day}</span>
@@ -243,12 +243,12 @@ export default function CalendarView() {
         </button>
       </div>
 
-      {/* כותרות ימים — ראשון קטן, שבוע גדול */}
-      <div className="cal-week-row cal-week-header" style={{ display: 'grid', gridTemplateColumns: '32px repeat(6,1fr) 100px', gap: 3, marginBottom: 3 }}>
+      {/* כותרות: ראשון קטן + ב-ו רגיל + שבת קטן + שבוע */}
+      <div className="cal-week-row cal-week-header" style={{ display: 'grid', gridTemplateColumns: '28px repeat(5,1fr) 28px 100px', gap: 3, marginBottom: 3 }}>
         {T.days.map((d, i) => (
           <div key={d} className="day-hdr" style={{
-            opacity: i === 0 ? 0.35 : 1,
-            fontSize: i === 0 ? '.54rem' : undefined,
+            opacity: (i === 0 || i === 6) ? 0.3 : 1,
+            fontSize: (i === 0 || i === 6) ? '.5rem' : undefined,
           }}>{d}</div>
         ))}
         <div className="day-hdr" style={{ textAlign: 'center', color: 'var(--b)', fontWeight: 700 }}>
@@ -259,7 +259,7 @@ export default function CalendarView() {
       {/* שורות שבועיות */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         {weeks.map((row, wi) => (
-          <div key={wi} className="cal-week-row" style={{ display: 'grid', gridTemplateColumns: '32px repeat(6,1fr) 100px', gap: 3 }}>
+          <div key={wi} className="cal-week-row" style={{ display: 'grid', gridTemplateColumns: '28px repeat(5,1fr) 28px 100px', gap: 3 }}>
             {row.map((cell, ci) =>
               !cell ? (
                 <div key={`e-${wi}-${ci}`}
@@ -273,6 +273,7 @@ export default function CalendarView() {
                   isExpanded={expandedDay === cell.dateStr}
                   lang={lang}
                   isSunday={ci === 0}
+                  isSaturday={ci === 6}
                   onExpand={() => setExpandedDay(expandedDay === cell.dateStr ? null : cell.dateStr)}
                   onEmpty={() => setModal({ type: 'new', date: cell.dateStr })}
                   onTrade={(id) => setModal({ type: 'edit', tradeId: id })}
