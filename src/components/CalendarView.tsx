@@ -19,11 +19,12 @@ interface WeekSummary {
 }
 
 function DayCell({
-  cell, isExpanded, lang, isSunday, onExpand, onEmpty, onTrade,
+  cell, isExpanded, lang, isSunday, isSaturday, onExpand, onEmpty, onTrade,
 }: {
-  cell: CellData; isExpanded: boolean; lang: string; isSunday?: boolean;
+  cell: CellData; isExpanded: boolean; lang: string; isSunday?: boolean; isSaturday?: boolean;
   onExpand: () => void; onEmpty: () => void; onTrade: (id: string) => void;
 }) {
+  const isWeekend = isSunday || isSaturday;
   const T = useT(lang as 'he' | 'en');
   const { trades, totalPnL, day } = cell;
   const hasTrades = trades.length > 0;
@@ -47,7 +48,7 @@ function DayCell({
 
   return (
     <div className={cls} onClick={() => { if (!hasTrades) onEmpty(); }}
-      style={isSunday ? { opacity: 0.45, fontSize: '.8em' } : undefined}
+      style={isWeekend ? { opacity: 0.45, fontSize: '.8em' } : undefined}
     >
       <div className="cell-head">
         <span className="cell-daynum">{day}</span>
@@ -244,11 +245,11 @@ export default function CalendarView() {
       </div>
 
       {/* כותרות ימים — ראשון קטן, שבוע גדול */}
-      <div style={{ display: 'grid', gridTemplateColumns: '32px repeat(6,1fr) 100px', gap: 3, marginBottom: 3 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '32px repeat(5,1fr) 32px 100px', gap: 3, marginBottom: 3 }}>
         {T.days.map((d, i) => (
           <div key={d} className="day-hdr" style={{
-            opacity: i === 0 ? 0.35 : 1,
-            fontSize: i === 0 ? '.54rem' : undefined,
+            opacity: i === 0 || i === 6 ? 0.35 : 1,
+            fontSize: i === 0 || i === 6 ? '.54rem' : undefined,
           }}>{d}</div>
         ))}
         <div className="day-hdr" style={{ textAlign: 'center', color: 'var(--b)', fontWeight: 700 }}>
@@ -259,12 +260,12 @@ export default function CalendarView() {
       {/* שורות שבועיות */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         {weeks.map((row, wi) => (
-          <div key={wi} style={{ display: 'grid', gridTemplateColumns: '32px repeat(6,1fr) 100px', gap: 3 }}>
+          <div key={wi} style={{ display: 'grid', gridTemplateColumns: '32px repeat(5,1fr) 32px 100px', gap: 3 }}>
             {row.map((cell, ci) =>
               !cell ? (
                 <div key={`e-${wi}-${ci}`}
                   className="day-cell empty"
-                  style={ci === 0 ? { opacity: 0.3, minHeight: 84 } : {}}
+                  style={ci === 0 || ci === 6 ? { opacity: 0.3, minHeight: 84 } : {}}
                 />
               ) : (
                 <DayCell
@@ -273,6 +274,7 @@ export default function CalendarView() {
                   isExpanded={expandedDay === cell.dateStr}
                   lang={lang}
                   isSunday={ci === 0}
+                  isSaturday={ci === 6}
                   onExpand={() => setExpandedDay(expandedDay === cell.dateStr ? null : cell.dateStr)}
                   onEmpty={() => setModal({ type: 'new', date: cell.dateStr })}
                   onTrade={(id) => setModal({ type: 'edit', tradeId: id })}
