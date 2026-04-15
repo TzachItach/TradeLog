@@ -505,6 +505,14 @@ input[type=checkbox] { accent-color: var(--b); cursor: pointer; }
   .day-headers { gap: 2px; margin-bottom: 2px; }
   .day-hdr { font-size: .58rem; padding: 3px 0; }
 
+  /* עמודת שבוע — מובייל: קטנה יותר, ראשון נעלם */
+  .cal-week-row {
+    grid-template-columns: 0px repeat(6,1fr) 58px !important;
+  }
+  .cal-week-row > *:first-child {
+    display: none;
+  }
+
   /* תא יום — גדול יותר, מידע מסודר אנכית */
   .day-cell {
     min-height: 70px;
@@ -572,6 +580,11 @@ input[type=checkbox] { accent-color: var(--b); cursor: pointer; }
   .day-cell { min-height: 60px; padding: 4px 3px; }
   .cell-daynum { font-size: .72rem; }
   .cell-pnl { font-size: .65rem; }
+
+  /* עמודת שבוע — מסך קטן מאוד */
+  .cal-week-row {
+    grid-template-columns: 0px repeat(6,1fr) 46px !important;
+  }
 }
 
 /* ── Light Mode ── */
