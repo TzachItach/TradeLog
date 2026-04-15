@@ -19,12 +19,11 @@ interface WeekSummary {
 }
 
 function DayCell({
-  cell, isExpanded, lang, isSunday, isSaturday, onExpand, onEmpty, onTrade,
+  cell, isExpanded, lang, isSunday, onExpand, onEmpty, onTrade,
 }: {
-  cell: CellData; isExpanded: boolean; lang: string; isSunday?: boolean; isSaturday?: boolean;
+  cell: CellData; isExpanded: boolean; lang: string; isSunday?: boolean;
   onExpand: () => void; onEmpty: () => void; onTrade: (id: string) => void;
 }) {
-  const isWeekend = isSunday || isSaturday;
   const T = useT(lang as 'he' | 'en');
   const { trades, totalPnL, day } = cell;
   const hasTrades = trades.length > 0;
@@ -48,7 +47,7 @@ function DayCell({
 
   return (
     <div className={cls} onClick={() => { if (!hasTrades) onEmpty(); }}
-      style={isWeekend ? { opacity: 0.45, fontSize: '.8em' } : undefined}
+      style={isSunday ? { opacity: 0.45, fontSize: '.8em' } : undefined}
     >
       <div className="cell-head">
         <span className="cell-daynum">{day}</span>
@@ -116,43 +115,43 @@ function WeekSummaryCell({ summary, weekNum, lang }: { summary: WeekSummary; wee
   return (
     <div style={{
       borderRadius: 8, border: `1.5px solid ${borderColor}`,
-      background: bgColor, padding: '8px 8px',
-      display: 'flex', flexDirection: 'column', gap: 5,
+      background: bgColor, padding: '6px 4px',
+      display: 'flex', flexDirection: 'column', gap: 4,
       alignItems: 'center', justifyContent: 'center',
       minHeight: 84,
     }}>
       {/* תווית */}
       <div style={{
-        fontSize: '.65rem', color: 'var(--t3)', fontWeight: 700,
-        letterSpacing: '.05em', textTransform: 'uppercase',
+        fontSize: '.6rem', color: 'var(--t3)', fontWeight: 700,
+        letterSpacing: '.04em', textTransform: 'uppercase',
       }}>
-        {isHe ? `שבוע ${weekNum}` : `Week ${weekNum}`}
+        {isHe ? `ש${weekNum}` : `W${weekNum}`}
       </div>
 
-      {/* P&L — גדול ובולט */}
+      {/* P&L */}
       <div style={{
-        fontSize: '.9rem', fontWeight: 900, fontFamily: 'monospace',
+        fontSize: '.78rem', fontWeight: 900, fontFamily: 'monospace',
         color: isProfit ? 'var(--g)' : 'var(--r)',
-        lineHeight: 1, textAlign: 'center',
+        lineHeight: 1, textAlign: 'center', wordBreak: 'break-all',
       }}>
         {formatPnL(summary.pnl)}
       </div>
 
       {/* WR pill */}
       <div style={{
-        fontSize: '.72rem', fontWeight: 800, padding: '3px 10px',
-        borderRadius: 12, background: wrColor + '20', color: wrColor,
+        fontSize: '.66rem', fontWeight: 800, padding: '2px 6px',
+        borderRadius: 10, background: wrColor + '20', color: wrColor,
         border: `1px solid ${wrColor}44`, lineHeight: 1.3,
         width: '100%', textAlign: 'center',
       }}>
-        {summary.wr}% WR
+        {summary.wr}%
       </div>
 
-      {/* W / L */}
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ fontSize: '.7rem', color: 'var(--g)', fontWeight: 700 }}>{summary.wins}W</span>
-        <span style={{ fontSize: '.6rem', color: 'var(--t3)' }}>·</span>
-        <span style={{ fontSize: '.7rem', color: 'var(--r)', fontWeight: 700 }}>{summary.losses}L</span>
+      {/* W/L */}
+      <div style={{ display: 'flex', gap: 3, alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ fontSize: '.64rem', color: 'var(--g)', fontWeight: 700 }}>{summary.wins}W</span>
+        <span style={{ fontSize: '.56rem', color: 'var(--t3)' }}>·</span>
+        <span style={{ fontSize: '.64rem', color: 'var(--r)', fontWeight: 700 }}>{summary.losses}L</span>
       </div>
     </div>
   );
@@ -245,11 +244,11 @@ export default function CalendarView() {
       </div>
 
       {/* כותרות ימים — ראשון קטן, שבוע גדול */}
-      <div style={{ display: 'grid', gridTemplateColumns: '32px repeat(5,1fr) 32px 100px', gap: 3, marginBottom: 3 }}>
+      <div className="cal-week-row cal-week-header" style={{ display: 'grid', gridTemplateColumns: '32px repeat(6,1fr) 100px', gap: 3, marginBottom: 3 }}>
         {T.days.map((d, i) => (
           <div key={d} className="day-hdr" style={{
-            opacity: i === 0 || i === 6 ? 0.35 : 1,
-            fontSize: i === 0 || i === 6 ? '.54rem' : undefined,
+            opacity: i === 0 ? 0.35 : 1,
+            fontSize: i === 0 ? '.54rem' : undefined,
           }}>{d}</div>
         ))}
         <div className="day-hdr" style={{ textAlign: 'center', color: 'var(--b)', fontWeight: 700 }}>
@@ -260,12 +259,12 @@ export default function CalendarView() {
       {/* שורות שבועיות */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         {weeks.map((row, wi) => (
-          <div key={wi} style={{ display: 'grid', gridTemplateColumns: '32px repeat(5,1fr) 32px 100px', gap: 3 }}>
+          <div key={wi} className="cal-week-row" style={{ display: 'grid', gridTemplateColumns: '32px repeat(6,1fr) 100px', gap: 3 }}>
             {row.map((cell, ci) =>
               !cell ? (
                 <div key={`e-${wi}-${ci}`}
                   className="day-cell empty"
-                  style={ci === 0 || ci === 6 ? { opacity: 0.3, minHeight: 84 } : {}}
+                  style={ci === 0 ? { opacity: 0.3, minHeight: 84 } : {}}
                 />
               ) : (
                 <DayCell
@@ -274,7 +273,6 @@ export default function CalendarView() {
                   isExpanded={expandedDay === cell.dateStr}
                   lang={lang}
                   isSunday={ci === 0}
-                  isSaturday={ci === 6}
                   onExpand={() => setExpandedDay(expandedDay === cell.dateStr ? null : cell.dateStr)}
                   onEmpty={() => setModal({ type: 'new', date: cell.dateStr })}
                   onTrade={(id) => setModal({ type: 'edit', tradeId: id })}
