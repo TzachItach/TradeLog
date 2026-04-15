@@ -1,30 +1,49 @@
 /* ================================================================
-   TradeLog — TraderSync Dark Pro Theme
+   TradeLog — Pulse Terminal Theme (by Stitch / Velocity Terminal)
+   Primary: #b4c5ff  Secondary: #4ae176  Tertiary: #ffb3b0
+   Font: Inter  Bg: #10131b
 ================================================================ */
 :root {
-  --bg:    #0d0f14;
-  --s1:    #080a0f;
-  --s2:    #111620;
-  --s3:    #181e2a;
-  --bd:    #1a1f2e;
-  --bd2:   #252d3f;
-  --t1:    #e8eaf5;
-  --t2:    #7a85a8;
-  --t3:    #3d4560;
-  --g:     #22d3a0;
-  --r:     #ff5370;
-  --b:     #4f86f7;
-  --o:     #f0a030;
-  --g-bg:  rgba(34,211,160,.09);
-  --g-bd:  rgba(34,211,160,.35);
-  --r-bg:  rgba(255,83,112,.09);
-  --r-bd:  rgba(255,83,112,.35);
-  --b-bg:  rgba(79,134,247,.10);
-  --b-bd:  rgba(79,134,247,.38);
+  /* ── Backgrounds ── */
+  --bg:    #10131b;
+  --s1:    #181b24;   /* surface-container-low  */
+  --s2:    #1c1f28;   /* surface-container      */
+  --s3:    #272a33;   /* surface-container-high */
+  --s4:    #32353e;   /* surface-container-highest */
+
+  /* ── Borders ── */
+  --bd:    rgba(255,255,255,.05);
+  --bd2:   #434654;   /* outline-variant */
+  --bd3:   #8d90a0;   /* outline */
+
+  /* ── Text ── */
+  --t1:    #e0e2ee;   /* on-surface */
+  --t2:    #c3c6d7;   /* on-surface-variant */
+  --t3:    #8d90a0;   /* outline */
+
+  /* ── Semantic ── */
+  --g:     #4ae176;   /* secondary — profit/win */
+  --r:     #ffb3b0;   /* tertiary  — loss */
+  --b:     #b4c5ff;   /* primary   — accent */
+  --b2:    #608bff;   /* primary-container */
+  --o:     #f0c040;   /* warning */
+
+  /* ── Semantic backgrounds ── */
+  --g-bg:  rgba(74,225,118,.10);
+  --g-bd:  rgba(74,225,118,.35);
+  --r-bg:  rgba(255,179,176,.09);
+  --r-bd:  rgba(255,179,176,.35);
+  --b-bg:  rgba(180,197,255,.09);
+  --b-bd:  rgba(180,197,255,.32);
+
+  /* ── Typography ── */
   --mono:  'Courier New', 'Lucida Console', monospace;
-  --sans:  system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sans:  'Inter', system-ui, -apple-system, sans-serif;
+
+  /* ── Radius — Stitch: sharp-ish ── */
   --rad:   8px;
-  --rad-s: 6px;
+  --rad-s: 4px;
+  --rad-l: 12px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; overflow: hidden; }
@@ -646,3 +665,261 @@ body.light .settings-section{ box-shadow: 0 1px 6px rgba(0,0,0,.04); }
 body.light .table-wrap      { box-shadow: 0 1px 6px rgba(0,0,0,.04); }
 body.light .auth-card       { box-shadow: 0 8px 32px rgba(0,0,0,.1); }
 body.light .logo-text       { color: var(--t1); }
+
+/* ================================================================
+   Pulse Terminal — Component Overrides
+================================================================ */
+
+/* ── Inter Font ── */
+body { font-family: 'Inter', system-ui, sans-serif !important; }
+
+/* ── Glass Panel (stat cards, calendar, sections) ── */
+.stat-card {
+  background: rgba(50,53,62,.4) !important;
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,.05) !important;
+  border-radius: var(--rad) !important;
+}
+.stat-card:hover { background: rgba(50,53,62,.6) !important; }
+
+.cal-wrap,
+.settings-section,
+.table-wrap,
+.report-card {
+  background: rgba(28,31,40,.85);
+  border: 1px solid rgba(255,255,255,.05) !important;
+  backdrop-filter: blur(12px);
+}
+
+/* ── Stat labels: uppercase tracking like Stitch ── */
+.stat-label {
+  font-size: .62rem !important;
+  letter-spacing: .18em !important;
+  text-transform: uppercase !important;
+  font-weight: 700 !important;
+  color: var(--t3) !important;
+}
+.stat-value {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 1.5rem !important;
+  letter-spacing: -.02em !important;
+}
+
+/* ── Stats bar: single glass block ── */
+.stats-bar {
+  background: rgba(50,53,62,.3) !important;
+  border: 1px solid rgba(255,255,255,.05) !important;
+  border-radius: var(--rad) !important;
+  gap: 1px !important;
+  backdrop-filter: blur(24px);
+}
+
+/* ── Sidebar: Stitch style ── */
+.sidebar {
+  background: #10131b !important;
+  border-inline-end: 1px solid rgba(255,255,255,.05) !important;
+  width: 200px !important;
+}
+.sidebar.collapsed { width: 50px !important; }
+.sidebar-logo {
+  border-bottom: 1px solid rgba(255,255,255,.05) !important;
+}
+.logo-text {
+  font-weight: 700 !important;
+  letter-spacing: -.04em !important;
+  color: var(--b) !important;
+  font-size: 1.05rem !important;
+}
+.logo-icon { background: var(--b2) !important; border-radius: 4px !important; }
+
+.nav-item {
+  border-radius: 2px !important;
+  font-size: .82rem !important;
+  font-weight: 500 !important;
+  color: var(--t3) !important;
+  letter-spacing: .01em !important;
+}
+.nav-item:hover {
+  background: rgba(255,255,255,.05) !important;
+  color: var(--t2) !important;
+  border-inline-start: none !important;
+}
+.nav-item.active {
+  background: rgba(180,197,255,.08) !important;
+  color: var(--b) !important;
+  border-inline-start: 2px solid var(--b) !important;
+  border-radius: 0 !important;
+  font-weight: 700 !important;
+}
+
+/* ── Header ── */
+.header {
+  background: #10131b !important;
+  border-bottom: 1px solid rgba(255,255,255,.05) !important;
+  height: 52px !important;
+}
+.account-tab {
+  border-radius: 4px !important;
+  font-size: .72rem !important;
+  font-weight: 600 !important;
+  letter-spacing: .04em !important;
+}
+.account-tab.active {
+  background: rgba(180,197,255,.1) !important;
+  color: var(--b) !important;
+  border-color: rgba(180,197,255,.3) !important;
+}
+
+/* ── Buttons ── */
+.btn-primary {
+  background: var(--b2) !important;
+  color: #002a77 !important;
+  border-radius: var(--rad-s) !important;
+  font-weight: 700 !important;
+  font-size: .82rem !important;
+  letter-spacing: .04em !important;
+  text-transform: uppercase !important;
+}
+.btn-primary:hover { opacity: .88 !important; }
+
+/* ── Trade badges: profit-pulse / loss-pulse ── */
+.trade-badge.pos {
+  background: rgba(74,225,118,.1) !important;
+  color: var(--g) !important;
+  border: none !important;
+  border-inline-start: 2px solid var(--g) !important;
+  border-radius: 2px !important;
+}
+.trade-badge.neg {
+  background: rgba(255,179,176,.1) !important;
+  color: var(--r) !important;
+  border: none !important;
+  border-inline-start: 2px solid var(--r) !important;
+  border-radius: 2px !important;
+}
+
+/* ── Calendar day cells ── */
+.day-cell {
+  border-radius: var(--rad-s) !important;
+  border: 1px solid rgba(255,255,255,.05) !important;
+  background: rgba(24,27,36,.8) !important;
+}
+.day-cell.profit {
+  background: rgba(74,225,118,.07) !important;
+  border-color: rgba(74,225,118,.25) !important;
+}
+.day-cell.loss {
+  background: rgba(255,179,176,.07) !important;
+  border-color: rgba(255,179,176,.25) !important;
+}
+.day-cell.today {
+  border-color: var(--b) !important;
+  background: rgba(180,197,255,.07) !important;
+}
+
+/* ── Modal ── */
+.modal-box {
+  background: var(--s2) !important;
+  border: 1px solid rgba(255,255,255,.07) !important;
+  border-radius: var(--rad-l) !important;
+  backdrop-filter: blur(24px);
+}
+.modal-overlay { background: rgba(16,19,27,.75) !important; }
+
+/* ── Form inputs ── */
+.form-input, .filter-inp {
+  background: var(--s1) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  border-radius: var(--rad-s) !important;
+  color: var(--t1) !important;
+  font-family: 'Inter', sans-serif !important;
+}
+.form-input:focus, .filter-inp:focus {
+  border-color: var(--b) !important;
+  outline: none !important;
+}
+
+/* ── Avatar ── */
+.avatar {
+  background: var(--b2) !important;
+  color: #002a77 !important;
+  border-radius: 50% !important;
+  font-weight: 700 !important;
+}
+
+/* ── Page title ── */
+.page-title {
+  font-weight: 700 !important;
+  letter-spacing: -.03em !important;
+  font-size: 1.25rem !important;
+}
+
+/* ── Section titles ── */
+.section-title {
+  font-size: .72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase !important;
+  color: var(--t3) !important;
+}
+
+/* ── Auth ── */
+.auth-wrap { background: var(--bg) !important; }
+.auth-card {
+  background: rgba(28,31,40,.95) !important;
+  border: 1px solid rgba(255,255,255,.07) !important;
+  border-radius: var(--rad-l) !important;
+  backdrop-filter: blur(24px);
+}
+.auth-title { color: var(--b) !important; letter-spacing: -.03em !important; font-weight: 800 !important; }
+.btn-oauth {
+  background: var(--s3) !important;
+  border: 1px solid rgba(255,255,255,.07) !important;
+  border-radius: var(--rad-s) !important;
+}
+.btn-oauth:hover { border-color: var(--b) !important; }
+.btn-demo {
+  background: rgba(180,197,255,.1) !important;
+  border-color: rgba(180,197,255,.3) !important;
+  border-radius: var(--rad-s) !important;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar-track { background: var(--bg) !important; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1) !important; border-radius: 2px !important; }
+
+/* ── Light Mode overrides for Pulse Terminal ── */
+body.light {
+  --bg:  #f0f2f8;
+  --s1:  #ffffff;
+  --s2:  #f4f6fc;
+  --s3:  #eaecf5;
+  --bd:  rgba(0,0,0,.06);
+  --bd2: #c5cce0;
+  --t1:  #0d1126;
+  --t2:  #3d4a6a;
+  --t3:  #8090b0;
+  --g:   #009e72;
+  --r:   #c0303c;
+  --b:   #4a7dff;
+  --b2:  #1a52d0;
+  --g-bg: rgba(0,158,114,.09);
+  --g-bd: rgba(0,158,114,.32);
+  --r-bg: rgba(192,48,60,.07);
+  --r-bd: rgba(192,48,60,.30);
+  --b-bg: rgba(74,125,255,.09);
+  --b-bd: rgba(74,125,255,.32);
+}
+body.light .stat-card     { background: rgba(255,255,255,.9) !important; }
+body.light .cal-wrap      { background: #fff !important; }
+body.light .settings-section { background: #fff !important; }
+body.light .day-cell      { background: rgba(240,242,248,.8) !important; }
+body.light .day-cell.profit { background: rgba(0,158,114,.06) !important; }
+body.light .day-cell.loss   { background: rgba(192,48,60,.06) !important; }
+body.light .modal-box     { background: #fff !important; }
+body.light .sidebar       { background: #fff !important; box-shadow: 2px 0 16px rgba(0,0,0,.08) !important; }
+body.light .header        { background: #fff !important; box-shadow: 0 1px 0 rgba(0,0,0,.06) !important; }
+body.light .logo-text     { color: var(--b) !important; }
+body.light .btn-primary   { color: #fff !important; }
+body.light .avatar        { color: #fff !important; }
