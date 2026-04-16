@@ -50,6 +50,8 @@ interface AppState {
   sidebarCollapsed: boolean;
   darkMode: boolean;
   dataLoading: boolean;
+  dailyGoalTarget: number;
+  dailyMaxLoss: number;
 
   setDemo: (v: boolean) => void;
   setUser: (u: AppState['user']) => void;
@@ -60,6 +62,8 @@ interface AppState {
   setActiveView: (v: string) => void;
   setSidebarCollapsed: (v: boolean) => void;
   setDarkMode: (v: boolean) => void;
+  setDailyGoalTarget: (v: number) => void;
+  setDailyMaxLoss: (v: number) => void;
 
   addTrade: (t: Trade) => void;
   updateTrade: (t: Trade) => void;
@@ -109,6 +113,8 @@ export const useStore = create<AppState>()(
       sidebarCollapsed: false,
       darkMode: true,
       dataLoading: false,
+      dailyGoalTarget: 0,
+      dailyMaxLoss: 0,
 
       setDemo: (v) => set({ isDemo: v }),
       setUser: (u) => set({ user: u }),
@@ -119,6 +125,8 @@ export const useStore = create<AppState>()(
       setActiveView: (v) => set({ activeView: v }),
       setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
       setDarkMode: (v) => set({ darkMode: v }),
+      setDailyGoalTarget: (v) => set({ dailyGoalTarget: v }),
+      setDailyMaxLoss: (v) => set({ dailyMaxLoss: v }),
 
       // ── עסקאות — שמור גם ב-Supabase ──
       addTrade: (t) => {
@@ -263,6 +271,7 @@ export const useStore = create<AppState>()(
         lang: s.lang, fontSize: s.fontSize, highContrast: s.highContrast,
         grayscale: s.grayscale, readableFont: s.readableFont,
         sidebarCollapsed: s.sidebarCollapsed, darkMode: s.darkMode,
+        dailyGoalTarget: s.dailyGoalTarget, dailyMaxLoss: s.dailyMaxLoss,
         // שמור נתונים ב-localStorage רק כ-cache — Supabase הוא source of truth
         accounts: s.accounts, trades: s.trades, strategies: s.strategies,
         selectedAccount: s.selectedAccount, isDemo: s.isDemo,

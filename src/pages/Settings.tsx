@@ -406,7 +406,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
 
 /* ── דף ראשי ── */
 export default function Settings() {
-  const { lang, accounts, strategies, user, addAccount, updateAccount, deleteAccount, addStrategy, updateStrategy, deleteStrategy, setUser } = useStore();
+  const { lang, accounts, strategies, user, dailyGoalTarget, dailyMaxLoss, setDailyGoalTarget, setDailyMaxLoss, addAccount, updateAccount, deleteAccount, addStrategy, updateStrategy, deleteStrategy, setUser } = useStore();
   const T = useT(lang);
   const navigate = useNavigate();
   const [accForm, setAccForm] = useState<'new' | string | null>(null);
@@ -556,6 +556,40 @@ export default function Settings() {
       </div>
 
       {showImport && <BrokerImport onClose={() => setShowImport(false)} />}
+
+      {/* יעדים יומיים */}
+      <div className="settings-section">
+        <div className="section-title">{lang === 'he' ? 'יעדים יומיים' : 'Daily Goals'}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div>
+            <label className="form-label">{lang === 'he' ? 'יעד רווח יומי ($)' : 'Daily Profit Target ($)'}</label>
+            <input
+              type="number"
+              className="form-input"
+              min={0}
+              value={dailyGoalTarget || ''}
+              placeholder="0"
+              onChange={(e) => setDailyGoalTarget(Math.max(0, Number(e.target.value)))}
+            />
+          </div>
+          <div>
+            <label className="form-label">{lang === 'he' ? 'גבול הפסד יומי ($)' : 'Daily Max Loss ($)'}</label>
+            <input
+              type="number"
+              className="form-input"
+              min={0}
+              value={dailyMaxLoss || ''}
+              placeholder="0"
+              onChange={(e) => setDailyMaxLoss(Math.max(0, Number(e.target.value)))}
+            />
+          </div>
+        </div>
+        <div style={{ marginTop: 10, fontSize: '.74rem', color: 'var(--t3)', lineHeight: 1.7 }}>
+          {lang === 'he'
+            ? '💡 הגדר 0 להשבית יעד. היעדים יוצגו בדשבורד עם progress bar להיום.'
+            : '💡 Set 0 to disable a goal. Goals appear on the dashboard with a progress bar for today.'}
+        </div>
+      </div>
 
       {/* פרופיל + התנתקות */}
       <div className="settings-section">

@@ -884,6 +884,64 @@ body { font-family: 'Inter', system-ui, sans-serif !important; }
   border-radius: var(--rad-s) !important;
 }
 
+/* ── Daily Goal Bar ── */
+.daily-goal-bar {
+  background: var(--s2);
+  border: 1px solid var(--bd2);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.dg-today {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.dg-label {
+  font-size: .78rem;
+  color: var(--t3);
+  font-weight: 500;
+}
+.dg-pnl {
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.dg-badge {
+  font-size: .7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.dg-badge-goal { background: var(--g-bg); color: var(--g); border: 1px solid var(--g-bd); }
+.dg-badge-loss { background: var(--r-bg); color: var(--r); border: 1px solid var(--r-bd); }
+
+.dg-bars { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 160px; }
+.dg-bar-row { display: flex; align-items: center; gap: 8px; }
+.dg-bar-label { font-size: .72rem; color: var(--t3); min-width: 90px; white-space: nowrap; }
+.dg-bar-track {
+  flex: 1;
+  height: 7px;
+  background: var(--s3, rgba(255,255,255,.07));
+  border-radius: 4px;
+  overflow: hidden;
+}
+.dg-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width .5s ease;
+}
+.dg-bar-fill-goal { background: var(--g); }
+.dg-bar-fill-loss { background: var(--r); }
+.dg-bar-pct { font-size: .72rem; font-weight: 600; min-width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar-track { background: var(--bg) !important; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1) !important; border-radius: 2px !important; }

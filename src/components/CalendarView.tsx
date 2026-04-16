@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useStore, formatPnL } from '../store';
 import { useT } from '../i18n';
 import type { Trade } from '../types';
+import { useStore as useGoalStore } from '../store';
 
 interface CellData {
   day: number;

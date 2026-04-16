@@ -2,6 +2,7 @@ import { useStore } from '../store';
 import { useT } from '../i18n';
 import StatsBar from '../components/StatsBar';
 import CalendarView from '../components/CalendarView';
+import DailyGoalBar from '../components/DailyGoalBar';
 
 export default function Dashboard() {
   const { lang } = useStore();
@@ -10,6 +11,7 @@ export default function Dashboard() {
   return (
     <div className="page-content">
       <StatsBar />
+      <DailyGoalBar />
       <CalendarView />
       <div className="disclaimer">{T.disclaimer}</div>
     </div>
