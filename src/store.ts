@@ -5,6 +5,7 @@ import { MOCK_ACCOUNTS, MOCK_TRADES, MOCK_STRATEGIES, TURTLE_SOUP_CHECKBOXES } f
 import {
   loadUserData, dbSaveAccount, dbDeleteAccount,
   dbSaveTrade, dbDeleteTrade, dbSaveStrategy, dbDeleteStrategy, dbSeedNewUser,
+  dbSaveProfile,
 } from './lib/db';
 
 export function createDefaultStrategies(): Strategy[] {
@@ -125,8 +126,16 @@ export const useStore = create<AppState>()(
       setActiveView: (v) => set({ activeView: v }),
       setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
       setDarkMode: (v) => set({ darkMode: v }),
-      setDailyGoalTarget: (v) => set({ dailyGoalTarget: v }),
-      setDailyMaxLoss: (v) => set({ dailyMaxLoss: v }),
+      setDailyGoalTarget: (v) => {
+        set({ dailyGoalTarget: v });
+        const userId = get().user?.id;
+        if (userId) dbSaveProfile(userId, { dailyGoalTarget: v, dailyMaxLoss: get().dailyMaxLoss });
+      },
+      setDailyMaxLoss: (v) => {
+        set({ dailyMaxLoss: v });
+        const userId = get().user?.id;
+        if (userId) dbSaveProfile(userId, { dailyGoalTarget: get().dailyGoalTarget, dailyMaxLoss: v });
+      },
 
       // ── עסקאות — שמור גם ב-Supabase ──
       addTrade: (t) => {
@@ -202,7 +211,7 @@ export const useStore = create<AppState>()(
         }, 8000);
 
         try {
-          const { accounts, strategies, trades } = await loadUserData(userId);
+          const { accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss } = await loadUserData(userId);
           clearTimeout(timeout);
           const isNewUser = accounts.length === 0 && strategies.length === 0;
 
@@ -212,7 +221,7 @@ export const useStore = create<AppState>()(
             await dbSeedNewUser(userId, defAccount, defStrategies);
             set({ accounts: [defAccount], strategies: defStrategies, trades: [], lastUserId: userId, selectedAccount: 'all' });
           } else {
-            set({ accounts, strategies, trades, lastUserId: userId, selectedAccount: 'all' });
+            set({ accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss, lastUserId: userId, selectedAccount: 'all' });
           }
         } catch (err) {
           clearTimeout(timeout);
@@ -228,7 +237,7 @@ export const useStore = create<AppState>()(
       // טעינת נתונים ברקע — לא חוסם את הממשק
       loadDataInBackground: (userId, name, email) => {
         set({ user: { id: userId, name, email }, isDemo: false });
-        loadUserData(userId).then(({ accounts, strategies, trades }) => {
+        loadUserData(userId).then(({ accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss }) => {
           const isNewUser = accounts.length === 0 && strategies.length === 0;
           if (isNewUser) {
             const defAccount = createDefaultAccount();
@@ -236,7 +245,7 @@ export const useStore = create<AppState>()(
             dbSeedNewUser(userId, defAccount, defStrategies);
             set({ accounts: [defAccount], strategies: defStrategies, trades: [], lastUserId: userId });
           } else {
-            set({ accounts, strategies, trades, lastUserId: userId });
+            set({ accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss, lastUserId: userId });
           }
         }).catch((err) => {
           console.warn('Background load failed, using cache:', err);

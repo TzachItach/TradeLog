@@ -9,8 +9,9 @@ function logErr(fn: string, error: { message: string; code?: string } | null) {
 // ─── LOAD ────────────────────────────────────────────────────
 export async function loadUserData(userId: string): Promise<{
   accounts: Account[]; strategies: Strategy[]; trades: Trade[];
+  dailyGoalTarget: number; dailyMaxLoss: number;
 }> {
-  if (DEMO_MODE || !supabase) return { accounts: [], strategies: [], trades: [] };
+  if (DEMO_MODE || !supabase) return { accounts: [], strategies: [], trades: [], dailyGoalTarget: 0, dailyMaxLoss: 0 };
 
   // צור profile אם לא קיים (fallback על המקרה שה-trigger לא רץ)
   const { error: pe } = await supabase
@@ -18,15 +19,20 @@ export async function loadUserData(userId: string): Promise<{
     .upsert({ id: userId }, { onConflict: 'id' });
   if (pe) logErr('profiles.upsert', pe);
 
-  const [accRes, stratRes, tradeRes] = await Promise.all([
+  const [profileRes, accRes, stratRes, tradeRes] = await Promise.all([
+    supabase.from('profiles').select('daily_goal_target, daily_max_loss').eq('id', userId).single(),
     supabase.from('accounts').select('*').eq('user_id', userId).order('created_at'),
     supabase.from('strategies').select('*, strategy_fields(*)').eq('user_id', userId).order('created_at'),
     supabase.from('trades').select('*').eq('user_id', userId).order('trade_date', { ascending: false }),
   ]);
 
+  logErr('profiles.select', profileRes.error);
   logErr('accounts.select', accRes.error);
   logErr('strategies.select', stratRes.error);
   logErr('trades.select', tradeRes.error);
+
+  const dailyGoalTarget = profileRes.data?.daily_goal_target ?? 0;
+  const dailyMaxLoss = profileRes.data?.daily_max_loss ?? 0;
 
   const accounts: Account[] = (accRes.data ?? []).map((r) => ({
     id: r.id, user_id: r.user_id, name: r.name,
@@ -60,7 +66,18 @@ export async function loadUserData(userId: string): Promise<{
   }));
 
   console.log(`[DB] Loaded: ${accounts.length} accounts, ${strategies.length} strategies, ${trades.length} trades`);
-  return { accounts, strategies, trades };
+  return { accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss };
+}
+
+// ─── PROFILE ─────────────────────────────────────────────────
+export async function dbSaveProfile(userId: string, data: { dailyGoalTarget: number; dailyMaxLoss: number }) {
+  if (DEMO_MODE || !supabase) return;
+  const { error } = await supabase.from('profiles').upsert({
+    id: userId,
+    daily_goal_target: data.dailyGoalTarget,
+    daily_max_loss: data.dailyMaxLoss,
+  }, { onConflict: 'id' });
+  logErr('profiles.upsert', error);
 }
 
 // ─── ACCOUNTS ────────────────────────────────────────────────
