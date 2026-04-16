@@ -884,6 +884,49 @@ body { font-family: 'Inter', system-ui, sans-serif !important; }
   border-radius: var(--rad-s) !important;
 }
 
+/* ── Modal Tabs ── */
+.modal-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 16px;
+  border-bottom: 1px solid var(--bd);
+  padding-bottom: 0;
+}
+.modal-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 7px 16px;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--t3);
+  cursor: pointer;
+  margin-bottom: -1px;
+  transition: color .15s, border-color .15s;
+  border-radius: 0;
+}
+.modal-tab:hover { color: var(--t1); }
+.modal-tab.active { color: var(--b); border-bottom-color: var(--b); }
+
+/* ── TradingView Chart ── */
+.tv-container {
+  height: 460px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.tv-empty {
+  height: 460px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--t3);
+  font-size: .88rem;
+  background: var(--s2);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
 /* ── Daily Goal Bar ── */
 .daily-goal-bar {
   background: var(--s2);

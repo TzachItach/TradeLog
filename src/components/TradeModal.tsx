@@ -4,6 +4,7 @@ import { useT } from '../i18n';
 import type { Trade } from '../types';
 import DailySummary from './DailySummary';
 import SymbolPicker from './SymbolPicker';
+import TradeChart from './TradeChart';
 import { getPointValue } from '../lib/futures';
 
 const EMPTY_TRADE = (date: string, accountId: string): Omit<Trade, 'id'> => ({
@@ -53,6 +54,7 @@ export default function TradeModal() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [savedDate, setSavedDate] = useState('');
+  const [activeTab, setActiveTab] = useState<'details' | 'chart'>('details');
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setModal(null); };
@@ -126,7 +128,28 @@ export default function TradeModal() {
             <button className="btn-close" onClick={() => setModal(null)}>×</button>
           </div>
 
-          <div className="form-grid">
+          {/* טאבים */}
+          <div className="modal-tabs">
+            <button
+              className={`modal-tab${activeTab === 'details' ? ' active' : ''}`}
+              onClick={() => setActiveTab('details')}
+            >
+              {isHe ? 'פרטים' : 'Details'}
+            </button>
+            <button
+              className={`modal-tab${activeTab === 'chart' ? ' active' : ''}`}
+              onClick={() => setActiveTab('chart')}
+            >
+              {isHe ? 'גרף TradingView' : 'TradingView Chart'}
+            </button>
+          </div>
+
+          {/* גרף */}
+          {activeTab === 'chart' && (
+            <TradeChart symbol={form.symbol} tradeDate={form.trade_date} lang={lang} />
+          )}
+
+          <div className="form-grid" style={{ display: activeTab === 'details' ? undefined : 'none' }}>
             {/* Date */}
             <div>
               <label className="form-label">{T.date}</label>
