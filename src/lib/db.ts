@@ -63,6 +63,7 @@ export async function loadUserData(userId: string): Promise<{
     htf_pd_array: r.htf_pd_array, psychology: r.psychology, notes: r.notes,
     confirmations: r.confirmations ?? {}, field_values: r.field_values ?? {},
     source: r.source ?? 'manual',
+    broker_trade_id: r.broker_trade_id ?? undefined,
   }));
 
   console.log(`[DB] Loaded: ${accounts.length} accounts, ${strategies.length} strategies, ${trades.length} trades`);
@@ -147,6 +148,7 @@ export async function dbSaveTrade(trade: Trade, userId: string) {
     confirmations: trade.confirmations ?? {},
     field_values: trade.field_values ?? {},
     source: trade.source ?? 'manual', status: 'complete',
+    broker_trade_id: trade.broker_trade_id ?? null,
   });
   logErr('trades.upsert', error);
 }

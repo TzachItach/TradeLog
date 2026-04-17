@@ -55,6 +55,7 @@ export interface Trade {
   confirmations: Record<string, boolean>;
   field_values: Record<string, unknown>;
   source: TradeSource;
+  broker_trade_id?: string;
   media?: TradeMedia[];
 }
 
