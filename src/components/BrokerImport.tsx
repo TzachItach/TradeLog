@@ -9,6 +9,7 @@ interface ParsedTrade {
   pnl: number;
   size: number;
   stop_loss_pts?: number;
+  take_profit_pts?: number;
   notes: string;
   broker_trade_id: string;
 }
@@ -143,9 +144,10 @@ function parseTradovateCSV(text: string): ParsedTrade[] {
     const exitPrice  = direction === 'long' ? avgSell : avgBuy;
 
     // אם העסקה נסגרה בהפסד → חשב stop_loss_pts מהמרחק בין כניסה ליציאה
-    const stop_loss_pts = totalPnL < 0
-      ? Math.round(Math.abs(avgSell - avgBuy) * 100) / 100
-      : undefined;
+    // אם העסקה נסגרה ברווח → חשב take_profit_pts מהמרחק בין כניסה ליציאה
+    const priceDiff = Math.round(Math.abs(avgSell - avgBuy) * 100) / 100;
+    const stop_loss_pts   = totalPnL < 0 ? priceDiff : undefined;
+    const take_profit_pts = totalPnL > 0 ? priceDiff : undefined;
 
     trades.push({
       symbol:          first.symbol,
@@ -154,6 +156,7 @@ function parseTradovateCSV(text: string): ParsedTrade[] {
       pnl:             Math.round(totalPnL * 100) / 100,
       size:            totalQty,
       stop_loss_pts,
+      take_profit_pts,
       notes:           `Entry: ${entryPrice.toFixed(2)} → Exit: ${exitPrice.toFixed(2)} | Imported from Tradovate`,
       broker_trade_id: brokerId,
     });
@@ -274,6 +277,7 @@ export default function BrokerImport({ onClose }: Props) {
         pnl: t.pnl,
         size: t.size,
         stop_loss_pts: t.stop_loss_pts,
+        take_profit_pts: t.take_profit_pts,
         notes: t.notes,
         broker_trade_id: t.broker_trade_id,
         source: broker === 'tradovate' ? 'tradovate' : 'topstepx',
