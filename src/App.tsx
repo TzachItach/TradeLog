@@ -11,6 +11,7 @@ import Settings from './pages/Settings';
 import Auth from './pages/Auth';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import Accessibility from './pages/Accessibility';
 
 /* מסך טעינה קצר — רק לבדיקת session ראשונית */
 function SplashScreen() {
@@ -141,6 +142,7 @@ export default function App() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/accessibility" element={<Accessibility />} />
         <Route path="/dashboard/*" element={
           <ProtectedRoute ready={ready} hasUser={hasUser}>
             <Layout />

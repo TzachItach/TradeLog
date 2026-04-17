@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { useT } from '../i18n';
@@ -16,6 +17,7 @@ export default function Auth() {
   const { lang, setLang, loadDemoData, setUser } = useStore();
   const T = useT(lang);
   const navigate = useNavigate();
+  const [agreed, setAgreed] = useState(false);
 
   const handleDemo = () => {
     loadDemoData();
@@ -48,8 +50,24 @@ export default function Auth() {
         <div className="auth-title">{T.welcomeBack}</div>
         <div className="auth-sub">{T.loginSubtitle}</div>
 
+        {/* Consent checkbox */}
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 16, cursor: 'pointer', fontSize: '.78rem', color: 'var(--t2)', lineHeight: 1.5 }}>
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={e => setAgreed(e.target.checked)}
+            style={{ marginTop: 2, flexShrink: 0, accentColor: 'var(--b)', width: 14, height: 14 }}
+          />
+          <span>
+            {lang === 'he'
+              ? <>קראתי ואני מסכים/ה ל<a href="/terms" style={{ color: 'var(--b)' }}>תנאי השימוש</a> ול<a href="/privacy" style={{ color: 'var(--b)' }}>מדיניות הפרטיות</a>, לרבות אחסון נתוניי על שרתים בחו"ל.</>
+              : <>I have read and agree to the <a href="/terms" style={{ color: 'var(--b)' }}>Terms of Use</a> and <a href="/privacy" style={{ color: 'var(--b)' }}>Privacy Policy</a>, including storage of my data on servers outside Israel.</>
+            }
+          </span>
+        </label>
+
         {!DEMO_MODE ? (
-          <button className="btn-oauth" onClick={signInWithGoogle} style={{ marginBottom: 16 }}>
+          <button className="btn-oauth" onClick={signInWithGoogle} disabled={!agreed} style={{ marginBottom: 16, opacity: agreed ? 1 : 0.45, cursor: agreed ? 'pointer' : 'not-allowed' }}>
             <GoogleIcon />
             {T.loginWith} {T.google}
           </button>
@@ -63,15 +81,11 @@ export default function Auth() {
 
         <div className="auth-divider">{lang === 'he' ? 'או' : 'or'}</div>
 
-        <button className="btn-demo" onClick={handleDemo}>
+        <button className="btn-demo" onClick={handleDemo} disabled={!agreed} style={{ opacity: agreed ? 1 : 0.45, cursor: agreed ? 'pointer' : 'not-allowed' }}>
           {T.demoMode}
         </button>
 
         <div style={{ marginTop: 24, borderTop: '1px solid var(--bd)', paddingTop: 18, fontSize: '.74rem', color: 'var(--t3)', textAlign: 'center', lineHeight: 1.7 }}>
-          <a href="/terms" style={{ color: 'var(--b)' }}>{T.terms}</a>
-          {' · '}
-          <a href="/privacy" style={{ color: 'var(--b)' }}>{T.privacy}</a>
-          <br />
           {lang === 'he' ? 'מסחר כרוך בסיכון. לא ייעוץ השקעות.' : 'Trading involves risk. Not investment advice.'}
         </div>
       </div>
