@@ -39,6 +39,15 @@ export async function loadUserData(userId: string): Promise<{
     account_type: r.account_type, broker: r.broker,
     initial_balance: r.initial_balance ?? 0,
     currency: r.currency ?? 'USD', is_active: r.is_active ?? true,
+    // Prop Firm fields
+    prop_phase: r.prop_phase ?? undefined,
+    prop_drawdown_type: r.prop_drawdown_type ?? undefined,
+    prop_max_drawdown: r.prop_max_drawdown ?? undefined,
+    prop_daily_limit: r.prop_daily_limit ?? undefined,
+    prop_profit_target: r.prop_profit_target ?? undefined,
+    prop_min_days: r.prop_min_days ?? undefined,
+    prop_max_days: r.prop_max_days ?? undefined,
+    prop_start_date: r.prop_start_date ?? undefined,
   }));
 
   const strategies: Strategy[] = (stratRes.data ?? []).map((r) => ({
@@ -89,6 +98,15 @@ export async function dbSaveAccount(account: Account, userId: string) {
     account_type: account.account_type, broker: account.broker,
     initial_balance: account.initial_balance,
     currency: account.currency, is_active: account.is_active,
+    // Prop Firm fields
+    prop_phase: account.prop_phase ?? null,
+    prop_drawdown_type: account.prop_drawdown_type ?? null,
+    prop_max_drawdown: account.prop_max_drawdown ?? null,
+    prop_daily_limit: account.prop_daily_limit ?? null,
+    prop_profit_target: account.prop_profit_target ?? null,
+    prop_min_days: account.prop_min_days ?? null,
+    prop_max_days: account.prop_max_days ?? null,
+    prop_start_date: account.prop_start_date ?? null,
   });
   logErr('accounts.upsert', error);
 }
