@@ -20,6 +20,10 @@ function AccountForm({ account, onSave, onCancel, lang }: {
   });
   const s = <K extends keyof Account>(k: K, v: Account[K]) => setForm((f) => ({ ...f, [k]: v }));
 
+  // whether the user wants to configure prop firm limits (optional)
+  const hasPropFields = !!(account?.prop_max_drawdown || account?.prop_daily_limit || account?.prop_profit_target);
+  const [showPropFields, setShowPropFields] = useState(hasPropFields);
+
   return (
     <div style={{ background: 'var(--s2)', border: '1px solid var(--bd2)', borderRadius: 10, padding: 18, marginTop: 10 }}>
       <div className="form-grid">
@@ -57,86 +61,103 @@ function AccountForm({ account, onSave, onCancel, lang }: {
       {/* ── שדות Prop Firm ── */}
       {form.account_type === 'prop_firm' && (
         <div style={{ marginTop: 16, padding: '14px 16px', background: 'var(--b-bg)', border: '1px solid var(--b-bd)', borderRadius: 10 }}>
-          <div style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--b)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            {isHe ? 'הגדרות Prop Firm' : 'Prop Firm Settings'}
+          <div style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--b)', marginBottom: showPropFields ? 14 : 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              {isHe ? 'הגדרות Prop Firm' : 'Prop Firm Settings'}
+              <span style={{ fontSize: '.68rem', fontWeight: 400, color: 'var(--t3)' }}>
+                {isHe ? '(אופציונלי)' : '(optional)'}
+              </span>
+            </div>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              style={{ fontSize: '.72rem', padding: '3px 10px' }}
+              onClick={() => setShowPropFields((v) => !v)}
+            >
+              {showPropFields
+                ? (isHe ? '▲ הסתר' : '▲ Hide')
+                : (isHe ? '▼ הגדר פרמטרים' : '▼ Configure limits')}
+            </button>
           </div>
 
-          <div className="form-grid">
-            <div>
-              <label className="form-label">{isHe ? 'שלב' : 'Phase'}</label>
-              <select className="form-input" value={form.prop_phase ?? 'challenge'}
-                onChange={(e) => s('prop_phase', e.target.value as Account['prop_phase'])}>
-                <option value="challenge">{isHe ? 'מבחן (Challenge)' : 'Challenge'}</option>
-                <option value="funded">{isHe ? 'ממומן (Funded)' : 'Funded'}</option>
-              </select>
-            </div>
-            <div>
-              <label className="form-label">{isHe ? 'סוג Drawdown' : 'Drawdown Type'}</label>
-              <select className="form-input" value={form.prop_drawdown_type ?? 'trailing_eod'}
-                onChange={(e) => s('prop_drawdown_type', e.target.value as Account['prop_drawdown_type'])}>
-                <option value="trailing_eod">{isHe ? 'Trailing EOD — עוקב לסגירת יום' : 'Trailing EOD — follows daily close'}</option>
-                <option value="trailing_intraday">{isHe ? 'Trailing Intraday — עוקב לתוך היום' : 'Trailing Intraday — follows intraday peak'}</option>
-                <option value="static">{isHe ? 'Static — רצפה קבועה מהיתרה ההתחלתית' : 'Static — fixed floor from starting balance'}</option>
-              </select>
-              <div style={{ fontSize: '.68rem', color: 'var(--t3)', marginTop: 4, lineHeight: 1.5 }}>
-                {form.prop_drawdown_type === 'trailing_intraday'
-                  ? (isHe
-                    ? '⚠ Intraday מחושב לפי סגירת יום בלבד (מכיוון שהעסקאות מוזנות ב-EOD)'
-                    : '⚠ Intraday approximated from EOD closes (since trades are logged end-of-day)')
-                  : form.prop_drawdown_type === 'static'
-                  ? (isHe ? 'הרצפה קבועה: יתרה התחלתית פחות Max Drawdown' : 'Fixed floor: starting balance minus max drawdown')
-                  : (isHe ? 'הרצפה עולה עם כל שיא חדש בסגירת יום' : 'Floor rises with each new end-of-day high water mark')
-                }
+          {showPropFields && (
+            <div className="form-grid">
+              <div>
+                <label className="form-label">{isHe ? 'שלב' : 'Phase'}</label>
+                <select className="form-input" value={form.prop_phase ?? 'challenge'}
+                  onChange={(e) => s('prop_phase', e.target.value as Account['prop_phase'])}>
+                  <option value="challenge">{isHe ? 'מבחן (Challenge)' : 'Challenge'}</option>
+                  <option value="funded">{isHe ? 'ממומן (Funded)' : 'Funded'}</option>
+                </select>
               </div>
-            </div>
-            <div>
-              <label className="form-label">{isHe ? 'Max Drawdown ($)' : 'Max Drawdown ($)'}</label>
-              <input type="number" min={0} className="form-input"
-                value={form.prop_max_drawdown ?? ''}
-                placeholder="e.g. 3000"
-                onChange={(e) => s('prop_max_drawdown', Number(e.target.value))} />
-            </div>
-            <div>
-              <label className="form-label">{isHe ? 'גבול הפסד יומי ($)' : 'Daily Loss Limit ($)'}</label>
-              <input type="number" min={0} className="form-input"
-                value={form.prop_daily_limit ?? ''}
-                placeholder="e.g. 1500"
-                onChange={(e) => s('prop_daily_limit', Number(e.target.value))} />
-            </div>
+              <div>
+                <label className="form-label">{isHe ? 'סוג Drawdown' : 'Drawdown Type'}</label>
+                <select className="form-input" value={form.prop_drawdown_type ?? 'trailing_eod'}
+                  onChange={(e) => s('prop_drawdown_type', e.target.value as Account['prop_drawdown_type'])}>
+                  <option value="trailing_eod">{isHe ? 'Trailing EOD — עוקב לסגירת יום' : 'Trailing EOD — follows daily close'}</option>
+                  <option value="trailing_intraday">{isHe ? 'Trailing Intraday — עוקב לתוך היום' : 'Trailing Intraday — follows intraday peak'}</option>
+                  <option value="static">{isHe ? 'Static — רצפה קבועה מהיתרה ההתחלתית' : 'Static — fixed floor from starting balance'}</option>
+                </select>
+                <div style={{ fontSize: '.68rem', color: 'var(--t3)', marginTop: 4, lineHeight: 1.5 }}>
+                  {form.prop_drawdown_type === 'trailing_intraday'
+                    ? (isHe
+                      ? '⚠ Intraday מחושב לפי סגירת יום בלבד (מכיוון שהעסקאות מוזנות ב-EOD)'
+                      : '⚠ Intraday approximated from EOD closes (since trades are logged end-of-day)')
+                    : form.prop_drawdown_type === 'static'
+                    ? (isHe ? 'הרצפה קבועה: יתרה התחלתית פחות Max Drawdown' : 'Fixed floor: starting balance minus max drawdown')
+                    : (isHe ? 'הרצפה עולה עם כל שיא חדש בסגירת יום' : 'Floor rises with each new end-of-day high water mark')
+                  }
+                </div>
+              </div>
+              <div>
+                <label className="form-label">{isHe ? 'Max Drawdown ($)' : 'Max Drawdown ($)'}</label>
+                <input type="number" min={0} className="form-input"
+                  value={form.prop_max_drawdown ?? ''}
+                  placeholder="e.g. 3000"
+                  onChange={(e) => s('prop_max_drawdown', Number(e.target.value))} />
+              </div>
+              <div>
+                <label className="form-label">{isHe ? 'גבול הפסד יומי ($)' : 'Daily Loss Limit ($)'}</label>
+                <input type="number" min={0} className="form-input"
+                  value={form.prop_daily_limit ?? ''}
+                  placeholder="e.g. 1500"
+                  onChange={(e) => s('prop_daily_limit', Number(e.target.value))} />
+              </div>
 
-            {(form.prop_phase ?? 'challenge') === 'challenge' && (
-              <>
-                <div>
-                  <label className="form-label">{isHe ? 'יעד רווח ($)' : 'Profit Target ($)'}</label>
-                  <input type="number" min={0} className="form-input"
-                    value={form.prop_profit_target ?? ''}
-                    placeholder="e.g. 6000"
-                    onChange={(e) => s('prop_profit_target', Number(e.target.value))} />
-                </div>
-                <div>
-                  <label className="form-label">{isHe ? 'מינ׳ ימי מסחר' : 'Min Trading Days'}</label>
-                  <input type="number" min={0} className="form-input"
-                    value={form.prop_min_days ?? ''}
-                    placeholder="e.g. 4"
-                    onChange={(e) => s('prop_min_days', Number(e.target.value))} />
-                </div>
-                <div>
-                  <label className="form-label">{isHe ? 'מקס׳ ימי מבחן' : 'Max Challenge Days'}</label>
-                  <input type="number" min={0} className="form-input"
-                    value={form.prop_max_days ?? ''}
-                    placeholder="e.g. 30"
-                    onChange={(e) => s('prop_max_days', Number(e.target.value))} />
-                </div>
-                <div>
-                  <label className="form-label">{isHe ? 'תאריך תחילת מבחן' : 'Challenge Start Date'}</label>
-                  <input type="date" className="form-input"
-                    value={form.prop_start_date ?? ''}
-                    onChange={(e) => s('prop_start_date', e.target.value)} />
-                </div>
-              </>
-            )}
-          </div>
+              {(form.prop_phase ?? 'challenge') === 'challenge' && (
+                <>
+                  <div>
+                    <label className="form-label">{isHe ? 'יעד רווח ($)' : 'Profit Target ($)'}</label>
+                    <input type="number" min={0} className="form-input"
+                      value={form.prop_profit_target ?? ''}
+                      placeholder="e.g. 6000"
+                      onChange={(e) => s('prop_profit_target', Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <label className="form-label">{isHe ? 'מינ׳ ימי מסחר' : 'Min Trading Days'}</label>
+                    <input type="number" min={0} className="form-input"
+                      value={form.prop_min_days ?? ''}
+                      placeholder="e.g. 4"
+                      onChange={(e) => s('prop_min_days', Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <label className="form-label">{isHe ? 'מקס׳ ימי מבחן' : 'Max Challenge Days'}</label>
+                    <input type="number" min={0} className="form-input"
+                      value={form.prop_max_days ?? ''}
+                      placeholder="e.g. 30"
+                      onChange={(e) => s('prop_max_days', Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <label className="form-label">{isHe ? 'תאריך תחילת מבחן' : 'Challenge Start Date'}</label>
+                    <input type="date" className="form-input"
+                      value={form.prop_start_date ?? ''}
+                      onChange={(e) => s('prop_start_date', e.target.value)} />
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       )}
 
