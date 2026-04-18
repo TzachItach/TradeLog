@@ -70,9 +70,10 @@ function SingleAccountCard({ account, isHe }: { account: Account; isHe: boolean 
   const hasMaxDays  = isChallenge && (account.prop_max_days ?? 0) > 0;
   const hasMinDays  = isChallenge && (account.prop_min_days ?? 0) > 0;
 
-  const ddTypeLabel = account.prop_drawdown_type === 'static'
-    ? (isHe ? 'סטטי' : 'Static')
-    : (isHe ? 'עוקב' : 'Trailing');
+  const ddTypeLabel =
+    account.prop_drawdown_type === 'static'         ? (isHe ? 'Static' : 'Static') :
+    account.prop_drawdown_type === 'trailing_intraday' ? (isHe ? 'Trailing Intraday' : 'Trailing Intraday') :
+    (isHe ? 'Trailing EOD' : 'Trailing EOD');
 
   const phaseLabel = isChallenge
     ? (isHe ? 'מבחן' : 'Challenge')
@@ -210,10 +211,17 @@ function SingleAccountCard({ account, isHe }: { account: Account; isHe: boolean 
 }
 
 export default function PropFirmCard() {
-  const { accounts, lang } = useStore();
+  const { accounts, lang, selectedAccount } = useStore();
   const isHe = lang === 'he';
 
-  const propAccounts = accounts.filter((a) => a.account_type === 'prop_firm');
+  const propAccounts = accounts.filter((a) => {
+    if (a.account_type !== 'prop_firm') return false;
+    // "all accounts" view — show all prop firm accounts
+    if (selectedAccount === 'all') return true;
+    // specific account selected — show only if it's this one
+    return a.id === selectedAccount;
+  });
+
   if (propAccounts.length === 0) return null;
 
   return (

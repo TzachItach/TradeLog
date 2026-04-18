@@ -16,7 +16,7 @@ export interface Account {
   is_active: boolean;
   // Prop Firm fields (optional, only for account_type === 'prop_firm')
   prop_phase?: 'challenge' | 'funded';
-  prop_drawdown_type?: 'trailing' | 'static';
+  prop_drawdown_type?: 'trailing_eod' | 'trailing_intraday' | 'static';
   prop_max_drawdown?: number;   // absolute $ amount
   prop_daily_limit?: number;    // absolute $ amount
   prop_profit_target?: number;  // absolute $ amount (challenge only)

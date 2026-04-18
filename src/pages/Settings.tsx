@@ -73,11 +73,22 @@ function AccountForm({ account, onSave, onCancel, lang }: {
             </div>
             <div>
               <label className="form-label">{isHe ? 'סוג Drawdown' : 'Drawdown Type'}</label>
-              <select className="form-input" value={form.prop_drawdown_type ?? 'trailing'}
+              <select className="form-input" value={form.prop_drawdown_type ?? 'trailing_eod'}
                 onChange={(e) => s('prop_drawdown_type', e.target.value as Account['prop_drawdown_type'])}>
-                <option value="trailing">{isHe ? 'Trailing (עוקב)' : 'Trailing'}</option>
-                <option value="static">{isHe ? 'Static (קבוע)' : 'Static'}</option>
+                <option value="trailing_eod">{isHe ? 'Trailing EOD — עוקב לסגירת יום' : 'Trailing EOD — follows daily close'}</option>
+                <option value="trailing_intraday">{isHe ? 'Trailing Intraday — עוקב לתוך היום' : 'Trailing Intraday — follows intraday peak'}</option>
+                <option value="static">{isHe ? 'Static — רצפה קבועה מהיתרה ההתחלתית' : 'Static — fixed floor from starting balance'}</option>
               </select>
+              <div style={{ fontSize: '.68rem', color: 'var(--t3)', marginTop: 4, lineHeight: 1.5 }}>
+                {form.prop_drawdown_type === 'trailing_intraday'
+                  ? (isHe
+                    ? '⚠ Intraday מחושב לפי סגירת יום בלבד (מכיוון שהעסקאות מוזנות ב-EOD)'
+                    : '⚠ Intraday approximated from EOD closes (since trades are logged end-of-day)')
+                  : form.prop_drawdown_type === 'static'
+                  ? (isHe ? 'הרצפה קבועה: יתרה התחלתית פחות Max Drawdown' : 'Fixed floor: starting balance minus max drawdown')
+                  : (isHe ? 'הרצפה עולה עם כל שיא חדש בסגירת יום' : 'Floor rises with each new end-of-day high water mark')
+                }
+              </div>
             </div>
             <div>
               <label className="form-label">{isHe ? 'Max Drawdown ($)' : 'Max Drawdown ($)'}</label>
@@ -94,7 +105,7 @@ function AccountForm({ account, onSave, onCancel, lang }: {
                 onChange={(e) => s('prop_daily_limit', Number(e.target.value))} />
             </div>
 
-            {form.prop_phase === 'challenge' && (
+            {(form.prop_phase ?? 'challenge') === 'challenge' && (
               <>
                 <div>
                   <label className="form-label">{isHe ? 'יעד רווח ($)' : 'Profit Target ($)'}</label>

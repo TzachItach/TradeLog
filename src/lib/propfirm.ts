@@ -55,11 +55,13 @@ export function calcPropFirmStats(account: Account, trades: Trade[]): PropFirmSt
   const currentBalance = runningBalance;
   const totalPnL = currentBalance - start;
 
-  // Trailing floor follows high water mark; static floor is fixed from start
+  // trailing_eod / trailing_intraday: floor follows high water mark of daily closes
+  // (intraday approximated as EOD since trades are logged end-of-day)
+  // static: floor is fixed from starting balance, never moves
   const trailingFloor =
-    ddType === 'trailing'
-      ? highWaterMark - maxDD
-      : start - maxDD;
+    ddType === 'static'
+      ? start - maxDD
+      : highWaterMark - maxDD;
 
   const drawdownRemaining = currentBalance - trailingFloor;
   const drawdownUsed = Math.max(0, maxDD - drawdownRemaining);
