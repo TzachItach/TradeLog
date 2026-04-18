@@ -43,8 +43,8 @@ function DayCell({
   else if (isLoss) cls += ' loss';
   if (isToday) cls += ' today';
 
-  const visible = isExpanded ? trades : trades.slice(0, 6);
-  const extra = trades.length - 6;
+  const visible = isExpanded ? trades : trades.slice(0, 2);
+  const extra = trades.length - 2;
 
   return (
     <div className={cls} onClick={() => { if (!hasTrades) onEmpty(); }}
@@ -64,6 +64,7 @@ function DayCell({
         <div style={{
           fontSize: '.72rem', fontWeight: 800, fontFamily: 'monospace',
           color: isProfit ? 'var(--g)' : 'var(--r)', lineHeight: 1, marginBottom: 3,
+          textAlign: 'center', width: '100%',
         }}>{formatPnL(totalPnL)}</div>
       )}
       <div className="cell-trades">
