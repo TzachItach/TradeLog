@@ -14,6 +14,15 @@ export interface Account {
   initial_balance: number;
   currency: string;
   is_active: boolean;
+  // Prop Firm fields (optional, only for account_type === 'prop_firm')
+  prop_phase?: 'challenge' | 'funded';
+  prop_drawdown_type?: 'trailing' | 'static';
+  prop_max_drawdown?: number;   // absolute $ amount
+  prop_daily_limit?: number;    // absolute $ amount
+  prop_profit_target?: number;  // absolute $ amount (challenge only)
+  prop_min_days?: number;       // minimum trading days (challenge only)
+  prop_max_days?: number;       // maximum trading days (challenge only)
+  prop_start_date?: string;     // ISO date string
 }
 
 export interface StrategyField {
