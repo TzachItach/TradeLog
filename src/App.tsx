@@ -12,6 +12,7 @@ import Auth from './pages/Auth';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Accessibility from './pages/Accessibility';
+import PropFirm from './pages/PropFirm';
 
 /* מסך טעינה קצר — רק לבדיקת session ראשונית */
 function SplashScreen() {
@@ -152,6 +153,7 @@ export default function App() {
           <Route path="trades" element={<TradesList />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="propfirm" element={<PropFirm />} />
           <Route path="settings" element={<Settings />} />
         </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
