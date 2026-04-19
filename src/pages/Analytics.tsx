@@ -3,7 +3,7 @@ import { useStore, formatPnL } from '../store';
 
 type Trade = ReturnType<typeof useStore.getState>['trades'][0];
 
-const G = '#00e0a8', R = '#ff4060', B = '#5b8fff', O = '#ffaa44';
+const G = '#00e0a8', R = '#ff4060', B = '#3fe56c', O = '#ffaa44';
 
 function useColors() {
   const isDark = !document.body.classList.contains('light');
