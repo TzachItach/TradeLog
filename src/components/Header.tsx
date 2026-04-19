@@ -36,7 +36,7 @@ export default function Header() {
           width: 26, height: 26, borderRadius: 7, background: 'var(--b)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
         }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#003912" strokeWidth="2.5" strokeLinecap="round">
             <polyline points="3,17 9,11 13,15 21,6" />
           </svg>
         </div>

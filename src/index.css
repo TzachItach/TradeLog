@@ -24,8 +24,8 @@
   /* ── Semantic ── */
   --g:     #4ae176;   /* secondary — profit/win */
   --r:     #ffb3b0;   /* tertiary  — loss */
-  --b:     #b4c5ff;   /* primary   — accent */
-  --b2:    #608bff;   /* primary-container */
+  --b:     #3fe56c;   /* primary   — accent (green, matches landing page) */
+  --b2:    #00c853;   /* primary-container */
   --o:     #f0c040;   /* warning */
 
   /* ── Semantic backgrounds ── */
@@ -33,8 +33,8 @@
   --g-bd:  rgba(74,225,118,.35);
   --r-bg:  rgba(255,179,176,.09);
   --r-bd:  rgba(255,179,176,.35);
-  --b-bg:  rgba(180,197,255,.09);
-  --b-bd:  rgba(180,197,255,.32);
+  --b-bg:  rgba(63,229,108,.08);
+  --b-bd:  rgba(63,229,108,.30);
 
   /* ── Typography ── */
   --mono:  'Courier New', 'Lucida Console', monospace;
@@ -311,7 +311,7 @@ textarea.form-input { resize: vertical; min-height: 76px; }
   transition: all .12s; border-radius: var(--rad-s);
 }
 .btn-primary {
-  background: var(--b); color: #fff;
+  background: var(--b); color: #002e0f;
   padding: 8px 18px; font-size: .84rem; font-weight: 700;
 }
 .btn-primary:hover { opacity: .88; }
@@ -773,7 +773,7 @@ body { font-family: 'Inter', system-ui, sans-serif !important; }
 /* ── Buttons ── */
 .btn-primary {
   background: var(--b2) !important;
-  color: #002a77 !important;
+  color: #002e0f !important;
   border-radius: var(--rad-s) !important;
   font-weight: 700 !important;
   font-size: .82rem !important;
@@ -879,8 +879,8 @@ body { font-family: 'Inter', system-ui, sans-serif !important; }
 }
 .btn-oauth:hover { border-color: var(--b) !important; }
 .btn-demo {
-  background: rgba(180,197,255,.1) !important;
-  border-color: rgba(180,197,255,.3) !important;
+  background: rgba(63,229,108,.08) !important;
+  border-color: rgba(63,229,108,.28) !important;
   border-radius: var(--rad-s) !important;
 }
 

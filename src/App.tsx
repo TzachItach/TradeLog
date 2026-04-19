@@ -13,6 +13,7 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Accessibility from './pages/Accessibility';
 import PropFirm from './pages/PropFirm';
+import Landing from './pages/Landing';
 
 /* מסך טעינה קצר — רק לבדיקת session ראשונית */
 function SplashScreen() {
@@ -140,6 +141,7 @@ export default function App() {
       <AppEffects />
       <AuthListener onReady={(u) => { setReady(true); setHasUser(u); }} />
       <Routes>
+        <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
@@ -156,7 +158,7 @@ export default function App() {
           <Route path="propfirm" element={<PropFirm />} />
           <Route path="settings" element={<Settings />} />
         </Route>
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

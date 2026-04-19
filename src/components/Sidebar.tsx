@@ -62,7 +62,7 @@ export default function Sidebar() {
       <aside className={"sidebar" + (isOpen ? ' mobile-open' : '')}>
         <div className="sidebar-logo" onClick={() => handleNav('/dashboard')}>
           <div className="logo-icon">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#003912" strokeWidth="2.5" strokeLinecap="round">
               <polyline points="3,17 9,11 13,15 21,6" />
             </svg>
           </div>
