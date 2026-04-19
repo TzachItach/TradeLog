@@ -30,7 +30,7 @@ export default function Accessibility() {
 
             <div className="legal-section">
               <h2>2. רמת הנגישות</h2>
-              <p>אנו שואפים לעמוד בדרישות תקן WCAG 2.1 ברמה AA. האתר משתמש בתוסף הנגישות של <strong>Enable</strong> (<a href="https://enable.co.il" style={{color:'var(--b)'}}>enable.co.il</a>), המספק מגוון כלים לשיפור הנגישות:</p>
+              <p>אנו שואפים לעמוד בדרישות תקן WCAG 2.1 ברמה AA. האתר משתמש בתוסף הנגישות של <strong>Negishot</strong> (<a href="https://negishot.co.il" style={{color:'var(--b)'}}>negishot.co.il</a>), המספק מגוון כלים לשיפור הנגישות:</p>
               <ul>
                 <li><strong>שינוי גודל טקסט</strong> — הגדלה והקטנה של הגופן</li>
                 <li><strong>ניגודיות גבוהה</strong> — מצב ניגודיות מוגברת לשיפור קריאות</li>
@@ -75,7 +75,7 @@ export default function Accessibility() {
 
             <div className="legal-section">
               <h2>2. Accessibility Level</h2>
-              <p>We strive to meet WCAG 2.1 Level AA requirements. The site uses the <strong>Enable</strong> accessibility plugin (<a href="https://enable.co.il" style={{color:'var(--b)'}}>enable.co.il</a>), providing the following tools:</p>
+              <p>We strive to meet WCAG 2.1 Level AA requirements. The site uses the <strong>Negishot</strong> accessibility plugin (<a href="https://negishot.co.il" style={{color:'var(--b)'}}>negishot.co.il</a>), providing the following tools:</p>
               <ul>
                 <li><strong>Text size adjustment</strong> — increase or decrease font size</li>
                 <li><strong>High contrast mode</strong> — enhanced contrast for improved readability</li>
