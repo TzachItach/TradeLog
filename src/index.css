@@ -311,7 +311,7 @@ textarea.form-input { resize: vertical; min-height: 76px; }
   transition: all .12s; border-radius: var(--rad-s);
 }
 .btn-primary {
-  background: var(--b); color: #002e0f;
+  background: linear-gradient(135deg, #3fe56c, #00c853); color: #002e0f;
   padding: 8px 18px; font-size: .84rem; font-weight: 700;
 }
 .btn-primary:hover { opacity: .88; }
@@ -772,7 +772,7 @@ body { font-family: 'Inter', system-ui, sans-serif !important; }
 
 /* ── Buttons ── */
 .btn-primary {
-  background: var(--b2) !important;
+  background: linear-gradient(135deg, #3fe56c, #00c853) !important;
   color: #002e0f !important;
   border-radius: var(--rad-s) !important;
   font-weight: 700 !important;
