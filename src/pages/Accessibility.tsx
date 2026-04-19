@@ -32,12 +32,12 @@ export default function Accessibility() {
               <h2>2. רמת הנגישות</h2>
               <p>אנו שואפים לעמוד בדרישות תקן WCAG 2.1 ברמה AA. האתר משתמש בתוסף הנגישות של <strong>Negishot</strong> (<a href="https://negishot.co.il" style={{color:'var(--b)'}}>negishot.co.il</a>), המספק מגוון כלים לשיפור הנגישות:</p>
               <ul>
-                <li><strong>שינוי גודל טקסט</strong> — הגדלה והקטנה של הגופן</li>
-                <li><strong>ניגודיות גבוהה</strong> — מצב ניגודיות מוגברת לשיפור קריאות</li>
-                <li><strong>גווני אפור</strong> — מצב grayscale למשתמשים עם לקויות צבע</li>
-                <li><strong>גופן קריא</strong> — מעבר לגופן מותאם לדיסלקציה</li>
-                <li><strong>מצב כהה/בהיר</strong> — בחירה חופשית בין ערכות צבע</li>
-                <li><strong>תמיכה ב-RTL</strong> — ממשק מלא בעברית מימין לשמאל</li>
+                <li><strong>הגדלת טקסט</strong> — הגדלת גודל הגופן לשיפור קריאות</li>
+                <li><strong>ניגודיות גבוהה</strong> — מצב ניגודיות מוגברת למשתמשים עם לקויות ראייה</li>
+                <li><strong>ניווט מקלדת</strong> — גלישה מלאה באתר באמצעות מקלדת בלבד</li>
+                <li><strong>הקראת טקסט</strong> — האזנה לתוכן הדף (Text-to-Speech)</li>
+                <li><strong>התאמת צבעים</strong> — שינוי ערכת הצבעים בהתאם להעדפת המשתמש</li>
+                <li><strong>התאמת גדלים</strong> — שינוי גודל אלמנטים מעבר לטקסט בלבד</li>
               </ul>
             </div>
 
@@ -77,12 +77,12 @@ export default function Accessibility() {
               <h2>2. Accessibility Level</h2>
               <p>We strive to meet WCAG 2.1 Level AA requirements. The site uses the <strong>Negishot</strong> accessibility plugin (<a href="https://negishot.co.il" style={{color:'var(--b)'}}>negishot.co.il</a>), providing the following tools:</p>
               <ul>
-                <li><strong>Text size adjustment</strong> — increase or decrease font size</li>
-                <li><strong>High contrast mode</strong> — enhanced contrast for improved readability</li>
-                <li><strong>Grayscale mode</strong> — for users with color vision deficiencies</li>
-                <li><strong>Readable font</strong> — switch to a dyslexia-friendly typeface</li>
-                <li><strong>Dark / light mode</strong> — freely choose your color scheme</li>
-                <li><strong>RTL support</strong> — full Hebrew right-to-left interface</li>
+                <li><strong>Text enlargement</strong> — increase font size for improved readability</li>
+                <li><strong>High contrast mode</strong> — enhanced visual distinction for low vision users</li>
+                <li><strong>Keyboard navigation</strong> — full site navigation via keyboard controls</li>
+                <li><strong>Text-to-speech</strong> — audio readout of page content</li>
+                <li><strong>Color customization</strong> — adjust color schemes per user preferences</li>
+                <li><strong>Size adjustment</strong> — customizable element sizing beyond text</li>
               </ul>
             </div>
 
