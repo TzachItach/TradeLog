@@ -1,7 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store';
 import { useT } from '../i18n';
-import AccessibilityWidget from './AccessibilityWidget';
 
 const icons: Record<string, JSX.Element> = {
   '/dashboard': (
@@ -95,7 +94,6 @@ export default function Sidebar() {
         </nav>
 
         <div className="sidebar-footer">
-          <AccessibilityWidget />
         </div>
       </aside>
     </>
