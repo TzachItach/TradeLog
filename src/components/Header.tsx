@@ -40,7 +40,7 @@ export default function Header() {
             <polyline points="3,17 9,11 13,15 21,6" />
           </svg>
         </div>
-        <span style={{ fontWeight: 700, fontSize: '.92rem', color: 'var(--b)' }}>{T.appName}</span>
+        <span style={{ fontWeight: 700, fontSize: '.92rem', color: 'var(--t1)' }}>{T.appName}</span>
       </div>
 
       {/* טאבי חשבונות */}
