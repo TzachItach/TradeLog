@@ -727,7 +727,7 @@ body { font-family: 'Inter', system-ui, sans-serif !important; }
 .logo-text {
   font-weight: 700 !important;
   letter-spacing: -.04em !important;
-  color: var(--b) !important;
+  color: var(--t1) !important;
   font-size: 1.05rem !important;
 }
 .logo-icon { background: var(--b2) !important; border-radius: 4px !important; }
@@ -977,6 +977,6 @@ body.light .day-cell.loss   { background: rgba(192,48,60,.06) !important; }
 body.light .modal-box     { background: #fff !important; }
 body.light .sidebar       { background: #fff !important; box-shadow: 2px 0 16px rgba(0,0,0,.08) !important; }
 body.light .header        { background: #fff !important; box-shadow: 0 1px 0 rgba(0,0,0,.06) !important; }
-body.light .logo-text     { color: var(--b) !important; }
+body.light .logo-text     { color: #1a1f2e !important; }
 body.light .btn-primary   { color: #fff !important; }
 body.light .avatar        { color: #fff !important; }
