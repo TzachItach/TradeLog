@@ -30,9 +30,9 @@ export default function Accessibility() {
 
             <div className="legal-section">
               <h2>2. רמת הנגישות</h2>
-              <p>אנו שואפים לעמוד בדרישות תקן WCAG 2.1 ברמה AA. בשירות קיימים הכלים הבאים לשיפור הנגישות:</p>
+              <p>אנו שואפים לעמוד בדרישות תקן WCAG 2.1 ברמה AA. האתר משתמש בתוסף הנגישות של <strong>Enable</strong> (<a href="https://enable.co.il" style={{color:'var(--b)'}}>enable.co.il</a>), המספק מגוון כלים לשיפור הנגישות:</p>
               <ul>
-                <li><strong>שינוי גודל טקסט</strong> — ניתן להגדיל ולהקטין את הגופן ישירות בממשק</li>
+                <li><strong>שינוי גודל טקסט</strong> — הגדלה והקטנה של הגופן</li>
                 <li><strong>ניגודיות גבוהה</strong> — מצב ניגודיות מוגברת לשיפור קריאות</li>
                 <li><strong>גווני אפור</strong> — מצב grayscale למשתמשים עם לקויות צבע</li>
                 <li><strong>גופן קריא</strong> — מעבר לגופן מותאם לדיסלקציה</li>
@@ -53,13 +53,14 @@ export default function Accessibility() {
             <div className="legal-section">
               <h2>4. פנייה בנושאי נגישות</h2>
               <p>נתקלת בבעיית נגישות? אנחנו רוצים לדעת ולתקן. פנה אלינו:</p>
-              <p>מייל: <a href="mailto:support@tradelog.app" style={{color:'var(--b)'}}>support@tradelog.app</a></p>
+              <p>מייל: <a href="mailto:tradelog@gmail.com" style={{color:'var(--b)'}}>tradelog@gmail.com</a></p>
               <p>נשתדל לחזור תוך 5 ימי עסקים.</p>
             </div>
 
             <div className="legal-section">
               <h2>5. רכז נגישות</h2>
-              <p>רכז הנגישות של השירות אחראי לטיפול בפניות ולשיפור מתמשך של הנגישות. לפנייה: <a href="mailto:support@tradelog.app" style={{color:'var(--b)'}}>support@tradelog.app</a></p>
+              <p>רכז הנגישות: <strong>צח איטח</strong></p>
+              <p>לפנייה: <a href="mailto:tradelog@gmail.com" style={{color:'var(--b)'}}>tradelog@gmail.com</a></p>
             </div>
           </>
         ) : (
@@ -74,9 +75,9 @@ export default function Accessibility() {
 
             <div className="legal-section">
               <h2>2. Accessibility Level</h2>
-              <p>We strive to meet WCAG 2.1 Level AA requirements. The following accessibility tools are available directly in the interface:</p>
+              <p>We strive to meet WCAG 2.1 Level AA requirements. The site uses the <strong>Enable</strong> accessibility plugin (<a href="https://enable.co.il" style={{color:'var(--b)'}}>enable.co.il</a>), providing the following tools:</p>
               <ul>
-                <li><strong>Text size adjustment</strong> — increase or decrease font size within the app</li>
+                <li><strong>Text size adjustment</strong> — increase or decrease font size</li>
                 <li><strong>High contrast mode</strong> — enhanced contrast for improved readability</li>
                 <li><strong>Grayscale mode</strong> — for users with color vision deficiencies</li>
                 <li><strong>Readable font</strong> — switch to a dyslexia-friendly typeface</li>
@@ -97,13 +98,14 @@ export default function Accessibility() {
             <div className="legal-section">
               <h2>4. Accessibility Feedback</h2>
               <p>Encountered an accessibility issue? We want to know and fix it. Contact us:</p>
-              <p>Email: <a href="mailto:support@tradelog.app" style={{color:'var(--b)'}}>support@tradelog.app</a></p>
+              <p>Email: <a href="mailto:tradelog@gmail.com" style={{color:'var(--b)'}}>tradelog@gmail.com</a></p>
               <p>We aim to respond within 5 business days.</p>
             </div>
 
             <div className="legal-section">
               <h2>5. Accessibility Coordinator</h2>
-              <p>Our accessibility coordinator is responsible for handling inquiries and continuously improving accessibility. Contact: <a href="mailto:support@tradelog.app" style={{color:'var(--b)'}}>support@tradelog.app</a></p>
+              <p>Accessibility Coordinator: <strong>Tzach Itach</strong></p>
+              <p>Contact: <a href="mailto:tradelog@gmail.com" style={{color:'var(--b)'}}>tradelog@gmail.com</a></p>
             </div>
           </>
         )}
