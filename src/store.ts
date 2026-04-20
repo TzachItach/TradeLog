@@ -276,6 +276,12 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'tradelog-storage',
+      version: 2,
+      migrate: (persisted: unknown) => {
+        // v1 → v2: reset darkMode to false (light-first redesign)
+        const state = persisted as Record<string, unknown>;
+        return { ...state, darkMode: false };
+      },
       partialize: (s) => ({
         lang: s.lang, fontSize: s.fontSize, highContrast: s.highContrast,
         grayscale: s.grayscale, readableFont: s.readableFont,
