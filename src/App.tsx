@@ -23,14 +23,14 @@ function SplashScreen() {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       flexDirection: 'column', gap: 14,
     }}>
-      <div style={{ width: 44, height: 44, borderRadius: 10, background: '#5e6ad2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: 44, height: 44, borderRadius: 10, background: '#0071e3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round">
           <polyline points="3,17 9,11 13,15 21,6" />
         </svg>
       </div>
-      <div style={{ color: '#d0d6e0', fontSize: '.9rem', fontWeight: 600, fontFamily: 'system-ui' }}>TradeLog</div>
+      <div style={{ color: '#f5f5f7', fontSize: '.9rem', fontWeight: 600, fontFamily: '-apple-system, Helvetica, sans-serif', letterSpacing: '-0.02em' }}>TradeLog</div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      <div style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,.1)', borderTopColor: '#7170ff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,.1)', borderTopColor: '#2997ff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>
   );
 }

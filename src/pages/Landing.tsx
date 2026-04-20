@@ -3,16 +3,16 @@ import { useStore } from '../store';
 import './landing.css';
 
 const calColors = [
-  '#3fe56c33','#3fe56c55','#ff406033','#3fe56c22','#3fe56c77',
-  '#1c2026',  '#3fe56c44','#ff406044','#3fe56c33','#1c2026',
-  '#3fe56c66','#1c2026',  '#3fe56c22','#3fe56c55','#ff406022',
-  '#1c2026',  '#3fe56c44','#3fe56c33','#1c2026',  '#3fe56c77',
-  '#ff406033','#3fe56c22','#3fe56c55','#1c2026',  '#3fe56c44',
-  '#3fe56c33','#1c2026',  '#ff406055',
+  '#30d15833','#30d15855','#ff453a33','#30d15822','#30d15877',
+  '#1c1c1e',  '#30d15844','#ff453a44','#30d15833','#1c1c1e',
+  '#30d15866','#1c1c1e',  '#30d15822','#30d15855','#ff453a22',
+  '#1c1c1e',  '#30d15844','#30d15833','#1c1c1e',  '#30d15877',
+  '#ff453a33','#30d15822','#30d15855','#1c1c1e',  '#30d15844',
+  '#30d15833','#1c1c1e',  '#ff453a55',
 ];
 
 const equityPoints = '0,110 40,95 80,100 120,78 160,82 200,60 240,65 280,42 320,48 360,28 400,15';
-const equityFill  = equityPoints + ' 400,130 0,130';
+const equityFill = equityPoints + ' 400,130 0,130';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ export default function Landing() {
         <div className="lp-nav-inner">
           <a className="lp-logo" href="/">
             <div className="lp-logo-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003912" strokeWidth="2.8" strokeLinecap="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round">
                 <polyline points="3,17 9,11 13,15 21,6" />
               </svg>
             </div>
@@ -89,7 +89,7 @@ export default function Landing() {
                 <div className="lp-mockup-dot" style={{ background: '#ff5f57' }} />
                 <div className="lp-mockup-dot" style={{ background: '#febc2e' }} />
                 <div className="lp-mockup-dot" style={{ background: '#28c840' }} />
-                <div style={{ flex: 1, height: 18, background: '#1a1f27', borderRadius: 4, marginInlineStart: 10, maxWidth: 220 }} />
+                <div style={{ flex: 1, height: 18, background: '#2c2c2e', borderRadius: 4, marginInlineStart: 10, maxWidth: 220 }} />
               </div>
 
               {/* App shell */}
@@ -97,12 +97,12 @@ export default function Landing() {
                 {/* Sidebar */}
                 <div className="lp-mockup-sidebar">
                   <div className="lp-mockup-logo">
-                    <div style={{ width: 20, height: 20, background: '#3fe56c', borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#003912" strokeWidth="3" strokeLinecap="round">
+                    <div style={{ width: 20, height: 20, background: '#0071e3', borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round">
                         <polyline points="3,17 9,11 13,15 21,6" />
                       </svg>
                     </div>
-                    <span style={{ fontSize: '.65rem', fontWeight: 800, color: '#dfe2eb' }}>TradeLog</span>
+                    <span style={{ fontSize: '.65rem', fontWeight: 600, color: '#f5f5f7' }}>TradeLog</span>
                   </div>
                   {[
                     { label: 'Dashboard', active: true },
@@ -113,9 +113,9 @@ export default function Landing() {
                   ].map(item => (
                     <div key={item.label} style={{
                       fontSize: '.58rem', padding: '5px 8px', borderRadius: 4,
-                      color: item.active ? '#3fe56c' : '#4a5568',
-                      background: item.active ? 'rgba(63,229,108,0.08)' : 'none',
-                      borderInlineStart: item.active ? '2px solid #3fe56c' : '2px solid transparent',
+                      color: item.active ? '#2997ff' : '#86868b',
+                      background: item.active ? 'rgba(0,113,227,0.12)' : 'none',
+                      borderInlineStart: item.active ? '2px solid #0071e3' : '2px solid transparent',
                     }}>
                       {item.label}
                     </div>
@@ -123,13 +123,13 @@ export default function Landing() {
                   {/* Mini KPIs */}
                   <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {[
-                      { label: "P&L היום", val: '+₪1,840', color: '#3fe56c' },
-                      { label: 'Win Rate',  val: '68%',     color: '#3fe56c' },
-                      { label: 'Max DD',    val: '-4.2%',   color: '#ff4060' },
+                      { label: "P&L היום", val: '+₪1,840', color: '#30d158' },
+                      { label: 'Win Rate',  val: '68%',     color: '#30d158' },
+                      { label: 'Max DD',    val: '-4.2%',   color: '#ff453a' },
                     ].map(k => (
                       <div key={k.label}>
-                        <div style={{ fontSize: '.48rem', textTransform: 'uppercase', letterSpacing: '.06em', color: '#4a5568' }}>{k.label}</div>
-                        <div style={{ fontSize: '.75rem', fontWeight: 800, color: k.color, fontFamily: 'monospace' }}>{k.val}</div>
+                        <div style={{ fontSize: '.48rem', textTransform: 'uppercase', letterSpacing: '.06em', color: '#86868b' }}>{k.label}</div>
+                        <div style={{ fontSize: '.75rem', fontWeight: 600, color: k.color, fontFamily: 'monospace' }}>{k.val}</div>
                       </div>
                     ))}
                   </div>
@@ -140,14 +140,14 @@ export default function Landing() {
                   {/* Top KPI strip */}
                   <div className="lp-mockup-kpi-row">
                     {[
-                      { label: 'רווח כולל', val: '+₪18,420', color: '#3fe56c' },
-                      { label: 'Win Rate',   val: '68%',      color: '#3fe56c' },
-                      { label: 'Profit Factor', val: '2.84',  color: '#3fe56c' },
-                      { label: 'עסקאות',     val: '142',      color: '#dfe2eb' },
+                      { label: 'רווח כולל', val: '+₪18,420', color: '#30d158' },
+                      { label: 'Win Rate',   val: '68%',      color: '#30d158' },
+                      { label: 'Profit Factor', val: '2.84',  color: '#30d158' },
+                      { label: 'עסקאות',     val: '142',      color: '#f5f5f7' },
                     ].map(k => (
                       <div key={k.label} className="lp-mockup-kpi">
-                        <div style={{ fontSize: '.48rem', textTransform: 'uppercase', letterSpacing: '.06em', color: '#4a5568', marginBottom: 3 }}>{k.label}</div>
-                        <div style={{ fontSize: '.82rem', fontWeight: 800, color: k.color, fontFamily: 'monospace' }}>{k.val}</div>
+                        <div style={{ fontSize: '.48rem', textTransform: 'uppercase', letterSpacing: '.06em', color: '#86868b', marginBottom: 3 }}>{k.label}</div>
+                        <div style={{ fontSize: '.82rem', fontWeight: 600, color: k.color, fontFamily: 'monospace' }}>{k.val}</div>
                       </div>
                     ))}
                   </div>
@@ -156,22 +156,22 @@ export default function Landing() {
                   <div className="lp-mockup-charts">
                     {/* Equity Curve */}
                     <div className="lp-mockup-chart-panel">
-                      <div style={{ fontSize: '.52rem', color: '#4a5568', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.06em' }}>Equity Curve</div>
+                      <div style={{ fontSize: '.52rem', color: '#86868b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.06em' }}>Equity Curve</div>
                       <svg viewBox="0 0 400 130" preserveAspectRatio="none" style={{ width: '100%', height: 80 }}>
                         <defs>
                           <linearGradient id="eq-fill" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#3fe56c" stopOpacity="0.25" />
-                            <stop offset="100%" stopColor="#3fe56c" stopOpacity="0" />
+                            <stop offset="0%" stopColor="#30d158" stopOpacity="0.25" />
+                            <stop offset="100%" stopColor="#30d158" stopOpacity="0" />
                           </linearGradient>
                         </defs>
                         <polygon points={equityFill} fill="url(#eq-fill)" />
-                        <polyline points={equityPoints} fill="none" stroke="#3fe56c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <polyline points={equityPoints} fill="none" stroke="#30d158" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </div>
 
                     {/* Calendar heatmap */}
                     <div className="lp-mockup-chart-panel">
-                      <div style={{ fontSize: '.52rem', color: '#4a5568', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.06em' }}>לוח שנה</div>
+                      <div style={{ fontSize: '.52rem', color: '#86868b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.06em' }}>לוח שנה</div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
                         {calColors.map((c, i) => (
                           <div key={i} style={{ aspectRatio: '1', borderRadius: 2, background: c }} />
@@ -188,9 +188,9 @@ export default function Landing() {
                       { sym: 'MNQ', dir: 'Long', pnl: '+₪460', pos: true },
                     ].map(t => (
                       <div key={t.sym + t.pnl} className="lp-mockup-trade-row">
-                        <span style={{ fontSize: '.55rem', fontWeight: 700, color: '#dfe2eb', fontFamily: 'monospace', minWidth: 28 }}>{t.sym}</span>
-                        <span style={{ fontSize: '.5rem', color: t.pos ? '#3fe56c' : '#ff4060', background: t.pos ? 'rgba(63,229,108,0.1)' : 'rgba(255,64,96,0.1)', padding: '1px 5px', borderRadius: 3 }}>{t.dir}</span>
-                        <span style={{ fontSize: '.55rem', fontWeight: 700, color: t.pos ? '#3fe56c' : '#ff4060', fontFamily: 'monospace', marginInlineStart: 'auto' }}>{t.pnl}</span>
+                        <span style={{ fontSize: '.55rem', fontWeight: 600, color: '#f5f5f7', fontFamily: 'monospace', minWidth: 28 }}>{t.sym}</span>
+                        <span style={{ fontSize: '.5rem', color: t.pos ? '#30d158' : '#ff453a', background: t.pos ? 'rgba(48,209,88,0.10)' : 'rgba(255,69,58,0.10)', padding: '1px 5px', borderRadius: 3 }}>{t.dir}</span>
+                        <span style={{ fontSize: '.55rem', fontWeight: 600, color: t.pos ? '#30d158' : '#ff453a', fontFamily: 'monospace', marginInlineStart: 'auto' }}>{t.pnl}</span>
                       </div>
                     ))}
                   </div>
@@ -215,6 +215,9 @@ export default function Landing() {
 
         {/* Features Bento */}
         <section className="lp-features" id="features">
+          <div className="lp-features-inner">
+          <h2>כלים שעובדים בשבילך</h2>
+          <p className="sub">כל מה שצריך כדי לנתח, לשפר ולשלוט בביצועי המסחר שלך.</p>
           <div className="lp-features-grid">
             <div className="lp-card">
               <div className="lp-card-icon">📥</div>
@@ -225,7 +228,7 @@ export default function Landing() {
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 {[85,60,92,45,78].map((w, i) => (
-                  <div key={i} style={{ height: 6, borderRadius: 3, background: `rgba(63,229,108,${w / 120})`, width: `${w}%` }} />
+                  <div key={i} style={{ height: 6, borderRadius: 3, background: `rgba(0,113,227,${w / 120})`, width: `${w}%` }} />
                 ))}
               </div>
             </div>
@@ -252,7 +255,7 @@ export default function Landing() {
                 </div>
                 <div className="lp-metric">
                   <div className="lp-metric-label">Max DD</div>
-                  <div className="lp-metric-val" style={{ color: '#ff4060' }}>-4.2%</div>
+                  <div className="lp-metric-val" style={{ color: '#d70015' }}>-4.2%</div>
                 </div>
               </div>
             </div>
@@ -270,6 +273,7 @@ export default function Landing() {
                 ))}
               </div>
             </div>
+          </div>
           </div>
         </section>
 

@@ -3,16 +3,16 @@ import { useStore, formatPnL } from '../store';
 
 type Trade = ReturnType<typeof useStore.getState>['trades'][0];
 
-const G = '#3bce7c', R = '#ff4060', B = '#5e6ad2', O = '#ffaa44';
+const G = '#30d158', R = '#ff453a', B = '#0071e3', O = '#ff9f0a';
 
 function useColors() {
   const isDark = !document.body.classList.contains('light');
   return {
     isDark,
-    text: isDark ? '#8a8f98' : '#40405a',
+    text: isDark ? '#86868b' : '#6e6e73',
     grid: isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.07)',
-    zero: isDark ? 'rgba(255,255,255,.08)' : '#d0d4e0',
-    bg: isDark ? '#0f1011' : '#ffffff',
+    zero: isDark ? 'rgba(255,255,255,.08)' : '#e8e8ed',
+    bg: isDark ? '#000000' : '#ffffff',
   };
 }
 
