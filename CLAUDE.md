@@ -27,7 +27,7 @@ src/
   index.css                — Dark/Light themes, RTL, mobile responsive
   lib/
     supabase.ts            — Client + DEMO_MODE
-    db.ts                  — loadUserData, dbSave*, dbSeedNewUser
+    db.ts                  — loadUserData, dbSave*, dbSeedNewUser, dbUploadTradeMedia, dbGetTradeMediaUrls
     futures.ts             — 50+ חוזים עתידיים עם pointValue מדויק
   components/
     Layout.tsx             — Shell: Sidebar + Header + Outlet
@@ -100,9 +100,21 @@ RLS: כל טבלה עם `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = u
   - `minWR = 1 / (1 + RR)`
 - **DailySummary popup**: מוצג 8 שניות אחרי שמירה עם progress bar
   - P&L יומי + WR יומי + best trade + סיכום שבוע
+- **Media (צילומי מסך)**:
+  - העלאה: drag & drop או click, מרובה תמונות
+  - שמירה: `dbUploadTradeMedia(tradeId, userId, files)` → Supabase Storage bucket `trade-media` (נתיב: `{userId}/{tradeId}/{uuid}.ext`) + שורה ב-`trade_media`
+  - טעינה: `loadUserData` עושה `select('*, trade_media(*)')` ומאכלס `trade.media`
+  - הצגה בעריכה: `dbGetTradeMediaUrls` מייצר Signed URLs (שעה) ומציג בגלריה
+  - תמונות: רוחב מלא (`max-height: 320px`, `object-fit: contain`)
+  - לחיצה על תמונה → Lightbox fullscreen (95vw × 92vh)
 
 ### Analytics (8 גרפים Canvas — ללא ספריות)
 Tabs: Equity Curve | Drawdown | P&L by Day | P&L by Symbol | Monthly Heatmap | Distribution | Risk/Reward Scatter | Streak Analysis
+
+#### ByDayChart — נקודות חשובות
+- `pT = 32` (לא 20) — מרווח עליון מספיק
+- לייבל P&L **בתוך** העמודה (טקסט לבן, near open end): עמודה חיובית → `bY + 13`, שלילית → `bY + bH - 4`
+- עמודה קצרה (<18px) → לייבל מחוץ, נועל בתוך גבולות הגרף עם `Math.max/min`
 
 ### BrokerImport
 - **Tradovate Performance CSV**: פורמט מיוחד
@@ -183,6 +195,7 @@ VITE_SUPABASE_ANON_KEY=...
 5. **Sidebar**: מוסתר במובייל, hamburger + overlay
 6. **לוגו קליקבילי** בכל מקום → `/dashboard`
 7. **Landing CSS**: namespace `.lp-*` מבודד — אין קונפליקט עם CSS של האפליקציה
+8. **Trade Media**: bucket בשם `trade-media` ב-Supabase Storage (private). RLS על storage.objects לפי `(storage.foldername(name))[1] = auth.uid()::text`. טבלת `trade_media` עם עמודות: `id, trade_id, user_id, storage_path, label, created_at`
 
 ---
 
