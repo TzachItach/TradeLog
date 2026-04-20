@@ -19,7 +19,7 @@ import Landing from './pages/Landing';
 function SplashScreen() {
   return (
     <div style={{
-      minHeight: '100vh', background: '#060910',
+      minHeight: '100vh', background: '#f5f5f7',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       flexDirection: 'column', gap: 14,
     }}>
@@ -28,9 +28,9 @@ function SplashScreen() {
           <polyline points="3,17 9,11 13,15 21,6" />
         </svg>
       </div>
-      <div style={{ color: '#f5f5f7', fontSize: '.9rem', fontWeight: 600, fontFamily: '-apple-system, Helvetica, sans-serif', letterSpacing: '-0.02em' }}>TradeLog</div>
+      <div style={{ color: '#1d1d1f', fontSize: '.9rem', fontWeight: 600, fontFamily: '-apple-system, Helvetica, sans-serif', letterSpacing: '-0.02em' }}>TradeLog</div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      <div style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,.1)', borderTopColor: '#2997ff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ width: 18, height: 18, border: '2px solid rgba(0,0,0,.10)', borderTopColor: '#0071e3', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>
   );
 }
@@ -108,7 +108,7 @@ function AppEffects() {
   }, [readableFont]);
 
   useEffect(() => {
-    document.body.classList.toggle('light', !darkMode);
+    document.body.classList.toggle('dark', darkMode);
   }, [darkMode]);
 
   useEffect(() => {

@@ -1,38 +1,38 @@
 /* ================================================================
-   TradeLog — Apple Design System
-   Accent: #0071e3  Dark links: #2997ff  Profit: #30d158  Loss: #ff453a
-   Font: SF Pro (-apple-system)  Bg: #000000
+   TradeLog — Apple Design System (Light-first)
+   Accent: #0071e3  Profit: #1c8f3a  Loss: #d70015
+   Font: SF Pro (-apple-system)  Default: Light (#f5f5f7 bg)
 ================================================================ */
 :root {
-  /* ── Backgrounds — Apple dark ── */
-  --bg:    #000000;    /* pure black */
-  --s1:    #161617;    /* near-black surface */
-  --s2:    #1c1c1e;    /* Apple dark surface */
-  --s3:    #2c2c2e;    /* elevated surface */
-  --s4:    #3a3a3c;    /* surface highest */
+  /* ── Backgrounds — Apple light (default) ── */
+  --bg:    #f5f5f7;    /* Apple light gray page */
+  --s1:    #ffffff;    /* white surface */
+  --s2:    #f5f5f7;    /* light gray elevated */
+  --s3:    #e8e8ed;    /* medium gray */
+  --s4:    #d2d2d7;    /* separator gray */
 
   /* ── Borders ── */
-  --bd:    rgba(255,255,255,.08);
-  --bd2:   rgba(255,255,255,.12);
-  --bd3:   rgba(255,255,255,.20);
+  --bd:    rgba(0,0,0,.08);
+  --bd2:   rgba(0,0,0,.12);
+  --bd3:   rgba(0,0,0,.20);
 
   /* ── Text ── */
-  --t1:    #f5f5f7;    /* Apple near-white */
-  --t2:    #ebebf0;    /* secondary */
-  --t3:    #86868b;    /* Apple secondary label */
+  --t1:    #1d1d1f;    /* Apple primary label */
+  --t2:    rgba(0,0,0,.80); /* secondary label */
+  --t3:    #6e6e73;    /* tertiary label */
 
   /* ── Semantic ── */
-  --g:     #30d158;    /* Apple system green — profit/win */
-  --r:     #ff453a;    /* Apple system red — loss/danger */
-  --b:     #0071e3;    /* Apple Blue — interactive only */
-  --b2:    #2997ff;    /* Apple bright blue — links on dark */
-  --o:     #ff9f0a;    /* Apple orange — warning */
+  --g:     #1c8f3a;    /* Apple light green — profit/win */
+  --r:     #d70015;    /* Apple light red — loss/danger */
+  --b:     #0071e3;    /* Apple Blue — interactive */
+  --b2:    #0066cc;    /* darker blue — links on light */
+  --o:     #c4780a;    /* Apple light orange — warning */
 
   /* ── Semantic backgrounds ── */
-  --g-bg:  rgba(48,209,88,.08);
-  --g-bd:  rgba(48,209,88,.30);
-  --r-bg:  rgba(255,69,58,.08);
-  --r-bd:  rgba(255,69,58,.28);
+  --g-bg:  rgba(28,143,58,.08);
+  --g-bd:  rgba(28,143,58,.28);
+  --r-bg:  rgba(215,0,21,.07);
+  --r-bd:  rgba(215,0,21,.25);
   --b-bg:  rgba(0,113,227,.08);
   --b-bd:  rgba(0,113,227,.28);
 
@@ -251,7 +251,7 @@ button, input, select, textarea { font-family: inherit; }
   width: 100%; background: var(--s2); border: 1px solid var(--bd2);
   color: var(--t1); padding: 9px 12px; border-radius: var(--rad-s);
   font-size: .87rem; outline: none; transition: border-color .12s;
-  color-scheme: dark;
+  color-scheme: light;
 }
 .form-input:focus { border-color: var(--b); }
 .form-input::placeholder { color: var(--t3); }
@@ -635,45 +635,9 @@ input[type=checkbox] { accent-color: var(--b); cursor: pointer; }
   }
 }
 
-/* ── Light Mode ── */
-body.light {
-  --bg:    #f5f5f7;
-  --s1:    #ffffff;
-  --s2:    #f5f5f7;
-  --s3:    #e8e8ed;
-  --s4:    #d2d2d7;
-  --bd:    rgba(0,0,0,.08);
-  --bd2:   rgba(0,0,0,.12);
-  --bd3:   rgba(0,0,0,.20);
-  --t1:    #1d1d1f;
-  --t2:    rgba(0,0,0,.80);
-  --t3:    #6e6e73;
-  --g:     #1c8f3a;
-  --r:     #d70015;
-  --b:     #0071e3;
-  --b2:    #0066cc;
-  --o:     #c4780a;
-  --g-bg:  rgba(28,143,58,.08);
-  --g-bd:  rgba(28,143,58,.28);
-  --r-bg:  rgba(215,0,21,.07);
-  --r-bd:  rgba(215,0,21,.25);
-  --b-bg:  rgba(0,113,227,.08);
-  --b-bd:  rgba(0,113,227,.28);
-}
-body.light .sidebar         { box-shadow: 2px 0 8px rgba(0,0,0,.06); }
-body.light .header          { box-shadow: 0 1px 4px rgba(0,0,0,.04); }
-body.light .modal-overlay   { background: rgba(0,0,0,.5); }
-body.light .cal-wrap        { box-shadow: 0 2px 12px rgba(0,0,0,.06); }
-body.light .stat-card       { background: #ffffff; }
-body.light .stat-card:hover { background: #fafafa; }
-body.light .settings-section{ box-shadow: 0 1px 6px rgba(0,0,0,.04); }
-body.light .table-wrap      { box-shadow: 0 1px 6px rgba(0,0,0,.04); }
-body.light .auth-card       { box-shadow: 0 8px 32px rgba(0,0,0,.1); }
-body.light .logo-text       { color: var(--t1); }
-
 /* ================================================================
-   Apple Design System — Component Overrides
-   Accent: #0071e3  Dark links: #2997ff  Profit: #30d158  Loss: #ff453a
+   Apple Design System — Component Overrides (Light-first)
+   Default = Light. body.dark = dark mode override.
 ================================================================ */
 
 /* ── SF Pro system font + smooth rendering ── */
@@ -681,34 +645,33 @@ body {
   font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
   letter-spacing: -0.022em !important;
   -webkit-font-smoothing: antialiased !important;
+  color-scheme: light;
 }
+body.dark { color-scheme: dark; }
 
-/* ── Stat cards — Apple card elevation ── */
+/* ── Stat cards ── */
 .stat-card {
-  background: #1c1c1e !important;
+  background: #ffffff !important;
   border: none !important;
   border-radius: 10px !important;
-  box-shadow: rgba(0,0,0,.3) 0 2px 8px !important;
+  box-shadow: rgba(0,0,0,.06) 0 2px 12px !important;
 }
-.stat-card:hover { background: #2c2c2e !important; box-shadow: rgba(0,0,0,.4) 0 4px 12px !important; }
+.stat-card:hover { background: #fafafa !important; box-shadow: rgba(0,0,0,.10) 0 4px 16px !important; }
 
+/* ── Panel containers ── */
 .cal-wrap,
 .settings-section,
 .report-card,
 .table-wrap {
-  background: #1c1c1e !important;
+  background: #ffffff !important;
   border: none !important;
-  box-shadow: rgba(0,0,0,.3) 0 2px 8px !important;
+  box-shadow: rgba(0,0,0,.06) 0 2px 12px !important;
 }
 
 /* ── Stats bar ── */
-.stats-bar {
-  background: transparent !important;
-  border: none !important;
-  gap: 10px !important;
-}
+.stats-bar { background: transparent !important; border: none !important; gap: 10px !important; }
 
-/* ── Stat labels: Apple style ── */
+/* ── Stat typography ── */
 .stat-label {
   font-size: .62rem !important;
   letter-spacing: .04em !important;
@@ -724,59 +687,45 @@ body {
 
 /* ── Sidebar ── */
 .sidebar {
-  background: #161617 !important;
-  border-inline-end: 1px solid rgba(255,255,255,.08) !important;
+  background: #ffffff !important;
+  border-inline-end: 1px solid rgba(0,0,0,.08) !important;
   width: 200px !important;
+  box-shadow: 2px 0 8px rgba(0,0,0,.04) !important;
 }
 .sidebar.collapsed { width: 50px !important; }
-.sidebar-logo { border-bottom: 1px solid rgba(255,255,255,.08) !important; }
+.sidebar-logo { border-bottom: 1px solid rgba(0,0,0,.08) !important; }
 .logo-text {
   font-weight: 600 !important;
   letter-spacing: -.02em !important;
-  color: var(--t1) !important;
+  color: #1d1d1f !important;
   font-size: 1rem !important;
 }
 .logo-icon { background: #0071e3 !important; border-radius: 7px !important; }
-
 .nav-item {
   border-radius: 6px !important;
   font-size: .82rem !important;
   font-weight: 400 !important;
-  color: var(--t3) !important;
   letter-spacing: -.01em !important;
 }
-.nav-item:hover {
-  background: rgba(255,255,255,.05) !important;
-  color: var(--t2) !important;
-  border-inline-start: none !important;
-}
+.nav-item:hover { background: rgba(0,0,0,.04) !important; border-inline-start: none !important; }
 .nav-item.active {
-  background: rgba(0,113,227,.12) !important;
-  color: var(--b2) !important;
+  background: rgba(0,113,227,.08) !important;
+  color: #0066cc !important;
   border-inline-start: 2px solid #0071e3 !important;
   border-radius: 0 !important;
   font-weight: 500 !important;
 }
 
-/* ── Header — Apple glass nav ── */
+/* ── Header — Apple glass (light) ── */
 .header {
-  background: rgba(0,0,0,.8) !important;
+  background: rgba(255,255,255,.88) !important;
   backdrop-filter: saturate(180%) blur(20px) !important;
   -webkit-backdrop-filter: saturate(180%) blur(20px) !important;
-  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  border-bottom: 1px solid rgba(0,0,0,.08) !important;
   height: 52px !important;
 }
-.account-tab {
-  border-radius: 6px !important;
-  font-size: .73rem !important;
-  font-weight: 500 !important;
-  letter-spacing: -.01em !important;
-}
-.account-tab.active {
-  background: rgba(0,113,227,.12) !important;
-  color: var(--b2) !important;
-  border-color: rgba(0,113,227,.28) !important;
-}
+.account-tab { border-radius: 6px !important; font-size: .73rem !important; font-weight: 500 !important; letter-spacing: -.01em !important; }
+.account-tab.active { background: rgba(0,113,227,.08) !important; color: #0066cc !important; border-color: rgba(0,113,227,.28) !important; }
 
 /* ── Buttons ── */
 .btn-primary {
@@ -790,18 +739,18 @@ body {
   box-shadow: none !important;
 }
 .btn-primary:hover { background: #0077ed !important; opacity: 1 !important; }
-.btn-ghost:hover { border-color: var(--b) !important; color: var(--b2) !important; }
+.btn-ghost:hover { border-color: var(--b) !important; color: var(--b) !important; }
 
 /* ── Trade badges ── */
 .trade-badge.pos {
-  background: rgba(48,209,88,.10) !important;
+  background: rgba(28,143,58,.08) !important;
   color: var(--g) !important;
   border: none !important;
   border-inline-start: 2px solid var(--g) !important;
   border-radius: 2px !important;
 }
 .trade-badge.neg {
-  background: rgba(255,69,58,.10) !important;
+  background: rgba(215,0,21,.07) !important;
   color: var(--r) !important;
   border: none !important;
   border-inline-start: 2px solid var(--r) !important;
@@ -811,102 +760,69 @@ body {
 /* ── Calendar day cells ── */
 .day-cell {
   border-radius: 8px !important;
-  border: 1px solid rgba(255,255,255,.06) !important;
-  background: #1c1c1e !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(0,0,0,.06) !important;
 }
-.day-cell.profit {
-  background: rgba(48,209,88,.07) !important;
-  border-color: rgba(48,209,88,.22) !important;
-}
-.day-cell.loss {
-  background: rgba(255,69,58,.07) !important;
-  border-color: rgba(255,69,58,.22) !important;
-}
-.day-cell.today {
-  border-color: rgba(0,113,227,.6) !important;
-  background: rgba(0,113,227,.06) !important;
-}
+.day-cell.profit { background: rgba(28,143,58,.06) !important; border-color: rgba(28,143,58,.20) !important; }
+.day-cell.loss   { background: rgba(215,0,21,.05) !important; border-color: rgba(215,0,21,.18) !important; }
+.day-cell.today  { border-color: rgba(0,113,227,.5) !important; background: rgba(0,113,227,.04) !important; }
 
 /* ── Modal ── */
 .modal-box {
-  background: #1c1c1e !important;
-  border: 1px solid rgba(255,255,255,.10) !important;
+  background: #ffffff !important;
+  border: none !important;
   border-radius: 12px !important;
-  box-shadow: rgba(0,0,0,.6) 0 20px 60px !important;
+  box-shadow: rgba(0,0,0,.18) 0 20px 60px !important;
 }
-.modal-overlay { background: rgba(0,0,0,.72) !important; backdrop-filter: blur(4px) !important; }
+.modal-overlay { background: rgba(0,0,0,.45) !important; backdrop-filter: blur(4px) !important; }
 
 /* ── Form inputs ── */
 .form-input, .filter-inp {
-  background: #2c2c2e !important;
-  border: 1px solid rgba(255,255,255,.10) !important;
+  background: #f5f5f7 !important;
+  border: 1px solid rgba(0,0,0,.12) !important;
   border-radius: 8px !important;
-  color: var(--t1) !important;
-  font-family: -apple-system, 'Helvetica Neue', sans-serif !important;
+  color: #1d1d1f !important;
   letter-spacing: -.01em !important;
+  color-scheme: light !important;
 }
 .form-input:focus, .filter-inp:focus {
   border-color: #0071e3 !important;
-  box-shadow: 0 0 0 3px rgba(0,113,227,.30) !important;
+  box-shadow: 0 0 0 3px rgba(0,113,227,.20) !important;
   outline: none !important;
 }
 
 /* ── Avatar ── */
 .avatar {
-  background: rgba(0,113,227,.12) !important;
-  color: var(--b2) !important;
+  background: rgba(0,113,227,.08) !important;
+  color: #0066cc !important;
   border: 1px solid rgba(0,113,227,.28) !important;
   border-radius: 6px !important;
   font-weight: 600 !important;
 }
 
-/* ── Page title ── */
-.page-title {
-  font-weight: 600 !important;
-  letter-spacing: -.03em !important;
-  font-size: 1.2rem !important;
-}
-
-/* ── Section titles ── */
-.section-title {
-  font-size: .68rem !important;
-  font-weight: 500 !important;
-  letter-spacing: .06em !important;
-  text-transform: uppercase !important;
-  color: var(--t3) !important;
-}
+/* ── Typography ── */
+.page-title { font-weight: 600 !important; letter-spacing: -.03em !important; font-size: 1.2rem !important; }
+.section-title { font-size: .68rem !important; font-weight: 500 !important; letter-spacing: .06em !important; text-transform: uppercase !important; color: var(--t3) !important; }
 
 /* ── Auth ── */
 .auth-wrap { background: var(--bg) !important; }
 .auth-card {
-  background: #1c1c1e !important;
-  border: 1px solid rgba(255,255,255,.10) !important;
+  background: #ffffff !important;
+  border: none !important;
   border-radius: 12px !important;
-  box-shadow: rgba(0,0,0,.6) 0 20px 60px !important;
+  box-shadow: rgba(0,0,0,.12) 0 8px 40px !important;
 }
 .auth-title { color: var(--t1) !important; letter-spacing: -.03em !important; font-weight: 600 !important; }
-.btn-oauth {
-  background: #2c2c2e !important;
-  border: 1px solid rgba(255,255,255,.10) !important;
-  border-radius: 8px !important;
-}
-.btn-oauth:hover {
-  background: #3a3a3c !important;
-  border-color: rgba(255,255,255,.16) !important;
-}
-.btn-demo {
-  background: rgba(0,113,227,.08) !important;
-  border-color: rgba(0,113,227,.28) !important;
-  color: var(--b2) !important;
-  border-radius: 8px !important;
-}
-.btn-demo:hover { background: rgba(0,113,227,.15) !important; }
+.btn-oauth { background: #f5f5f7 !important; border: 1px solid rgba(0,0,0,.10) !important; border-radius: 8px !important; color: #1d1d1f !important; }
+.btn-oauth:hover { background: #ebebed !important; }
+.btn-demo { background: rgba(0,113,227,.08) !important; border-color: rgba(0,113,227,.28) !important; color: #0066cc !important; border-radius: 8px !important; }
+.btn-demo:hover { background: rgba(0,113,227,.14) !important; }
 
 /* ── Daily Goal Bar ── */
 .daily-goal-bar {
-  background: #1c1c1e;
+  background: #ffffff;
   border: none;
-  box-shadow: rgba(0,0,0,.3) 0 2px 8px;
+  box-shadow: rgba(0,0,0,.06) 0 2px 12px;
   border-radius: var(--rad-l);
   padding: 14px 18px;
   margin: 0 0 14px;
@@ -915,108 +831,82 @@ body {
   gap: 20px;
   flex-wrap: wrap;
 }
-.dg-today {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-.dg-label {
-  font-size: .78rem;
-  color: var(--t3);
-  font-weight: 500;
-}
-.dg-pnl {
-  font-size: 1.15rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -.02em;
-}
-.dg-badge {
-  font-size: .7rem;
-  font-weight: 500;
-  padding: 2px 8px;
-  border-radius: 20px;
-  letter-spacing: .03em;
-}
+.dg-today { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.dg-label { font-size: .78rem; color: var(--t3); font-weight: 500; }
+.dg-pnl { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.dg-badge { font-size: .7rem; font-weight: 500; padding: 2px 8px; border-radius: 20px; letter-spacing: .03em; }
 .dg-badge-goal { background: var(--g-bg); color: var(--g); border: 1px solid var(--g-bd); }
 .dg-badge-loss { background: var(--r-bg); color: var(--r); border: 1px solid var(--r-bd); }
-
 .dg-bars { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 160px; }
 .dg-bar-row { display: flex; align-items: center; gap: 8px; }
 .dg-bar-label { font-size: .72rem; color: var(--t3); min-width: 90px; white-space: nowrap; }
-.dg-bar-track {
-  flex: 1;
-  height: 5px;
-  background: rgba(255,255,255,.06);
-  border-radius: 4px;
-  overflow: hidden;
-}
-.dg-bar-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width .5s ease;
-}
+.dg-bar-track { flex: 1; height: 5px; background: rgba(0,0,0,.07); border-radius: 4px; overflow: hidden; }
+.dg-bar-fill { height: 100%; border-radius: 4px; transition: width .5s ease; }
 .dg-bar-fill-goal { background: var(--g); }
 .dg-bar-fill-loss { background: var(--r); }
 .dg-bar-pct { font-size: .72rem; font-weight: 500; min-width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar-track { background: var(--bg) !important; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,.10) !important; border-radius: 2px !important; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,.12) !important; border-radius: 2px !important; }
 
-/* ── Apple Design System — Light Mode overrides ── */
-body.light {
-  --bg:  #f5f5f7;
-  --s1:  #ffffff;
-  --s2:  #f5f5f7;
-  --s3:  #e8e8ed;
-  --s4:  #d2d2d7;
-  --bd:  rgba(0,0,0,.08);
-  --bd2: rgba(0,0,0,.12);
-  --bd3: rgba(0,0,0,.20);
-  --t1:  #1d1d1f;
-  --t2:  rgba(0,0,0,.80);
-  --t3:  #6e6e73;
-  --g:   #1c8f3a;
-  --r:   #d70015;
-  --b:   #0071e3;
-  --b2:  #0066cc;
-  --o:   #c4780a;
-  --g-bg: rgba(28,143,58,.08);
-  --g-bd: rgba(28,143,58,.28);
-  --r-bg: rgba(215,0,21,.07);
-  --r-bd: rgba(215,0,21,.25);
-  --b-bg: rgba(0,113,227,.08);
-  --b-bd: rgba(0,113,227,.28);
+/* ================================================================
+   Dark Mode overrides — body.dark
+================================================================ */
+body.dark {
+  --bg:    #000000;
+  --s1:    #161617;
+  --s2:    #1c1c1e;
+  --s3:    #2c2c2e;
+  --s4:    #3a3a3c;
+  --bd:    rgba(255,255,255,.08);
+  --bd2:   rgba(255,255,255,.12);
+  --bd3:   rgba(255,255,255,.20);
+  --t1:    #f5f5f7;
+  --t2:    #ebebf0;
+  --t3:    #86868b;
+  --g:     #30d158;
+  --r:     #ff453a;
+  --b:     #0071e3;
+  --b2:    #2997ff;
+  --o:     #ff9f0a;
+  --g-bg:  rgba(48,209,88,.08);
+  --g-bd:  rgba(48,209,88,.30);
+  --r-bg:  rgba(255,69,58,.08);
+  --r-bd:  rgba(255,69,58,.28);
+  --b-bg:  rgba(0,113,227,.08);
+  --b-bd:  rgba(0,113,227,.28);
 }
-body.light .stat-card       { background: #ffffff !important; box-shadow: rgba(0,0,0,.08) 0 2px 12px !important; border: none !important; }
-body.light .stat-card:hover { background: #fafafa !important; box-shadow: rgba(0,0,0,.12) 0 4px 16px !important; }
-body.light .cal-wrap        { background: #ffffff !important; box-shadow: rgba(0,0,0,.08) 0 2px 12px !important; border: none !important; }
-body.light .settings-section { background: #ffffff !important; box-shadow: rgba(0,0,0,.06) 0 1px 6px !important; border: none !important; }
-body.light .table-wrap      { background: #ffffff !important; box-shadow: rgba(0,0,0,.06) 0 1px 6px !important; border: none !important; }
-body.light .report-card     { background: #ffffff !important; box-shadow: rgba(0,0,0,.06) 0 1px 6px !important; border: none !important; }
-body.light .day-cell        { background: #ffffff !important; border: 1px solid rgba(0,0,0,.06) !important; }
-body.light .day-cell.profit { background: rgba(28,143,58,.06) !important; border-color: rgba(28,143,58,.20) !important; }
-body.light .day-cell.loss   { background: rgba(215,0,21,.05) !important; border-color: rgba(215,0,21,.18) !important; }
-body.light .day-cell.today  { border-color: rgba(0,113,227,.5) !important; background: rgba(0,113,227,.05) !important; }
-body.light .modal-box       { background: #ffffff !important; border: none !important; box-shadow: rgba(0,0,0,.20) 0 20px 60px !important; }
-body.light .sidebar         { background: #ffffff !important; border-color: rgba(0,0,0,.08) !important; box-shadow: 2px 0 8px rgba(0,0,0,.06) !important; }
-body.light .header          { background: rgba(255,255,255,.85) !important; backdrop-filter: saturate(180%) blur(20px) !important; -webkit-backdrop-filter: saturate(180%) blur(20px) !important; border-color: rgba(0,0,0,.08) !important; box-shadow: none !important; }
-body.light .logo-icon       { background: #0071e3 !important; }
-body.light .logo-text       { color: #1d1d1f !important; }
-body.light .nav-item.active { background: rgba(0,113,227,.08) !important; color: #0066cc !important; border-inline-start-color: #0071e3 !important; }
-body.light .account-tab.active { background: rgba(0,113,227,.08) !important; color: #0066cc !important; border-color: rgba(0,113,227,.28) !important; }
-body.light .daily-goal-bar  { background: #ffffff; box-shadow: rgba(0,0,0,.06) 0 1px 8px; border: none; }
-body.light .dg-bar-track    { background: rgba(0,0,0,.07); }
-body.light .form-input, body.light .filter-inp { background: #f5f5f7 !important; border-color: rgba(0,0,0,.12) !important; }
-body.light .auth-card       { background: #ffffff !important; border: none !important; box-shadow: rgba(0,0,0,.16) 0 8px 40px !important; }
-body.light .btn-oauth       { background: #f5f5f7 !important; border-color: rgba(0,0,0,.10) !important; }
-body.light .btn-oauth:hover { background: #ebebed !important; }
-body.light .btn-demo        { background: rgba(0,113,227,.08) !important; border-color: rgba(0,113,227,.28) !important; color: #0071e3 !important; }
-body.light .form-input, body.light .filter-inp {
-  background: #ffffff !important;
-  border-color: rgba(0,0,0,.12) !important;
-  color: #0d0d12 !important;
-}
-body.light .avatar { background: rgba(94,106,210,.10) !important; color: var(--b) !important; border-color: rgba(94,106,210,.25) !important; }
+body.dark .stat-card       { background: #1c1c1e !important; box-shadow: rgba(0,0,0,.3) 0 2px 8px !important; }
+body.dark .stat-card:hover { background: #2c2c2e !important; box-shadow: rgba(0,0,0,.4) 0 4px 12px !important; }
+body.dark .cal-wrap,
+body.dark .settings-section,
+body.dark .report-card,
+body.dark .table-wrap      { background: #1c1c1e !important; box-shadow: rgba(0,0,0,.3) 0 2px 8px !important; }
+body.dark .sidebar         { background: #161617 !important; border-color: rgba(255,255,255,.08) !important; box-shadow: none !important; }
+body.dark .sidebar-logo    { border-color: rgba(255,255,255,.08) !important; }
+body.dark .logo-text       { color: #f5f5f7 !important; }
+body.dark .nav-item:hover  { background: rgba(255,255,255,.05) !important; }
+body.dark .nav-item.active { background: rgba(0,113,227,.12) !important; color: #2997ff !important; border-inline-start-color: #0071e3 !important; }
+body.dark .header          { background: rgba(0,0,0,.80) !important; border-color: rgba(255,255,255,.08) !important; }
+body.dark .account-tab.active { background: rgba(0,113,227,.12) !important; color: #2997ff !important; border-color: rgba(0,113,227,.28) !important; }
+body.dark .day-cell        { background: #1c1c1e !important; border-color: rgba(255,255,255,.06) !important; }
+body.dark .day-cell.profit { background: rgba(48,209,88,.07) !important; border-color: rgba(48,209,88,.22) !important; }
+body.dark .day-cell.loss   { background: rgba(255,69,58,.07) !important; border-color: rgba(255,69,58,.22) !important; }
+body.dark .day-cell.today  { border-color: rgba(0,113,227,.6) !important; background: rgba(0,113,227,.06) !important; }
+body.dark .modal-box       { background: #1c1c1e !important; border: 1px solid rgba(255,255,255,.10) !important; box-shadow: rgba(0,0,0,.6) 0 20px 60px !important; }
+body.dark .modal-overlay   { background: rgba(0,0,0,.72) !important; }
+body.dark .form-input,
+body.dark .filter-inp      { background: #2c2c2e !important; border-color: rgba(255,255,255,.10) !important; color: #f5f5f7 !important; color-scheme: dark !important; }
+body.dark .form-input:focus,
+body.dark .filter-inp:focus { box-shadow: 0 0 0 3px rgba(0,113,227,.30) !important; }
+body.dark .auth-card       { background: #1c1c1e !important; border: 1px solid rgba(255,255,255,.10) !important; box-shadow: rgba(0,0,0,.6) 0 20px 60px !important; }
+body.dark .btn-oauth       { background: #2c2c2e !important; border-color: rgba(255,255,255,.10) !important; color: #f5f5f7 !important; }
+body.dark .btn-oauth:hover { background: #3a3a3c !important; border-color: rgba(255,255,255,.16) !important; }
+body.dark .btn-demo        { background: rgba(0,113,227,.08) !important; border-color: rgba(0,113,227,.28) !important; color: #2997ff !important; }
+body.dark .daily-goal-bar  { background: #1c1c1e; box-shadow: rgba(0,0,0,.3) 0 2px 8px; }
+body.dark .dg-bar-track    { background: rgba(255,255,255,.06); }
+body.dark .trade-badge.pos { background: rgba(48,209,88,.10) !important; }
+body.dark .trade-badge.neg { background: rgba(255,69,58,.10) !important; }
+body.dark .avatar          { background: rgba(0,113,227,.12) !important; color: #2997ff !important; }
+body.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.10) !important; }

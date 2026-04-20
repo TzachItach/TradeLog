@@ -112,7 +112,7 @@ export const useStore = create<AppState>()(
       grayscale: false,
       readableFont: false,
       sidebarCollapsed: false,
-      darkMode: true,
+      darkMode: false,
       dataLoading: false,
       dailyGoalTarget: 0,
       dailyMaxLoss: 0,
