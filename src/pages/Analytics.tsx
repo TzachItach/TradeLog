@@ -203,7 +203,7 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
   }, [trades, lang]);
 
   useCanvas(ref, (ctx, W, H) => {
-    const pL = 64, pR = 16, pT = 20, pB = 42, cW = W - pL - pR, cH = H - pT - pB;
+    const pL = 64, pR = 16, pT = 32, pB = 42, cW = W - pL - pR, cH = H - pT - pB;
     const vals = byDay.map((d) => d.pnl);
     const maxAbs = Math.max(Math.max(...vals.map(Math.abs)), 100);
     const zeroY = pT + cH / 2;
@@ -234,7 +234,10 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
 
       if (d.count > 0) {
         ctx.fillStyle = col; ctx.font = 'bold 10px system-ui'; ctx.textAlign = 'center';
-        ctx.fillText(formatPnL(d.pnl), x, d.pnl >= 0 ? bY - 5 : bY + bH + 13);
+        const labelY = d.pnl >= 0
+          ? Math.max(bY - 5, pT + 11)
+          : Math.min(bY + bH + 13, H - pB - 4);
+        ctx.fillText(formatPnL(d.pnl), x, labelY);
       }
       ctx.fillStyle = c.text; ctx.font = '11px system-ui'; ctx.textAlign = 'center';
       ctx.fillText(d.label, x, H - pB + 14);
