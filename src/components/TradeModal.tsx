@@ -5,6 +5,7 @@ import type { Trade } from '../types';
 import DailySummary from './DailySummary';
 import SymbolPicker from './SymbolPicker';
 import { getPointValue } from '../lib/futures';
+import { dbUploadTradeMedia } from '../lib/db';
 
 const EMPTY_TRADE = (date: string, accountId: string): Omit<Trade, 'id'> => ({
   account_id: accountId,
@@ -25,7 +26,7 @@ const EMPTY_TRADE = (date: string, accountId: string): Omit<Trade, 'id'> => ({
 });
 
 export default function TradeModal() {
-  const { lang, modal, setModal, accounts, strategies, trades, addTrade, updateTrade, deleteTrade, selectedAccount } = useStore();
+  const { lang, modal, setModal, accounts, strategies, trades, addTrade, updateTrade, deleteTrade, selectedAccount, user } = useStore();
   const T = useT(lang);
   const overlayRef = useRef<HTMLDivElement>(null);
   const isHe = lang === 'he';
@@ -79,10 +80,14 @@ export default function TradeModal() {
 
   const save = () => {
     if (!form.symbol.trim()) { alert(isHe ? 'נא להזין סמל' : 'Please enter a symbol'); return; }
+    const tradeId = existingTrade ? existingTrade.id : crypto.randomUUID();
     if (existingTrade) {
-      updateTrade({ ...form, id: existingTrade.id });
+      updateTrade({ ...form, id: tradeId });
     } else {
-      addTrade({ ...form, id: crypto.randomUUID(), pnl: Number(form.pnl) || 0 });
+      addTrade({ ...form, id: tradeId, pnl: Number(form.pnl) || 0 });
+    }
+    if (mediaFiles.length > 0 && user?.id) {
+      dbUploadTradeMedia(tradeId, user.id, mediaFiles);
     }
     setSavedDate(form.trade_date);
     setModal(null);

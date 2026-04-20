@@ -177,6 +177,25 @@ export async function dbDeleteTrade(id: string) {
   logErr('trades.delete', error);
 }
 
+export async function dbUploadTradeMedia(tradeId: string, userId: string, files: File[]) {
+  if (DEMO_MODE || !supabase) return;
+  for (const file of files) {
+    const ext = file.name.split('.').pop() ?? 'jpg';
+    const path = `${userId}/${tradeId}/${crypto.randomUUID()}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from('trade-media')
+      .upload(path, file, { cacheControl: '3600', upsert: false });
+    if (upErr) { logErr('storage.upload', upErr); continue; }
+    const { error: dbErr } = await supabase.from('trade_media').insert({
+      id: crypto.randomUUID(),
+      trade_id: tradeId,
+      user_id: userId,
+      storage_path: path,
+    });
+    logErr('trade_media.insert', dbErr);
+  }
+}
+
 // ─── SEED ────────────────────────────────────────────────────
 export async function dbSeedNewUser(userId: string, account: Account, strategies: Strategy[]) {
   if (DEMO_MODE || !supabase) return;
