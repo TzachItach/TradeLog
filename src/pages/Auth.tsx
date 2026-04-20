@@ -40,11 +40,11 @@ export default function Auth() {
       <div className="auth-card" dir={lang === 'he' ? 'rtl' : 'ltr'}>
         <div className="auth-logo">
           <div style={{ width: 48, height: 48, background: 'var(--b)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#003912" strokeWidth="2.5" strokeLinecap="round">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round">
               <polyline points="3,17 9,11 13,15 21,6" />
             </svg>
           </div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--b)' }}>TradeLog</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--t1)', letterSpacing: '-.03em' }}>TradeLog</div>
         </div>
 
         <div className="auth-title">{T.welcomeBack}</div>

@@ -14,7 +14,7 @@ export function createDefaultStrategies(): Strategy[] {
     id: stratId,
     name: 'Turtle Soup',
     description: 'ICT Turtle Soup Setup',
-    color: '#3fe56c',
+    color: '#5e6ad2',
     is_active: true,
     fields: [
       ...TURTLE_SOUP_CHECKBOXES.map((label, i) => ({
