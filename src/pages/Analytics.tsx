@@ -227,17 +227,27 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
       const bY = d.pnl >= 0 ? yOf(d.pnl) : zeroY;
       const col = d.pnl > 0 ? G : d.pnl < 0 ? R : '#545e80';
 
+      const barH = Math.max(bH, 2);
       ctx.fillStyle = col + (d.count === 0 ? '33' : 'bb');
       ctx.beginPath();
-      ctx.roundRect(x - bW/2, bY, bW, Math.max(bH, 2), d.pnl >= 0 ? [4,4,0,0] : [0,0,4,4]);
+      ctx.roundRect(x - bW/2, bY, bW, barH, d.pnl >= 0 ? [4,4,0,0] : [0,0,4,4]);
       ctx.fill();
 
       if (d.count > 0) {
-        ctx.fillStyle = col; ctx.font = 'bold 10px system-ui'; ctx.textAlign = 'center';
-        const labelY = d.pnl >= 0
-          ? Math.max(bY - 5, pT + 11)
-          : Math.min(bY + bH + 13, H - pB - 4);
-        ctx.fillText(formatPnL(d.pnl), x, labelY);
+        ctx.font = 'bold 10px system-ui'; ctx.textAlign = 'center';
+        if (barH >= 18) {
+          // label inside the bar, near the open end
+          ctx.fillStyle = 'rgba(255,255,255,0.92)';
+          const insideY = d.pnl >= 0 ? bY + 13 : bY + barH - 4;
+          ctx.fillText(formatPnL(d.pnl), x, insideY);
+        } else {
+          // bar too short — draw outside but clamped
+          ctx.fillStyle = col;
+          const outsideY = d.pnl >= 0
+            ? Math.max(bY - 4, pT + 11)
+            : Math.min(bY + barH + 12, H - pB - 4);
+          ctx.fillText(formatPnL(d.pnl), x, outsideY);
+        }
       }
       ctx.fillStyle = c.text; ctx.font = '11px system-ui'; ctx.textAlign = 'center';
       ctx.fillText(d.label, x, H - pB + 14);
