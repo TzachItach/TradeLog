@@ -293,11 +293,12 @@ textarea.form-input { resize: vertical; min-height: 76px; }
 .upload-text { font-size: .78rem; color: var(--t2); margin-top: 5px; }
 .upload-sub  { font-size: .66rem; color: var(--t3); margin-top: 2px; }
 .upload-thumb {
-  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+  display: flex; flex-direction: column; gap: 10px; margin-top: 12px;
 }
 .upload-thumb img {
-  width: 72px; height: 52px; object-fit: cover;
-  border-radius: 5px; border: 1px solid var(--bd2);
+  width: 100%; height: auto; max-height: 320px; object-fit: contain;
+  border-radius: 8px; border: 1px solid var(--bd2);
+  background: var(--s1); cursor: zoom-in;
 }
 /* Modal actions */
 .modal-actions {

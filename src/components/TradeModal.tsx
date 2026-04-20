@@ -51,6 +51,7 @@ export default function TradeModal() {
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
   const [existingMediaUrls, setExistingMediaUrls] = useState<string[]>([]);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [showSummary, setShowSummary] = useState(false);
@@ -334,8 +335,12 @@ export default function TradeModal() {
                 <div className="upload-sub">{T.clickUpload} · PNG · JPG · SVG</div>
                 {(existingMediaUrls.length > 0 || mediaPreviews.length > 0) && (
                   <div className="upload-thumb" onClick={e => e.stopPropagation()}>
-                    {existingMediaUrls.map((src, i) => <img key={`existing-${i}`} src={src} alt={`saved-${i}`} />)}
-                    {mediaPreviews.map((src, i) => <img key={`new-${i}`} src={src} alt={`new-${i}`} />)}
+                    {existingMediaUrls.map((src, i) => (
+                      <img key={`existing-${i}`} src={src} alt={`saved-${i}`} onClick={() => setLightboxSrc(src)} />
+                    ))}
+                    {mediaPreviews.map((src, i) => (
+                      <img key={`new-${i}`} src={src} alt={`new-${i}`} onClick={() => setLightboxSrc(src)} />
+                    ))}
                   </div>
                 )}
               </div>
@@ -356,6 +361,34 @@ export default function TradeModal() {
       {/* סיכום יומי */}
       {showSummary && savedDate && (
         <DailySummary savedDate={savedDate} onClose={() => setShowSummary(false)} />
+      )}
+
+      {/* Lightbox */}
+      {lightboxSrc && (
+        <div
+          onClick={() => setLightboxSrc(null)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,.92)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'zoom-out',
+          }}
+        >
+          <img
+            src={lightboxSrc}
+            alt="fullscreen"
+            style={{ maxWidth: '95vw', maxHeight: '92vh', objectFit: 'contain', borderRadius: 8 }}
+            onClick={e => e.stopPropagation()}
+          />
+          <button
+            onClick={() => setLightboxSrc(null)}
+            style={{
+              position: 'absolute', top: 16, right: 20,
+              background: 'none', border: 'none', color: '#fff',
+              fontSize: '2rem', cursor: 'pointer', lineHeight: 1,
+            }}
+          >×</button>
+        </div>
       )}
     </>
   );
