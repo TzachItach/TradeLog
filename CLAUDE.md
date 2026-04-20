@@ -187,8 +187,9 @@ VITE_SUPABASE_ANON_KEY=...
 ---
 
 ## מה עוד דיברנו לבנות (לא הושלם)
-- **Stripe subscriptions**: ₪69/חודש + ₪590/שנה + 14 יום ניסיון חינם
-  - נדרש: Supabase `profiles` schema (`subscription_status`, `trial_ends_at`, `stripe_customer_id`), Edge Function webhook, `useSubscription` hook, Paywall UI, email reminders
+- **מנויים בתשלום**: ₪69/חודש + ₪590/שנה + 14 יום ניסיון חינם
+  - **פלטפורמת תשלום**: Lemon Squeezy (לא Stripe) — פועל כ-Merchant of Record, מתאים לעוסק פטור לא רשמי, מטפל במע"מ וחשבוניות
+  - נדרש: Supabase `profiles` schema (`subscription_status`, `trial_ends_at`, `lemonsqueezy_customer_id`), webhook handler, `useSubscription` hook, Paywall UI, email reminders
 - Push notifications במובייל
 - התראות יעד יומי (יעד רווח / יעד הפסד)
 - השוואה שבוע/חודש ב-StatsBar (חץ ↑↓ ליד כל מספר)
