@@ -23,7 +23,7 @@ export async function loadUserData(userId: string): Promise<{
     supabase.from('profiles').select('daily_goal_target, daily_max_loss').eq('id', userId).single(),
     supabase.from('accounts').select('*').eq('user_id', userId).order('created_at'),
     supabase.from('strategies').select('*, strategy_fields(*)').eq('user_id', userId).order('created_at'),
-    supabase.from('trades').select('*').eq('user_id', userId).order('trade_date', { ascending: false }),
+    supabase.from('trades').select('*, trade_media(*)').eq('user_id', userId).order('trade_date', { ascending: false }),
   ]);
 
   logErr('profiles.select', profileRes.error);
@@ -73,6 +73,9 @@ export async function loadUserData(userId: string): Promise<{
     confirmations: r.confirmations ?? {}, field_values: r.field_values ?? {},
     source: r.source ?? 'manual',
     broker_trade_id: r.broker_trade_id ?? undefined,
+    media: (r.trade_media ?? []).map((m: { id: string; trade_id: string; storage_path: string; label?: string }) => ({
+      id: m.id, trade_id: m.trade_id, storage_path: m.storage_path, label: m.label,
+    })),
   }));
 
   console.log(`[DB] Loaded: ${accounts.length} accounts, ${strategies.length} strategies, ${trades.length} trades`);
@@ -177,23 +180,44 @@ export async function dbDeleteTrade(id: string) {
   logErr('trades.delete', error);
 }
 
-export async function dbUploadTradeMedia(tradeId: string, userId: string, files: File[]) {
+export async function dbUploadTradeMedia(tradeId: string, userId: string, files: File[]): Promise<void> {
   if (DEMO_MODE || !supabase) return;
   for (const file of files) {
     const ext = file.name.split('.').pop() ?? 'jpg';
     const path = `${userId}/${tradeId}/${crypto.randomUUID()}.${ext}`;
+    console.log('[DB] Uploading media:', path);
     const { error: upErr } = await supabase.storage
       .from('trade-media')
       .upload(path, file, { cacheControl: '3600', upsert: false });
-    if (upErr) { logErr('storage.upload', upErr); continue; }
+    if (upErr) {
+      console.error('[DB] storage.upload failed:', upErr.message, upErr);
+      continue;
+    }
     const { error: dbErr } = await supabase.from('trade_media').insert({
       id: crypto.randomUUID(),
       trade_id: tradeId,
       user_id: userId,
       storage_path: path,
     });
-    logErr('trade_media.insert', dbErr);
+    if (dbErr) {
+      console.error('[DB] trade_media.insert failed:', dbErr.message, dbErr);
+    } else {
+      console.log('[DB] Media saved OK:', path);
+    }
   }
+}
+
+export async function dbGetTradeMediaUrls(mediaPaths: string[]): Promise<string[]> {
+  if (DEMO_MODE || !supabase || mediaPaths.length === 0) return [];
+  const urls = await Promise.all(
+    mediaPaths.map(async (path) => {
+      const { data } = await supabase!.storage
+        .from('trade-media')
+        .createSignedUrl(path, 60 * 60); // שעה
+      return data?.signedUrl ?? '';
+    })
+  );
+  return urls.filter(Boolean);
 }
 
 // ─── SEED ────────────────────────────────────────────────────

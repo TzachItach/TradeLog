@@ -5,7 +5,7 @@ import type { Trade } from '../types';
 import DailySummary from './DailySummary';
 import SymbolPicker from './SymbolPicker';
 import { getPointValue } from '../lib/futures';
-import { dbUploadTradeMedia } from '../lib/db';
+import { dbUploadTradeMedia, dbGetTradeMediaUrls } from '../lib/db';
 
 const EMPTY_TRADE = (date: string, accountId: string): Omit<Trade, 'id'> => ({
   account_id: accountId,
@@ -50,6 +50,7 @@ export default function TradeModal() {
   );
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
+  const [existingMediaUrls, setExistingMediaUrls] = useState<string[]>([]);
   const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [showSummary, setShowSummary] = useState(false);
@@ -60,6 +61,12 @@ export default function TradeModal() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [setModal]);
+
+  useEffect(() => {
+    if (!existingTrade?.media?.length) return;
+    const paths = existingTrade.media.map(m => m.storage_path);
+    dbGetTradeMediaUrls(paths).then(setExistingMediaUrls);
+  }, [existingTrade?.id]);
 
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
     setForm(f => ({ ...f, [key]: value }));
@@ -325,9 +332,10 @@ export default function TradeModal() {
                 </svg>
                 <div className="upload-text">{T.dragDrop}</div>
                 <div className="upload-sub">{T.clickUpload} · PNG · JPG · SVG</div>
-                {mediaPreviews.length > 0 && (
+                {(existingMediaUrls.length > 0 || mediaPreviews.length > 0) && (
                   <div className="upload-thumb" onClick={e => e.stopPropagation()}>
-                    {mediaPreviews.map((src, i) => <img key={i} src={src} alt={`screenshot-${i}`} />)}
+                    {existingMediaUrls.map((src, i) => <img key={`existing-${i}`} src={src} alt={`saved-${i}`} />)}
+                    {mediaPreviews.map((src, i) => <img key={`new-${i}`} src={src} alt={`new-${i}`} />)}
                   </div>
                 )}
               </div>
