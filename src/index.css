@@ -950,6 +950,19 @@ body:not(.dark) .daily-goal-bar { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
   .daily-goals-grid { grid-template-columns: 1fr; }
 }
 
+/* ── Analytics tabs — scroll horizontally on mobile ── */
+.analytics-tabs {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px;
+}
+@media (max-width: 768px) {
+  .analytics-tabs {
+    flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .analytics-tabs::-webkit-scrollbar { display: none; }
+  .analytics-tabs button { flex-shrink: 0; }
+}
+
 /* ── Negishot accessibility widget — push above bottom nav on mobile ── */
 @media (max-width: 768px) {
   #negishot-widget {

@@ -277,7 +277,7 @@ function BySymbolChart({ trades }: { trades: Trade[] }) {
   const h = Math.max(bySymbol.length * 44 + 20, 100);
 
   useCanvas(ref, (ctx, W, H) => {
-    const pL = 56, pR = 80, pT = 10, pB = 10, cW = W - pL - pR, cH = H - pT - pB;
+    const pL = 56, pR = Math.min(80, W * 0.22), pT = 10, pB = 10, cW = W - pL - pR, cH = H - pT - pB;
     const maxAbs = Math.max(...bySymbol.map(([, v]) => Math.abs(v)), 1);
     const rowH = cH / bySymbol.length;
 
@@ -338,7 +338,7 @@ function MonthlyHeatmap({ trades, lang }: { trades: Trade[]; lang: string }) {
   return (
     <div style={{ overflowX: 'auto' }}>
       {years.map((year) => (
-        <div key={year} style={{ marginBottom: 16 }}>
+        <div key={year} style={{ marginBottom: 16, minWidth: 600 }}>
           <div style={{ fontSize: '.78rem', fontWeight: 700, color: 'var(--t2)', marginBottom: 8 }}>{year}</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12,1fr)', gap: 4 }}>
             {Array.from({ length: 12 }, (_, mi) => {
@@ -384,9 +384,10 @@ function DistributionChart({ trades }: { trades: Trade[] }) {
     const start = Math.floor(min / step) * step;
     const bkts: number[] = [];
     const lbls: string[] = [];
+    const fmtLbl = (v: number) => Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v);
     for (let v = start; v <= max + step; v += step) {
       bkts.push(0);
-      lbls.push(v >= 0 ? `+${(v / 1000).toFixed(0)}k` : `${(v / 1000).toFixed(0)}k`);
+      lbls.push(v >= 0 ? `+${fmtLbl(v)}` : fmtLbl(v));
     }
     pnls.forEach((p) => {
       const idx = Math.min(Math.floor((p - start) / step), bkts.length - 1);
@@ -599,7 +600,7 @@ export default function Analytics() {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 18 }}>
+      <div className="analytics-tabs">
         {tabs.map((t, i) => (
           <button key={i} onClick={() => setTab(i)}
             style={{
