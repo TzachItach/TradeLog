@@ -1,6 +1,7 @@
 import { Outlet, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import BottomNav from './BottomNav';
 import TradeModal from './TradeModal';
 import { useStore } from '../store';
 
@@ -43,6 +44,7 @@ export default function Layout() {
         <AppFooter lang={lang} />
       </div>
       {modal && <TradeModal />}
+      <BottomNav />
     </div>
   );
 }

@@ -2,8 +2,23 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { useT } from '../i18n';
 
+/** Half-dark / half-light split circle button */
+function ThemeToggle({ darkMode, onClick }: { darkMode: boolean; onClick: () => void }) {
+  return (
+    <button
+      className="theme-toggle-btn"
+      onClick={onClick}
+      title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-label="Toggle theme"
+    >
+      <span className="theme-toggle-dark" />
+      <span className="theme-toggle-light" />
+    </button>
+  );
+}
+
 export default function Header() {
-  const { lang, setLang, accounts, selectedAccount, setSelectedAccount, setModal, user, sidebarCollapsed, setSidebarCollapsed } = useStore();
+  const { lang, setLang, accounts, selectedAccount, setSelectedAccount, setModal, user, sidebarCollapsed, setSidebarCollapsed, darkMode, setDarkMode } = useStore();
   const T = useT(lang);
   const navigate = useNavigate();
 
@@ -64,6 +79,8 @@ export default function Header() {
       </div>
 
       <div className="header-right">
+        <ThemeToggle darkMode={darkMode} onClick={() => setDarkMode(!darkMode)} />
+
         <button
           className="btn btn-lang"
           onClick={() => setLang(lang === 'he' ? 'en' : 'he')}
