@@ -220,8 +220,15 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
       }
     });
 
+    // Abbreviated format: $672 or $2.1k — keeps labels narrow
+    const fmtShort = (v: number) => {
+      const abs = Math.abs(v);
+      const s = abs >= 1000 ? `$${(abs / 1000).toFixed(1)}k` : `$${Math.round(abs)}`;
+      return v < 0 ? `-${s}` : `+${s}`;
+    };
+
     const bW = Math.min(44, (cW / 7) * 0.6);
-    byDay.forEach((d, i) => {
+    byDay.forEach((d: { label: string; pnl: number; count: number }, i: number) => {
       const x = pL + (i + 0.5) * (cW / 7);
       const bH = Math.abs(yOf(d.pnl) - zeroY);
       const bY = d.pnl >= 0 ? yOf(d.pnl) : zeroY;
@@ -233,22 +240,19 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
       ctx.roundRect(x - bW/2, bY, bW, barH, d.pnl >= 0 ? [4,4,0,0] : [0,0,4,4]);
       ctx.fill();
 
+      // Always draw label outside the bar — above positive, below negative
       if (d.count > 0) {
-        ctx.font = 'bold 10px system-ui'; ctx.textAlign = 'center';
-        if (barH >= 18) {
-          // label inside the bar, near the open end
-          ctx.fillStyle = 'rgba(255,255,255,0.92)';
-          const insideY = d.pnl >= 0 ? bY + 13 : bY + barH - 4;
-          ctx.fillText(formatPnL(d.pnl), x, insideY);
+        ctx.font = 'bold 9px system-ui'; ctx.textAlign = 'center';
+        ctx.fillStyle = col;
+        if (d.pnl >= 0) {
+          const labelY = Math.max(bY - 4, pT + 11);
+          ctx.fillText(fmtShort(d.pnl), x, labelY);
         } else {
-          // bar too short — draw outside but clamped
-          ctx.fillStyle = col;
-          const outsideY = d.pnl >= 0
-            ? Math.max(bY - 4, pT + 11)
-            : Math.min(bY + barH + 12, H - pB - 4);
-          ctx.fillText(formatPnL(d.pnl), x, outsideY);
+          const labelY = Math.min(bY + barH + 11, pT + cH - 4);
+          ctx.fillText(fmtShort(d.pnl), x, labelY);
         }
       }
+
       ctx.fillStyle = c.text; ctx.font = '11px system-ui'; ctx.textAlign = 'center';
       ctx.fillText(d.label, x, H - pB + 14);
       if (d.count > 0) {
