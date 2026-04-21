@@ -252,22 +252,24 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
       if (d.count > 0) {
         ctx.font = 'bold 10px system-ui'; ctx.textAlign = 'center'; ctx.fillStyle = col;
         if (d.pnl >= 0) {
-          const ly = Math.max(bY - 6, pT + 12);
+          // above bar — clear 8px gap from bar top
+          const ly = Math.max(bY - 8, pT + 12);
           ctx.fillText(fmtShort(d.pnl), x, ly);
         } else {
-          const ly = Math.min(bY + barH + 12, pT + cH - 3);
+          // below bar — clear 14px gap from bar bottom, never past separator
+          const ly = Math.min(bY + barH + 14, sepY - 6);
           ctx.fillText(fmtShort(d.pnl), x, ly);
         }
       }
 
-      // Below separator: trade count then day name
+      // Below separator: trade count (line 1) then day name (line 2)
       if (d.count > 0) {
         ctx.fillStyle = c.text; ctx.globalAlpha = 0.45; ctx.font = '9px system-ui'; ctx.textAlign = 'center';
-        ctx.fillText(`(${d.count})`, x, sepY + 14);
+        ctx.fillText(`(${d.count})`, x, sepY + 16);
         ctx.globalAlpha = 1;
       }
       ctx.fillStyle = c.text; ctx.font = '11px system-ui'; ctx.textAlign = 'center';
-      ctx.fillText(d.label, x, sepY + (d.count > 0 ? 28 : 16));
+      ctx.fillText(d.label, x, sepY + (d.count > 0 ? 33 : 20));
     });
   }, [byDay, c.isDark]);
 
