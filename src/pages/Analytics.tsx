@@ -203,7 +203,8 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
   }, [trades, lang]);
 
   useCanvas(ref, (ctx, W, H) => {
-    const pL = 64, pR = 16, pT = 32, pB = 72, cW = W - pL - pR, cH = H - pT - pB;
+    // pB = space for: gap(10) + separator(1) + gap(8) + dayName(13) + count(13) = 45
+    const pL = 64, pR = 16, pT = 32, pB = 52, cW = W - pL - pR, cH = H - pT - pB;
     const vals = byDay.map((d) => d.pnl);
     const maxAbs = Math.max(Math.max(...vals.map(Math.abs)), 100);
     const zeroY = pT + cH / 2;
@@ -221,19 +222,17 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
       }
     });
 
-    // Separator line between chart and label area
-    ctx.beginPath();
-    ctx.strokeStyle = c.grid;
-    ctx.lineWidth = 1;
-    ctx.moveTo(pL, pT + cH + 8); ctx.lineTo(pL + cW, pT + cH + 8);
-    ctx.stroke();
-
     // Abbreviated: $672 or $2.1k
     const fmtShort = (v: number) => {
       const abs = Math.abs(v);
       const s = abs >= 1000 ? `$${(abs / 1000).toFixed(1)}k` : `$${Math.round(abs)}`;
       return v < 0 ? `-${s}` : `+${s}`;
     };
+
+    // Separator between chart area and day-name axis
+    const sepY = pT + cH + 10;
+    ctx.beginPath(); ctx.strokeStyle = c.grid; ctx.lineWidth = 1;
+    ctx.moveTo(pL, sepY); ctx.lineTo(pL + cW, sepY); ctx.stroke();
 
     const bW = Math.min(48, (cW / 7) * 0.68);
     byDay.forEach((d: { label: string; pnl: number; count: number }, i: number) => {
@@ -249,16 +248,24 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
       ctx.roundRect(x - bW/2, bY, bW, barH, d.pnl >= 0 ? [4,4,0,0] : [0,0,4,4]);
       ctx.fill();
 
-      // Axis area — 3 lines: day name / P&L / count
-      const axisTop = pT + cH + 16;
-      ctx.fillStyle = c.text; ctx.font = '11px system-ui'; ctx.textAlign = 'center';
-      ctx.fillText(d.label, x, axisTop);
-
+      // P&L label — close to bar tip, clamped within chart area
       if (d.count > 0) {
-        ctx.fillStyle = col; ctx.font = 'bold 10px system-ui';
-        ctx.fillText(fmtShort(d.pnl), x, axisTop + 16);
-        ctx.fillStyle = c.text; ctx.globalAlpha = 0.5; ctx.font = '9px system-ui';
-        ctx.fillText(`${d.count} trades`, x, axisTop + 29);
+        ctx.font = 'bold 10px system-ui'; ctx.textAlign = 'center'; ctx.fillStyle = col;
+        if (d.pnl >= 0) {
+          const ly = Math.max(bY - 6, pT + 12);
+          ctx.fillText(fmtShort(d.pnl), x, ly);
+        } else {
+          const ly = Math.min(bY + barH + 12, pT + cH - 3);
+          ctx.fillText(fmtShort(d.pnl), x, ly);
+        }
+      }
+
+      // Below separator: day name + trade count
+      ctx.fillStyle = c.text; ctx.font = '11px system-ui'; ctx.textAlign = 'center';
+      ctx.fillText(d.label, x, sepY + 16);
+      if (d.count > 0) {
+        ctx.globalAlpha = 0.45; ctx.font = '9px system-ui';
+        ctx.fillText(`(${d.count})`, x, sepY + 29);
         ctx.globalAlpha = 1;
       }
     });
