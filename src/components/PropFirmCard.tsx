@@ -104,17 +104,25 @@ function SingleAccountCard({ account, isHe }: { account: Account; isHe: boolean 
 
       {/* Balance row */}
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 100 }}>
-          <div style={{ fontSize: '.7rem', color: 'var(--t3)', marginBottom: 2 }}>{isHe ? 'יתרה נוכחית' : 'Current Balance'}</div>
-          <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--t1)' }}>{fmt(stats.currentBalance)}</div>
+        <div style={{ flex: 1, minWidth: 90 }}>
+          <div style={{ fontSize: '.7rem', color: 'var(--t3)', marginBottom: 2 }}>{isHe ? 'יתרה נוכחית' : 'Balance'}</div>
+          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--t1)' }}>{fmt(stats.currentBalance)}</div>
         </div>
-        <div style={{ flex: 1, minWidth: 100 }}>
+        <div style={{ flex: 1, minWidth: 90 }}>
           <div style={{ fontSize: '.7rem', color: 'var(--t3)', marginBottom: 2 }}>{isHe ? 'רצפה' : 'Floor'}</div>
-          <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--r)' }}>{fmt(stats.trailingFloor)}</div>
+          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--r)' }}>{fmt(stats.trailingFloor)}</div>
         </div>
-        <div style={{ flex: 1, minWidth: 100 }}>
+        {hasTarget && (
+          <div style={{ flex: 1, minWidth: 90 }}>
+            <div style={{ fontSize: '.7rem', color: 'var(--t3)', marginBottom: 2 }}>{isHe ? 'נותר ליעד' : 'To Target'}</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: stats.profitRemaining === 0 ? 'var(--g)' : 'var(--t1)' }}>
+              {stats.profitRemaining === 0 ? '✓' : fmt(stats.profitRemaining)}
+            </div>
+          </div>
+        )}
+        <div style={{ flex: 1, minWidth: 90 }}>
           <div style={{ fontSize: '.7rem', color: 'var(--t3)', marginBottom: 2 }}>{isHe ? 'היום' : "Today's P&L"}</div>
-          <div style={{ fontSize: '1.15rem', fontWeight: 800, color: todayColor }}>
+          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: todayColor }}>
             {stats.todayPnL === 0 ? '—' : fmt(stats.todayPnL)}
           </div>
         </div>

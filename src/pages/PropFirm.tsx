@@ -70,15 +70,19 @@ function AccountCard({ account, isHe }: { account: Account; isHe: boolean }) {
       </div>
 
       {/* Key numbers */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${hasTarget ? 4 : 3}, 1fr)`, gap: 12 }}>
         {[
-          { label: isHe ? 'יתרה נוכחית' : 'Balance',       value: fmt(stats.currentBalance), color: 'var(--t1)' },
-          { label: isHe ? 'רצפה'         : 'Floor',         value: fmt(stats.trailingFloor),  color: 'var(--r)'  },
-          { label: isHe ? 'P&L היום'     : "Today's P&L",   value: stats.todayPnL === 0 ? '—' : fmt(stats.todayPnL), color: todayColor },
+          { label: isHe ? 'יתרה נוכחית' : 'Balance',     value: fmt(stats.currentBalance),                                    color: 'var(--t1)' },
+          { label: isHe ? 'רצפה'         : 'Floor',        value: fmt(stats.trailingFloor),                                     color: 'var(--r)'  },
+          ...(hasTarget ? [
+            { label: isHe ? 'יעד'         : 'Target',       value: fmt(stats.profitTargetBalance),                               color: 'var(--g)'  },
+            { label: isHe ? 'נותר ליעד'  : 'To Target',     value: stats.profitRemaining === 0 ? '✓' : fmt(stats.profitRemaining), color: stats.profitRemaining === 0 ? 'var(--g)' : 'var(--t1)' },
+          ] : []),
+          { label: isHe ? 'P&L היום'    : "Today's P&L",   value: stats.todayPnL === 0 ? '—' : fmt(stats.todayPnL),             color: todayColor },
         ].map((kpi) => (
           <div key={kpi.label} style={{ background: 'var(--s1)', borderRadius: 10, padding: '12px 14px' }}>
             <div style={{ fontSize: '.68rem', color: 'var(--t3)', marginBottom: 4 }}>{kpi.label}</div>
-            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: kpi.color }}>{kpi.value}</div>
+            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: kpi.color }}>{kpi.value}</div>
           </div>
         ))}
       </div>

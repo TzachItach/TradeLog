@@ -14,6 +14,8 @@ export interface PropFirmStats {
   dailyLimitPct: number;       // 0–100
   profitPnL: number;           // total P&L toward profit target
   profitPct: number;           // 0–100+ progress toward profit target
+  profitRemaining: number;     // $ still needed to hit target
+  profitTargetBalance: number; // absolute balance that equals "passed"
   daysTraded: number;          // unique days with at least one trade
   daysSinceStart: number;      // calendar days since prop_start_date
   daysRemaining: number;       // max_days - daysSinceStart (negative = overdue)
@@ -80,6 +82,8 @@ export function calcPropFirmStats(account: Account, trades: Trade[]): PropFirmSt
   // Profit progress
   const profitPnL = totalPnL;
   const profitPct = profitTarget > 0 ? Math.min(100, (profitPnL / profitTarget) * 100) : 0;
+  const profitRemaining = profitTarget > 0 ? Math.max(0, profitTarget - profitPnL) : 0;
+  const profitTargetBalance = start + profitTarget;
 
   // Days
   const daysTraded = sortedDays.length;
@@ -122,6 +126,8 @@ export function calcPropFirmStats(account: Account, trades: Trade[]): PropFirmSt
     dailyLimitPct,
     profitPnL,
     profitPct,
+    profitRemaining,
+    profitTargetBalance,
     daysTraded,
     daysSinceStart,
     daysRemaining,
