@@ -868,6 +868,16 @@ body:not(.dark) .daily-goal-bar { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
 }
 .bottom-nav-add:active { transform: scale(.93); box-shadow: 0 2px 8px rgba(29,185,84,.2); }
 
+/* Daily Goals two-column grid — stacks on mobile */
+.daily-goals-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 480px) {
+  .daily-goals-grid { grid-template-columns: 1fr; }
+}
+
 /* ── Negishot accessibility widget — push above bottom nav on mobile ── */
 @media (max-width: 768px) {
   #negishot-widget {

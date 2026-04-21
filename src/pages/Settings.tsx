@@ -668,7 +668,7 @@ export default function Settings() {
       {/* יעדים יומיים */}
       <div className="settings-section">
         <div className="section-title">{lang === 'he' ? 'יעדים יומיים' : 'Daily Goals'}</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <div className="daily-goals-grid">
           <div>
             <label className="form-label">{lang === 'he' ? 'יעד רווח יומי ($)' : 'Daily Profit Target ($)'}</label>
             <input
