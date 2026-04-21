@@ -260,14 +260,14 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
         }
       }
 
-      // Below separator: day name + trade count
-      ctx.fillStyle = c.text; ctx.font = '11px system-ui'; ctx.textAlign = 'center';
-      ctx.fillText(d.label, x, sepY + 16);
+      // Below separator: trade count then day name
       if (d.count > 0) {
-        ctx.globalAlpha = 0.45; ctx.font = '9px system-ui';
-        ctx.fillText(`(${d.count})`, x, sepY + 29);
+        ctx.fillStyle = c.text; ctx.globalAlpha = 0.45; ctx.font = '9px system-ui'; ctx.textAlign = 'center';
+        ctx.fillText(`(${d.count})`, x, sepY + 14);
         ctx.globalAlpha = 1;
       }
+      ctx.fillStyle = c.text; ctx.font = '11px system-ui'; ctx.textAlign = 'center';
+      ctx.fillText(d.label, x, sepY + (d.count > 0 ? 28 : 16));
     });
   }, [byDay, c.isDark]);
 
