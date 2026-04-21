@@ -376,6 +376,69 @@ body:not(.dark) .cal-wrap { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
 .leg-item { display: flex; align-items: center; gap: 6px; font-size: .7rem; color: var(--t2); }
 .leg-dot { width: 7px; height: 7px; border-radius: 50%; }
 
+/* ── Dashboard Bottom Row ── */
+.dashboard-bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  margin-top: 20px;
+}
+.dashboard-equity-col,
+.dashboard-trades-col { display: flex; flex-direction: column; gap: 10px; }
+
+.dashboard-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.dashboard-section-title {
+  font-size: 1rem; font-weight: 700; letter-spacing: -.02em; color: var(--t1);
+}
+.dashboard-see-all {
+  font-size: .72rem; font-weight: 600; color: var(--t3);
+  cursor: pointer; letter-spacing: .04em; text-transform: uppercase;
+  transition: color .15s;
+}
+.dashboard-see-all:hover { color: var(--t1); text-decoration: underline; }
+
+.dashboard-chart-card {
+  background: var(--s1);
+  border: 1px solid var(--bd);
+  border-radius: var(--rad-l);
+  padding: 16px;
+}
+
+/* ── Recent Trades Card ── */
+.recent-trades-card {
+  background: var(--s1);
+  border: 1px solid var(--bd);
+  border-radius: var(--rad-l);
+  padding: 8px;
+  flex: 1;
+}
+.recent-trade-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 8px;
+  border-radius: var(--rad);
+  cursor: pointer;
+  transition: background .12s;
+}
+.recent-trade-row:hover { background: var(--s2); }
+.recent-trade-symbol {
+  width: 36px; height: 36px; border-radius: var(--rad);
+  background: var(--s2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .68rem; font-weight: 800; color: var(--t1);
+  flex-shrink: 0; letter-spacing: -.02em;
+}
+.recent-trade-symbol.long  { background: rgba(29,185,84,.15); color: var(--g); }
+.recent-trade-symbol.short { background: rgba(255,77,96,.12); color: var(--r); }
+.recent-trade-info { flex: 1; min-width: 0; }
+.recent-trade-name { font-size: .8rem; font-weight: 600; color: var(--t1); }
+.recent-trade-meta { font-size: .68rem; color: var(--t3); margin-top: 1px; }
+.recent-trade-pnl { font-size: .88rem; font-weight: 700; }
+.recent-trade-pnl.green { color: var(--g); }
+.recent-trade-pnl.red   { color: var(--r); }
+.recent-trades-divider { height: 1px; background: var(--bd); margin: 2px 8px; }
+
 /* ── Disclaimer ── */
 .disclaimer {
   margin-top: 14px; padding: 10px 14px;
@@ -769,6 +832,7 @@ body:not(.dark) .daily-goal-bar { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
   .new-trade-label { display: none; }
   .header { padding: 0 14px; gap: 8px; }
   .page-content { padding: 14px 12px; }
+  .dashboard-bottom-row { grid-template-columns: 1fr; }
 
   .cal-wrap { padding: 10px 6px; }
   .cal-grid { gap: 2px; }
