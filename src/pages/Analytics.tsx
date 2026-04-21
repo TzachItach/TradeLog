@@ -203,7 +203,7 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
   }, [trades, lang]);
 
   useCanvas(ref, (ctx, W, H) => {
-    const pL = 64, pR = 16, pT = 32, pB = 42, cW = W - pL - pR, cH = H - pT - pB;
+    const pL = 64, pR = 16, pT = 32, pB = 56, cW = W - pL - pR, cH = H - pT - pB;
     const vals = byDay.map((d) => d.pnl);
     const maxAbs = Math.max(Math.max(...vals.map(Math.abs)), 100);
     const zeroY = pT + cH / 2;
@@ -220,7 +220,7 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
       }
     });
 
-    // Abbreviated format: $672 or $2.1k — keeps labels narrow
+    // Abbreviated: $672 or $2.1k
     const fmtShort = (v: number) => {
       const abs = Math.abs(v);
       const s = abs >= 1000 ? `$${(abs / 1000).toFixed(1)}k` : `$${Math.round(abs)}`;
@@ -240,24 +240,16 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
       ctx.roundRect(x - bW/2, bY, bW, barH, d.pnl >= 0 ? [4,4,0,0] : [0,0,4,4]);
       ctx.fill();
 
-      // Always draw label outside the bar — above positive, below negative
-      if (d.count > 0) {
-        ctx.font = 'bold 9px system-ui'; ctx.textAlign = 'center';
-        ctx.fillStyle = col;
-        if (d.pnl >= 0) {
-          const labelY = Math.max(bY - 4, pT + 11);
-          ctx.fillText(fmtShort(d.pnl), x, labelY);
-        } else {
-          const labelY = Math.min(bY + barH + 11, pT + cH - 4);
-          ctx.fillText(fmtShort(d.pnl), x, labelY);
-        }
-      }
-
+      // Day name
       ctx.fillStyle = c.text; ctx.font = '11px system-ui'; ctx.textAlign = 'center';
       ctx.fillText(d.label, x, H - pB + 14);
+
+      // P&L value below day name — colored, no overlap with bars
       if (d.count > 0) {
-        ctx.fillStyle = c.grid; ctx.font = '9px system-ui';
-        ctx.fillText(`(${d.count})`, x, H - pB + 26);
+        ctx.fillStyle = col; ctx.font = 'bold 9px system-ui';
+        ctx.fillText(fmtShort(d.pnl), x, H - pB + 28);
+        ctx.fillStyle = c.text; ctx.font = '9px system-ui';
+        ctx.fillText(`(${d.count})`, x, H - pB + 41);
       }
     });
   }, [byDay, c.isDark]);
