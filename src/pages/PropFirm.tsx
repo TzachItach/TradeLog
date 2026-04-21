@@ -70,7 +70,7 @@ function AccountCard({ account, isHe }: { account: Account; isHe: boolean }) {
       </div>
 
       {/* Key numbers */}
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${hasTarget ? 4 : 3}, 1fr)`, gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 10 }}>
         {[
           { label: isHe ? 'יתרה נוכחית' : 'Balance',     value: fmt(stats.currentBalance),                                    color: 'var(--t1)' },
           { label: isHe ? 'רצפה'         : 'Floor',        value: fmt(stats.trailingFloor),                                     color: 'var(--r)'  },
@@ -90,11 +90,11 @@ function AccountCard({ account, isHe }: { account: Account; isHe: boolean }) {
       {/* Drawdown meter */}
       {hasDD && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '2px 8px' }}>
             <span style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--t1)' }}>
               {isHe ? 'Drawdown נותר' : 'Drawdown Remaining'}
             </span>
-            <span style={{ fontSize: '.76rem', color: stats.drawdownPct >= 80 ? 'var(--r)' : 'var(--t3)' }}>
+            <span style={{ fontSize: '.74rem', color: stats.drawdownPct >= 80 ? 'var(--r)' : 'var(--t3)' }}>
               {fmt(stats.drawdownRemaining)} / {fmt(account.prop_max_drawdown!)}
               &nbsp;·&nbsp;{(100 - stats.drawdownPct).toFixed(0)}% {isHe ? 'נשאר' : 'left'}
             </span>
@@ -102,7 +102,7 @@ function AccountCard({ account, isHe }: { account: Account; isHe: boolean }) {
           <MeterBar pct={stats.drawdownPct} color={stats.drawdownPct >= 80 ? 'var(--r)' : stats.drawdownPct >= 50 ? 'var(--o)' : 'var(--b)'} />
           {account.prop_drawdown_type !== 'static' && (
             <div style={{ fontSize: '.68rem', color: 'var(--t3)', marginTop: 4 }}>
-              {isHe ? `Peak: ${fmt(stats.highWaterMark)}` : `Peak: ${fmt(stats.highWaterMark)}`}
+              Peak: {fmt(stats.highWaterMark)}
             </div>
           )}
         </div>
@@ -111,11 +111,11 @@ function AccountCard({ account, isHe }: { account: Account; isHe: boolean }) {
       {/* Daily limit meter */}
       {hasDailyLim && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '2px 8px' }}>
             <span style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--t1)' }}>
               {isHe ? 'גבול הפסד יומי' : 'Daily Loss Limit'}
             </span>
-            <span style={{ fontSize: '.76rem', color: stats.dailyLimitPct >= 80 ? 'var(--r)' : 'var(--t3)' }}>
+            <span style={{ fontSize: '.74rem', color: stats.dailyLimitPct >= 80 ? 'var(--r)' : 'var(--t3)' }}>
               {fmt(stats.dailyLimitRemaining)} {isHe ? 'נשאר' : 'left'} / {fmt(account.prop_daily_limit!)}
             </span>
           </div>
@@ -126,11 +126,11 @@ function AccountCard({ account, isHe }: { account: Account; isHe: boolean }) {
       {/* Profit target meter */}
       {hasTarget && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '2px 8px' }}>
             <span style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--t1)' }}>
               {isHe ? 'יעד רווח' : 'Profit Target'}
             </span>
-            <span style={{ fontSize: '.76rem', color: stats.profitPct >= 100 ? 'var(--g)' : 'var(--t3)' }}>
+            <span style={{ fontSize: '.74rem', color: stats.profitPct >= 100 ? 'var(--g)' : 'var(--t3)' }}>
               {fmt(stats.profitPnL)} / {fmt(account.prop_profit_target!)}
               &nbsp;·&nbsp;{stats.profitPct.toFixed(0)}%
             </span>

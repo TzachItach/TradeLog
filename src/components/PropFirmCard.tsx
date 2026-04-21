@@ -131,11 +131,11 @@ function SingleAccountCard({ account, isHe }: { account: Account; isHe: boolean 
       {/* Drawdown meter */}
       {(account.prop_max_drawdown ?? 0) > 0 && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2px 8px', marginBottom: 2 }}>
             <span style={{ fontSize: '.74rem', color: 'var(--t2)', fontWeight: 600 }}>
               {isHe ? 'Drawdown נותר' : 'Drawdown Remaining'}
             </span>
-            <span style={{ fontSize: '.74rem', color: stats.drawdownPct >= 80 ? 'var(--r)' : 'var(--t3)' }}>
+            <span style={{ fontSize: '.72rem', color: stats.drawdownPct >= 80 ? 'var(--r)' : 'var(--t3)' }}>
               {fmt(stats.drawdownRemaining)} / {fmt(account.prop_max_drawdown!)}
               {' '}({(100 - stats.drawdownPct).toFixed(0)}% {isHe ? 'נשאר' : 'left'})
             </span>
@@ -143,7 +143,7 @@ function SingleAccountCard({ account, isHe }: { account: Account; isHe: boolean 
           <MeterBar pct={stats.drawdownPct} status={stats.status} />
           {account.prop_drawdown_type === 'trailing' && (
             <div style={{ fontSize: '.68rem', color: 'var(--t3)', marginTop: 3 }}>
-              {isHe ? `Peak: ${fmt(stats.highWaterMark)}` : `Peak: ${fmt(stats.highWaterMark)}`}
+              Peak: {fmt(stats.highWaterMark)}
             </div>
           )}
         </div>
@@ -152,11 +152,11 @@ function SingleAccountCard({ account, isHe }: { account: Account; isHe: boolean 
       {/* Daily limit meter */}
       {hasDailyLim && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2px 8px', marginBottom: 2 }}>
             <span style={{ fontSize: '.74rem', color: 'var(--t2)', fontWeight: 600 }}>
               {isHe ? 'גבול הפסד יומי' : 'Daily Loss Limit'}
             </span>
-            <span style={{ fontSize: '.74rem', color: stats.dailyLimitPct >= 80 ? 'var(--r)' : 'var(--t3)' }}>
+            <span style={{ fontSize: '.72rem', color: stats.dailyLimitPct >= 80 ? 'var(--r)' : 'var(--t3)' }}>
               {fmt(stats.dailyLimitRemaining)} {isHe ? 'נשאר' : 'left'} / {fmt(account.prop_daily_limit!)}
             </span>
           </div>
@@ -167,11 +167,11 @@ function SingleAccountCard({ account, isHe }: { account: Account; isHe: boolean 
       {/* Profit target meter (challenge) */}
       {hasTarget && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2px 8px', marginBottom: 2 }}>
             <span style={{ fontSize: '.74rem', color: 'var(--t2)', fontWeight: 600 }}>
               {isHe ? 'יעד רווח' : 'Profit Target'}
             </span>
-            <span style={{ fontSize: '.74rem', color: stats.profitPct >= 100 ? 'var(--g)' : 'var(--t3)' }}>
+            <span style={{ fontSize: '.72rem', color: stats.profitPct >= 100 ? 'var(--g)' : 'var(--t3)' }}>
               {fmt(stats.profitPnL)} / {fmt(account.prop_profit_target!)}
               {' '}({stats.profitPct.toFixed(0)}%)
             </span>
