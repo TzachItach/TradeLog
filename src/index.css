@@ -871,14 +871,7 @@ body:not(.dark) .daily-goal-bar { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
 
 /* ── Negishot accessibility widget — push above bottom nav on mobile ── */
 @media (max-width: 768px) {
-  /* Negishot renders a fixed button — lift it above the 60px bottom nav */
-  #ngs_widget_btn,
-  #ngs-widget-btn,
-  #ngsWidget,
-  #ngs_widget,
-  .ngs-widget,
-  [id^="ngs_"],
-  [id^="NGS_"] {
+  #negishot-widget {
     bottom: 70px !important;
   }
 }
