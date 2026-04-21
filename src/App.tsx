@@ -19,18 +19,18 @@ import Landing from './pages/Landing';
 function SplashScreen() {
   return (
     <div style={{
-      minHeight: '100vh', background: '#f5f5f7',
+      minHeight: '100vh', background: '#121212',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      flexDirection: 'column', gap: 14,
+      flexDirection: 'column', gap: 16,
     }}>
-      <div style={{ width: 44, height: 44, borderRadius: 10, background: '#0071e3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round">
+      <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#1DB954', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.8" strokeLinecap="round">
           <polyline points="3,17 9,11 13,15 21,6" />
         </svg>
       </div>
-      <div style={{ color: '#1d1d1f', fontSize: '.9rem', fontWeight: 600, fontFamily: '-apple-system, Helvetica, sans-serif', letterSpacing: '-0.02em' }}>TradeLog</div>
+      <div style={{ color: '#FFFFFF', fontSize: '1rem', fontWeight: 700, fontFamily: 'system-ui, -apple-system, Helvetica, sans-serif', letterSpacing: '-0.03em' }}>TradeLog</div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      <div style={{ width: 18, height: 18, border: '2px solid rgba(0,0,0,.10)', borderTopColor: '#0071e3', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ width: 20, height: 20, border: '2px solid rgba(255,255,255,.10)', borderTopColor: '#1DB954', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>
   );
 }

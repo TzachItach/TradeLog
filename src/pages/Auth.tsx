@@ -39,8 +39,8 @@ export default function Auth() {
 
       <div className="auth-card" dir={lang === 'he' ? 'rtl' : 'ltr'}>
         <div className="auth-logo">
-          <div style={{ width: 48, height: 48, background: 'var(--b)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round">
+          <div style={{ width: 52, height: 52, background: '#1DB954', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.8" strokeLinecap="round">
               <polyline points="3,17 9,11 13,15 21,6" />
             </svg>
           </div>

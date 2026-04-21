@@ -57,8 +57,8 @@ function exportPDF(trades: ReturnType<typeof useStore.getState>['trades'], strat
     </style>
   </head><body>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-      <div style="width:36px;height:36px;background:#0071e3;border-radius:8px;display:flex;align-items:center;justify-content:center">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"><polyline points="3,17 9,11 13,15 21,6"/></svg>
+      <div style="width:36px;height:36px;background:#1DB954;border-radius:50%;display:flex;align-items:center;justify-content:center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.8" stroke-linecap="round"><polyline points="3,17 9,11 13,15 21,6"/></svg>
       </div>
       <h1>TradeLog</h1>
     </div>
@@ -73,7 +73,7 @@ function exportPDF(trades: ReturnType<typeof useStore.getState>['trades'], strat
       <tbody>${rows}</tbody>
     </table>
     <div class="disc">⚠ ${lang === 'he' ? 'המידע המוצג אינו ייעוץ השקעות. מסחר בניירות ערך כרוך בסיכון אובדן הון.' : 'Information displayed is not investment advice. Trading involves significant risk of capital loss.'}</div>
-    <div style="margin-top:16px;text-align:center"><button onclick="window.print()" style="background:#0071e3;color:#fff;border:none;padding:10px 24px;border-radius:980px;cursor:pointer;font-size:.9rem">🖨 ${lang === 'he' ? 'הדפס / שמור PDF' : 'Print / Save as PDF'}</button></div>
+    <div style="margin-top:16px;text-align:center"><button onclick="window.print()" style="background:#1DB954;color:#fff;border:none;padding:10px 24px;border-radius:980px;cursor:pointer;font-size:.9rem">🖨 ${lang === 'he' ? 'הדפס / שמור PDF' : 'Print / Save as PDF'}</button></div>
   </body></html>`);
   win.document.close();
 }

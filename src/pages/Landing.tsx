@@ -3,12 +3,12 @@ import { useStore } from '../store';
 import './landing.css';
 
 const calColors = [
-  '#30d15833','#30d15855','#ff453a33','#30d15822','#30d15877',
-  '#1c1c1e',  '#30d15844','#ff453a44','#30d15833','#1c1c1e',
-  '#30d15866','#1c1c1e',  '#30d15822','#30d15855','#ff453a22',
-  '#1c1c1e',  '#30d15844','#30d15833','#1c1c1e',  '#30d15877',
-  '#ff453a33','#30d15822','#30d15855','#1c1c1e',  '#30d15844',
-  '#30d15833','#1c1c1e',  '#ff453a55',
+  'rgba(29,185,84,.20)','rgba(29,185,84,.40)','rgba(233,20,41,.20)','rgba(29,185,84,.15)','rgba(29,185,84,.55)',
+  '#282828',            'rgba(29,185,84,.35)','rgba(233,20,41,.30)','rgba(29,185,84,.20)','#282828',
+  'rgba(29,185,84,.50)','#282828',            'rgba(29,185,84,.15)','rgba(29,185,84,.40)','rgba(233,20,41,.15)',
+  '#282828',            'rgba(29,185,84,.35)','rgba(29,185,84,.20)','#282828',            'rgba(29,185,84,.60)',
+  'rgba(233,20,41,.25)','rgba(29,185,84,.15)','rgba(29,185,84,.40)','#282828',            'rgba(29,185,84,.35)',
+  'rgba(29,185,84,.20)','#282828',            'rgba(233,20,41,.40)',
 ];
 
 const equityPoints = '0,110 40,95 80,100 120,78 160,82 200,60 240,65 280,42 320,48 360,28 400,15';
@@ -28,12 +28,12 @@ export default function Landing() {
 
   return (
     <div className="lp" dir="rtl">
-      {/* Nav — stays LTR so logo is always on the left */}
+      {/* Nav */}
       <header className="lp-nav" dir="ltr">
         <div className="lp-nav-inner">
           <a className="lp-logo" href="/">
             <div className="lp-logo-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.8" strokeLinecap="round">
                 <polyline points="3,17 9,11 13,15 21,6" />
               </svg>
             </div>
@@ -41,14 +41,14 @@ export default function Landing() {
           </a>
           <nav>
             <ul className="lp-nav-links">
-              <li><a href="#features">פיצ׳רים</a></li>
-              <li><a href="#pricing">מחירים</a></li>
-              <li><a href="#advanced">יכולות</a></li>
+              <li><a href="#features">Features</a></li>
+              <li><a href="#pricing">Pricing</a></li>
+              <li><a href="#advanced">Tools</a></li>
             </ul>
           </nav>
           <div className="lp-nav-actions">
-            <button className="lp-btn-ghost" onClick={goAuth}>התחברות</button>
-            <button className="lp-btn-primary" onClick={goAuth}>התחל חינם</button>
+            <button className="lp-btn-ghost" onClick={goAuth}>Sign in</button>
+            <button className="lp-btn-primary" onClick={goAuth}>Start free</button>
           </div>
         </div>
       </header>
@@ -59,63 +59,62 @@ export default function Landing() {
           <div className="lp-hero-inner">
             <div className="lp-badge">
               <div className="lp-badge-dot" />
-              <span>14 יום ניסיון חינם · ללא כרטיס אשראי</span>
+              <span>14-day free trial · No credit card required</span>
             </div>
             <h1>
-              מסחר כמו מקצוען,<br />
-              <span className="accent">ניתוח כמו מכונה</span>
+              Trade like a pro,<br />
+              <span className="accent">analyze like a machine</span>
             </h1>
             <p>
-              יומן המסחר המתקדם ביותר לסוחרי חוזים עתידיים.
-              עקוב אחרי כל עסקה, שלוט בפסיכולוגיה שלך, וחדד את היתרון שלך.
+              The most advanced trading journal for futures traders.
+              Track every trade, master your psychology, and sharpen your edge.
             </p>
             <div className="lp-hero-ctas">
               <button className="lp-btn-hero-primary" onClick={goAuth}>
-                התחל ניסיון חינם — 14 יום
+                Start free trial — 14 days
               </button>
               <button className="lp-btn-hero-secondary" onClick={handleDemo}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <circle cx="12" cy="12" r="10"/>
                   <polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none"/>
                 </svg>
-                צפה בהדגמה
+                Live demo
               </button>
             </div>
 
             {/* Dashboard Mockup */}
             <div className="lp-mockup" dir="ltr">
-              {/* Browser chrome */}
               <div className="lp-mockup-bar">
                 <div className="lp-mockup-dot" style={{ background: '#ff5f57' }} />
                 <div className="lp-mockup-dot" style={{ background: '#febc2e' }} />
                 <div className="lp-mockup-dot" style={{ background: '#28c840' }} />
-                <div style={{ flex: 1, height: 18, background: '#2c2c2e', borderRadius: 4, marginInlineStart: 10, maxWidth: 220 }} />
+                <div style={{ flex: 1, height: 16, background: '#282828', borderRadius: 4, marginInlineStart: 10, maxWidth: 200 }} />
               </div>
 
-              {/* App shell */}
               <div className="lp-mockup-app">
                 {/* Sidebar */}
                 <div className="lp-mockup-sidebar">
                   <div className="lp-mockup-logo">
-                    <div style={{ width: 20, height: 20, background: '#0071e3', borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round">
+                    <div style={{ width: 22, height: 22, background: '#1DB954', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round">
                         <polyline points="3,17 9,11 13,15 21,6" />
                       </svg>
                     </div>
-                    <span style={{ fontSize: '.65rem', fontWeight: 600, color: '#f5f5f7' }}>TradeLog</span>
+                    <span style={{ fontSize: '.65rem', fontWeight: 700, color: '#FFFFFF' }}>TradeLog</span>
                   </div>
                   {[
-                    { label: 'Dashboard', active: true },
-                    { label: 'עסקאות', active: false },
-                    { label: 'Analytics', active: false },
-                    { label: 'Reports', active: false },
-                    { label: 'Prop Firm', active: false },
+                    { label: 'Calendar', active: true },
+                    { label: 'Trades',   active: false },
+                    { label: 'Analytics',active: false },
+                    { label: 'Reports',  active: false },
+                    { label: 'Prop Firm',active: false },
                   ].map(item => (
                     <div key={item.label} style={{
-                      fontSize: '.58rem', padding: '5px 8px', borderRadius: 4,
-                      color: item.active ? '#2997ff' : '#86868b',
-                      background: item.active ? 'rgba(0,113,227,0.12)' : 'none',
-                      borderInlineStart: item.active ? '2px solid #0071e3' : '2px solid transparent',
+                      fontSize: '.58rem', padding: '6px 8px', borderRadius: 4,
+                      color: item.active ? '#FFFFFF' : 'rgba(255,255,255,.45)',
+                      background: item.active ? 'rgba(255,255,255,.10)' : 'none',
+                      borderInlineStart: item.active ? '3px solid #1DB954' : '3px solid transparent',
+                      fontWeight: item.active ? 600 : 400,
                     }}>
                       {item.label}
                     </div>
@@ -123,13 +122,13 @@ export default function Landing() {
                   {/* Mini KPIs */}
                   <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {[
-                      { label: "P&L היום", val: '+₪1,840', color: '#30d158' },
-                      { label: 'Win Rate',  val: '68%',     color: '#30d158' },
-                      { label: 'Max DD',    val: '-4.2%',   color: '#ff453a' },
+                      { label: "Today P&L", val: '+$1,840', color: '#1DB954' },
+                      { label: 'Win Rate',  val: '68%',     color: '#1DB954' },
+                      { label: 'Max DD',    val: '-4.2%',   color: '#ff4d60' },
                     ].map(k => (
                       <div key={k.label}>
-                        <div style={{ fontSize: '.48rem', textTransform: 'uppercase', letterSpacing: '.06em', color: '#86868b' }}>{k.label}</div>
-                        <div style={{ fontSize: '.75rem', fontWeight: 600, color: k.color, fontFamily: 'monospace' }}>{k.val}</div>
+                        <div style={{ fontSize: '.46rem', textTransform: 'uppercase', letterSpacing: '.07em', color: 'rgba(255,255,255,.35)' }}>{k.label}</div>
+                        <div style={{ fontSize: '.75rem', fontWeight: 700, color: k.color, fontFamily: 'monospace' }}>{k.val}</div>
                       </div>
                     ))}
                   </div>
@@ -137,41 +136,40 @@ export default function Landing() {
 
                 {/* Main content */}
                 <div className="lp-mockup-main">
-                  {/* Top KPI strip */}
+                  {/* KPI strip */}
                   <div className="lp-mockup-kpi-row">
                     {[
-                      { label: 'רווח כולל', val: '+₪18,420', color: '#30d158' },
-                      { label: 'Win Rate',   val: '68%',      color: '#30d158' },
-                      { label: 'Profit Factor', val: '2.84',  color: '#30d158' },
-                      { label: 'עסקאות',     val: '142',      color: '#f5f5f7' },
+                      { label: 'Total P&L',     val: '+$18,420', color: '#1DB954' },
+                      { label: 'Win Rate',       val: '68%',      color: '#1DB954' },
+                      { label: 'Profit Factor',  val: '2.84',     color: '#1DB954' },
+                      { label: 'Trades',         val: '142',      color: '#FFFFFF' },
                     ].map(k => (
                       <div key={k.label} className="lp-mockup-kpi">
-                        <div style={{ fontSize: '.48rem', textTransform: 'uppercase', letterSpacing: '.06em', color: '#86868b', marginBottom: 3 }}>{k.label}</div>
-                        <div style={{ fontSize: '.82rem', fontWeight: 600, color: k.color, fontFamily: 'monospace' }}>{k.val}</div>
+                        <div style={{ fontSize: '.46rem', textTransform: 'uppercase', letterSpacing: '.07em', color: 'rgba(255,255,255,.40)', marginBottom: 3 }}>{k.label}</div>
+                        <div style={{ fontSize: '.82rem', fontWeight: 700, color: k.color, fontFamily: 'monospace' }}>{k.val}</div>
                       </div>
                     ))}
                   </div>
 
                   {/* Charts row */}
                   <div className="lp-mockup-charts">
-                    {/* Equity Curve */}
                     <div className="lp-mockup-chart-panel">
-                      <div style={{ fontSize: '.52rem', color: '#86868b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.06em' }}>Equity Curve</div>
-                      <svg viewBox="0 0 400 130" preserveAspectRatio="none" style={{ width: '100%', height: 80 }}>
+                      <div style={{ fontSize: '.50rem', color: 'rgba(255,255,255,.40)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.07em' }}>Equity Curve</div>
+                      <svg viewBox="0 0 400 130" preserveAspectRatio="none" style={{ width: '100%', height: 72 }}>
                         <defs>
                           <linearGradient id="eq-fill" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#30d158" stopOpacity="0.25" />
-                            <stop offset="100%" stopColor="#30d158" stopOpacity="0" />
+                            <stop offset="0%" stopColor="#1DB954" stopOpacity="0.28" />
+                            <stop offset="100%" stopColor="#1DB954" stopOpacity="0" />
                           </linearGradient>
                         </defs>
                         <polygon points={equityFill} fill="url(#eq-fill)" />
-                        <polyline points={equityPoints} fill="none" stroke="#30d158" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <polyline points={equityPoints} fill="none" stroke="#1DB954" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                        <circle cx="400" cy="15" r="4" fill="#1DB954"/>
                       </svg>
                     </div>
 
-                    {/* Calendar heatmap */}
                     <div className="lp-mockup-chart-panel">
-                      <div style={{ fontSize: '.52rem', color: '#86868b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.06em' }}>לוח שנה</div>
+                      <div style={{ fontSize: '.50rem', color: 'rgba(255,255,255,.40)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.07em' }}>Calendar</div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
                         {calColors.map((c, i) => (
                           <div key={i} style={{ aspectRatio: '1', borderRadius: 2, background: c }} />
@@ -183,14 +181,14 @@ export default function Landing() {
                   {/* Trade rows */}
                   <div className="lp-mockup-trades">
                     {[
-                      { sym: 'NQ', dir: 'Long', pnl: '+₪920', pos: true },
-                      { sym: 'ES', dir: 'Short', pnl: '-₪240', pos: false },
-                      { sym: 'MNQ', dir: 'Long', pnl: '+₪460', pos: true },
+                      { sym: 'NQ',  dir: 'Long',  pnl: '+$920', pos: true  },
+                      { sym: 'ES',  dir: 'Short', pnl: '-$240', pos: false },
+                      { sym: 'MNQ', dir: 'Long',  pnl: '+$460', pos: true  },
                     ].map(t => (
                       <div key={t.sym + t.pnl} className="lp-mockup-trade-row">
-                        <span style={{ fontSize: '.55rem', fontWeight: 600, color: '#f5f5f7', fontFamily: 'monospace', minWidth: 28 }}>{t.sym}</span>
-                        <span style={{ fontSize: '.5rem', color: t.pos ? '#30d158' : '#ff453a', background: t.pos ? 'rgba(48,209,88,0.10)' : 'rgba(255,69,58,0.10)', padding: '1px 5px', borderRadius: 3 }}>{t.dir}</span>
-                        <span style={{ fontSize: '.55rem', fontWeight: 600, color: t.pos ? '#30d158' : '#ff453a', fontFamily: 'monospace', marginInlineStart: 'auto' }}>{t.pnl}</span>
+                        <span style={{ fontSize: '.56rem', fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace', minWidth: 28 }}>{t.sym}</span>
+                        <span style={{ fontSize: '.50rem', color: t.pos ? '#1DB954' : '#ff4d60', background: t.pos ? 'rgba(29,185,84,.12)' : 'rgba(255,77,96,.12)', padding: '1px 5px', borderRadius: 999 }}>{t.dir}</span>
+                        <span style={{ fontSize: '.56rem', fontWeight: 700, color: t.pos ? '#1DB954' : '#ff4d60', fontFamily: 'monospace', marginInlineStart: 'auto' }}>{t.pnl}</span>
                       </div>
                     ))}
                   </div>
@@ -203,7 +201,7 @@ export default function Landing() {
         {/* Social Proof */}
         <section className="lp-social">
           <div className="lp-social-inner">
-            <span className="lp-social-label">תואם לייבוא מ</span>
+            <span className="lp-social-label">Imports from</span>
             <div className="lp-brokers">
               <div className="lp-broker">Tradovate</div>
               <div className="lp-broker">TopstepX</div>
@@ -213,115 +211,115 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Features Bento */}
+        {/* Features */}
         <section className="lp-features" id="features">
           <div className="lp-features-inner">
-          <h2>כלים שעובדים בשבילך</h2>
-          <p className="sub">כל מה שצריך כדי לנתח, לשפר ולשלוט בביצועי המסחר שלך.</p>
-          <div className="lp-features-grid">
-            <div className="lp-card">
-              <div className="lp-card-icon">📥</div>
-              <h3>ייבוא עסקאות אוטומטי</h3>
-              <p>
-                סנכרן את נתוני הביצוע שלך מ-Tradovate ו-TopstepX בלחיצה אחת.
-                ללא הזנה ידנית, ללא טעויות.
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {[85,60,92,45,78].map((w, i) => (
-                  <div key={i} style={{ height: 6, borderRadius: 3, background: `rgba(0,113,227,${w / 120})`, width: `${w}%` }} />
-                ))}
+            <h2>Tools that work for you</h2>
+            <p className="sub">Everything you need to analyze, improve, and take control of your trading performance.</p>
+            <div className="lp-features-grid">
+              <div className="lp-card">
+                <div className="lp-card-icon">📥</div>
+                <h3>Automated Trade Import</h3>
+                <p>
+                  Sync your execution data from Tradovate and TopstepX in one click.
+                  No manual entry, no errors.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                  {[85,60,92,45,78].map((w, i) => (
+                    <div key={i} style={{ height: 5, borderRadius: 3, background: `rgba(29,185,84,${w / 130})`, width: `${w}%` }} />
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div className="lp-card featured">
-              <div className="lp-card-icon">📊</div>
-              <h3>אנליטיקס מקצועי</h3>
-              <p>
-                8 גרפים מתקדמים: Equity Curve, Drawdown, P&amp;L לפי יום וסמל,
-                Heatmap, פיזור R:R ועוד — בזמן אמת.
-              </p>
-              <div className="lp-metrics">
-                <div className="lp-metric">
-                  <div className="lp-metric-label">Profit Factor</div>
-                  <div className="lp-metric-val">2.84</div>
-                </div>
-                <div className="lp-metric">
-                  <div className="lp-metric-label">Win Rate</div>
-                  <div className="lp-metric-val">68%</div>
-                </div>
-                <div className="lp-metric">
-                  <div className="lp-metric-label">Avg R:R</div>
-                  <div className="lp-metric-val">1.9</div>
-                </div>
-                <div className="lp-metric">
-                  <div className="lp-metric-label">Max DD</div>
-                  <div className="lp-metric-val" style={{ color: '#d70015' }}>-4.2%</div>
+              <div className="lp-card featured">
+                <div className="lp-card-icon">📊</div>
+                <h3>Professional Analytics</h3>
+                <p>
+                  8 advanced charts: Equity Curve, Drawdown, P&amp;L by day &amp; symbol,
+                  Heatmap, R:R scatter and more — in real time.
+                </p>
+                <div className="lp-metrics">
+                  <div className="lp-metric">
+                    <div className="lp-metric-label">Profit Factor</div>
+                    <div className="lp-metric-val">2.84</div>
+                  </div>
+                  <div className="lp-metric">
+                    <div className="lp-metric-label">Win Rate</div>
+                    <div className="lp-metric-val">68%</div>
+                  </div>
+                  <div className="lp-metric">
+                    <div className="lp-metric-label">Avg R:R</div>
+                    <div className="lp-metric-val">1.9</div>
+                  </div>
+                  <div className="lp-metric">
+                    <div className="lp-metric-label">Max DD</div>
+                    <div className="lp-metric-val" style={{ color: '#ff4d60' }}>-4.2%</div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="lp-card">
-              <div className="lp-card-icon">📅</div>
-              <h3>לוח שנה חזותי</h3>
-              <p>
-                זהה דפוסים בביצועים שלך. ראה באילו ימים אתה מצטיין
-                ואילו סשנים כדאי להימנע מהם.
-              </p>
-              <div className="lp-mini-cal">
-                {calColors.map((c, i) => (
-                  <div key={i} className="lp-mini-day" style={{ background: c }} />
-                ))}
+              <div className="lp-card">
+                <div className="lp-card-icon">📅</div>
+                <h3>Visual Trading Calendar</h3>
+                <p>
+                  Identify patterns in your performance. See which days you excel
+                  and which sessions to avoid.
+                </p>
+                <div className="lp-mini-cal">
+                  {calColors.map((c, i) => (
+                    <div key={i} className="lp-mini-day" style={{ background: c }} />
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
           </div>
         </section>
 
         {/* Advanced */}
         <section className="lp-advanced" id="advanced">
           <div className="lp-advanced-inner">
-            <h2>כלים ברמה מקצועית</h2>
+            <h2>Pro-level tools</h2>
             <p className="sub">
-              נבנה לסוחרים רציניים שצריכים כלי דיוק לניהול סיכון ולמעבר הערכות Prop Firm.
+              Built for serious traders who need precision tools for risk management and Prop Firm evaluations.
             </p>
             <div className="lp-adv-grid">
               <div className="lp-adv-item">
                 <div className="lp-adv-icon">🛡️</div>
                 <div>
-                  <h4>ניהול סיכון מתקדם</h4>
+                  <h4>Advanced Risk Management</h4>
                   <p>
-                    מחשבון R:R מדויק לכל חוזה עתידי. מעקב אחר Max Drawdown,
-                    Daily Loss וחשיפה בזמן אמת.
+                    Precise R:R calculator for every futures contract. Real-time tracking of
+                    Max Drawdown, Daily Loss, and exposure.
                   </p>
                 </div>
               </div>
               <div className="lp-adv-item">
                 <div className="lp-adv-icon">🏢</div>
                 <div>
-                  <h4>מעקב Prop Firm</h4>
+                  <h4>Prop Firm Tracker</h4>
                   <p>
-                    מעקב ייעודי עבור Topstep, Apex ו-MyFundedFutures.
-                    ניטור Trailing Drawdown בדיוק מלא.
+                    Dedicated tracking for Topstep, Apex, and MyFundedFutures.
+                    Trailing Drawdown monitoring with full precision.
                   </p>
                 </div>
               </div>
               <div className="lp-adv-item">
                 <div className="lp-adv-icon">📋</div>
                 <div>
-                  <h4>50+ חוזים עתידיים</h4>
+                  <h4>50+ Futures Contracts</h4>
                   <p>
-                    NQ, ES, CL, GC, SI ועוד — עם Point Value מדויק לכל סמל
-                    לחישוב R:R אוטומטי.
+                    NQ, ES, CL, GC, SI and more — with exact Point Values per symbol
+                    for automatic R:R calculations.
                   </p>
                 </div>
               </div>
               <div className="lp-adv-item">
                 <div className="lp-adv-icon">📤</div>
                 <div>
-                  <h4>ייצוא PDF ו-CSV</h4>
+                  <h4>PDF &amp; CSV Export</h4>
                   <p>
-                    ייצא דוחות מקצועיים לשיתוף עם מנטור, מוסד מימון
-                    או לארכיון אישי.
+                    Export professional reports for sharing with a mentor, funding institution,
+                    or personal archive.
                   </p>
                 </div>
               </div>
@@ -331,61 +329,70 @@ export default function Landing() {
 
         {/* Pricing */}
         <section className="lp-pricing" id="pricing">
-          <div className="lp-pricing-head">
-            <h2>מחירים שקופים</h2>
-            <p>14 יום ניסיון חינם לכל המשתמשים החדשים. ללא כרטיס אשראי.</p>
-          </div>
-          <div className="lp-plans">
-            <div className="lp-plan">
-              <div className="lp-plan-label">חודשי</div>
-              <div className="lp-plan-price">
-                <span className="amount">₪69</span>
-                <span className="period">/ חודש</span>
+          <div className="lp-pricing-inner">
+            <h2>Simple, transparent pricing</h2>
+            <p className="sub">14-day free trial for all new users. No credit card required.</p>
+            <div className="lp-pricing-grid">
+              <div className="lp-plan">
+                <div className="lp-plan-name">Monthly</div>
+                <div className="lp-plan-price">$19<span>/mo</span></div>
+                <div className="lp-plan-sub">Billed monthly</div>
+                <ul className="lp-plan-features">
+                  <li>Unlimited trade imports</li>
+                  <li>All 8 analytics charts</li>
+                  <li>Visual trading calendar</li>
+                  <li>PDF &amp; CSV export</li>
+                </ul>
+                <button className="lp-plan-btn" onClick={goAuth}>Start free trial</button>
               </div>
-              <div className="lp-plan-trial">14 יום ניסיון חינם</div>
-              <ul>
-                <li><span className="check">✓</span> ייבוא עסקאות ללא הגבלה</li>
-                <li><span className="check">✓</span> כל 8 גרפי האנליטיקס</li>
-                <li><span className="check">✓</span> לוח שנה חזותי</li>
-                <li><span className="check">✓</span> ייצוא PDF ו-CSV</li>
-              </ul>
-              <button className="lp-btn-plan secondary" onClick={goAuth}>
-                התחל ניסיון חינם
-              </button>
-            </div>
 
-            <div className="lp-plan best">
-              <div className="lp-plan-badge">הכי כדאי</div>
-              <div className="lp-plan-label">שנתי — חסוך 29%</div>
-              <div className="lp-plan-price">
-                <span className="amount">₪590</span>
-                <span className="period">/ שנה</span>
+              <div className="lp-plan popular">
+                <div className="lp-plan-badge">Most popular</div>
+                <div className="lp-plan-name">Annual — save 29%</div>
+                <div className="lp-plan-price">$159<span>/yr</span></div>
+                <div className="lp-plan-sub">About $13/month · 14-day free trial</div>
+                <ul className="lp-plan-features">
+                  <li>Everything in Monthly</li>
+                  <li>Advanced Prop Firm tracker</li>
+                  <li>Early access to new features</li>
+                  <li>Priority support</li>
+                </ul>
+                <button className="lp-plan-btn" onClick={goAuth}>Start free trial</button>
               </div>
-              <div className="lp-plan-trial">כ-₪49 לחודש · 14 יום ניסיון חינם</div>
-              <ul>
-                <li><span className="check">✓</span> הכל בחבילה החודשית</li>
-                <li><span className="check">✓</span> מעקב Prop Firm מתקדם</li>
-                <li><span className="check">✓</span> גישה מוקדמת לפיצ׳רים חדשים</li>
-                <li><span className="check">✓</span> תמיכה בעדיפות גבוהה</li>
-              </ul>
-              <button className="lp-btn-plan primary" onClick={goAuth}>
-                התחל ניסיון חינם
-              </button>
+
+              <div className="lp-plan">
+                <div className="lp-plan-name">Lifetime</div>
+                <div className="lp-plan-price">$349<span> once</span></div>
+                <div className="lp-plan-sub">One-time payment, forever access</div>
+                <ul className="lp-plan-features">
+                  <li>Everything included</li>
+                  <li>All future updates</li>
+                  <li>Highest priority support</li>
+                  <li>Founding member badge</li>
+                </ul>
+                <button className="lp-plan-btn" onClick={goAuth}>Get lifetime access</button>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Final CTA */}
+        {/* CTA */}
         <section className="lp-cta">
-          <h2>מוכן לשדרג את ביצועי המסחר שלך?</h2>
-          <p>ללא כרטיס אשראי. 14 יום לגמרי חינם. ביטול בכל עת.</p>
-          <div className="lp-cta-btns">
-            <button className="lp-btn-cta-primary" onClick={goAuth}>
-              התחל ניסיון חינם — 14 יום
-            </button>
-            <button className="lp-btn-cta-secondary" onClick={handleDemo}>
-              צפה בהדגמה חיה
-            </button>
+          <div className="lp-cta-inner">
+            <h2>Ready to level up your trading?</h2>
+            <p>No credit card. 14 days completely free. Cancel anytime.</p>
+            <div className="lp-cta-btns">
+              <button className="lp-btn-hero-primary" onClick={goAuth}>
+                Start free trial — 14 days
+              </button>
+              <button className="lp-btn-hero-secondary" onClick={handleDemo}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none"/>
+                </svg>
+                Live demo
+              </button>
+            </div>
           </div>
         </section>
       </main>
@@ -393,15 +400,20 @@ export default function Landing() {
       {/* Footer */}
       <footer className="lp-footer">
         <div className="lp-footer-inner">
-          <div className="lp-footer-brand">
-            <div className="name">TradeLog</div>
-            <div className="copy">© 2026 TradeLog. כל הזכויות שמורות.</div>
+          <div className="lp-footer-logo">
+            <div style={{ width: 28, height: 28, background: '#1DB954', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round">
+                <polyline points="3,17 9,11 13,15 21,6"/>
+              </svg>
+            </div>
+            TradeLog
           </div>
-          <div className="lp-footer-links">
-            <a href="/terms">תנאי שימוש</a>
-            <a href="/privacy">פרטיות</a>
-            <a href="/accessibility">נגישות</a>
-          </div>
+          <ul className="lp-footer-links">
+            <li><a href="/terms">Terms</a></li>
+            <li><a href="/privacy">Privacy</a></li>
+            <li><a href="/accessibility">Accessibility</a></li>
+          </ul>
+          <div className="lp-footer-copy">© {new Date().getFullYear()} TradeLog. All rights reserved.</div>
         </div>
       </footer>
     </div>

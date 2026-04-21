@@ -14,7 +14,7 @@ export function createDefaultStrategies(): Strategy[] {
     id: stratId,
     name: 'Turtle Soup',
     description: 'ICT Turtle Soup Setup',
-    color: '#0071e3',
+    color: '#1DB954',
     is_active: true,
     fields: [
       ...TURTLE_SOUP_CHECKBOXES.map((label, i) => ({
@@ -112,7 +112,7 @@ export const useStore = create<AppState>()(
       grayscale: false,
       readableFont: false,
       sidebarCollapsed: false,
-      darkMode: false,
+      darkMode: true,
       dataLoading: false,
       dailyGoalTarget: 0,
       dailyMaxLoss: 0,
@@ -276,11 +276,11 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'tradelog-storage',
-      version: 2,
+      version: 3,
       migrate: (persisted: unknown) => {
-        // v1 → v2: reset darkMode to false (light-first redesign)
+        // v1/v2 → v3: reset darkMode to true (Spotify dark-first redesign)
         const state = persisted as Record<string, unknown>;
-        return { ...state, darkMode: false };
+        return { ...state, darkMode: true };
       },
       partialize: (s) => ({
         lang: s.lang, fontSize: s.fontSize, highContrast: s.highContrast,

@@ -13,11 +13,12 @@ export default function Header() {
 
   return (
     <header className="header">
-      {/* המבורגר — מובייל בלבד */}
+      {/* Hamburger — mobile only */}
       <button
         className="btn btn-icon hamburger-btn"
         onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
         aria-label="תפריט"
+        style={{ background: 'transparent', border: '1px solid rgba(255,255,255,.15)', color: 'var(--t1)' }}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <line x1="3" y1="6" x2="21" y2="6"/>
@@ -26,24 +27,24 @@ export default function Header() {
         </svg>
       </button>
 
-      {/* לוגו — מובייל בלבד, דסקטופ מוסתר (הלוגו בסיידבר) */}
+      {/* Logo — mobile only */}
       <div
         className="header-logo"
         onClick={() => navigate('/dashboard')}
         title={T.appName}
       >
         <div style={{
-          width: 26, height: 26, borderRadius: 7, background: 'var(--b)',
+          width: 28, height: 28, borderRadius: '50%', background: 'var(--g)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
         }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.8" strokeLinecap="round">
             <polyline points="3,17 9,11 13,15 21,6" />
           </svg>
         </div>
-        <span style={{ fontWeight: 700, fontSize: '.92rem', color: 'var(--t1)' }}>{T.appName}</span>
+        <span style={{ fontWeight: 700, fontSize: '.92rem', color: 'var(--t1)', letterSpacing: '-.02em' }}>{T.appName}</span>
       </div>
 
-      {/* טאבי חשבונות */}
+      {/* Account tabs */}
       <div className="account-tabs">
         <div
           className={"account-tab" + (selectedAccount === 'all' ? ' active' : '')}
@@ -64,8 +65,7 @@ export default function Header() {
 
       <div className="header-right">
         <button
-          className="btn btn-lang btn-close"
-          style={{ fontSize: '.82rem', padding: '4px 12px', borderRadius: 16 }}
+          className="btn btn-lang"
           onClick={() => setLang(lang === 'he' ? 'en' : 'he')}
         >
           {lang === 'he' ? 'EN' : 'עב'}

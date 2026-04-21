@@ -52,7 +52,7 @@ export async function loadUserData(userId: string): Promise<{
 
   const strategies: Strategy[] = (stratRes.data ?? []).map((r) => ({
     id: r.id, user_id: r.user_id, name: r.name,
-    description: r.description ?? '', color: r.color ?? '#0071e3',
+    description: r.description ?? '', color: r.color ?? '#1DB954',
     is_active: r.is_active ?? true,
     fields: (r.strategy_fields ?? [])
       .sort((a: { sort_order: number }, b: { sort_order: number }) => a.sort_order - b.sort_order)
