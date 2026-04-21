@@ -133,35 +133,59 @@ NQ=$20, MNQ=$2, ES=$50, MES=$5, CL=$1000, GC=$100, SI=$5000...
 
 ---
 
-## עיצוב וצבעים (Design System — Stitch)
+## עיצוב וצבעים (Design System — Apple Light)
+
+### עקרון ראשי
+**Light-first**: `:root` = light palette (לבן/אפור), `body.dark` = dark override.
+- `body.classList.toggle('dark', darkMode)` — כשאין class → light (ברירת מחדל)
+- `darkMode` default ב-store: `false`
+- store `version: 2` + migrate מאפס darkMode לכל משתמש קיים
 
 ### CSS Variables (index.css)
 ```css
---b: #3fe56c     /* ירוק ראשי (שונה מ-#5b8fff כחול) */
---b2: #00c853    /* ירוק כהה */
---b-bg: rgba(63,229,108,.08)
---b-bd: rgba(63,229,108,.30)
---g: #00e0a8     /* ירוק רווח */
---r: #ff4060     /* אדום הפסד */
---o: #ffaa44     /* כתום אזהרה */
---t1/t2/t3       /* טקסט ראשי/משני/hint */
---s1/s2          /* רקעים */
---bd/bd2         /* גבולות */
+/* :root — Light (ברירת מחדל) */
+--bg:   #f5f5f7   /* רקע דף */
+--s1:   #ffffff   /* surface לבן */
+--s2:   #f5f5f7   /* surface מוגבה */
+--bd:   rgba(0,0,0,.08)
+--t1:   #1d1d1f   /* טקסט ראשי */
+--t2:   rgba(0,0,0,.80)
+--t3:   #6e6e73   /* hint */
+--g:    #1c8f3a   /* ירוק רווח (כהה לניגודיות על לבן) */
+--r:    #d70015   /* אדום הפסד */
+--b:    #0071e3   /* כחול Apple */
+--b2:   #0066cc
+--o:    #c4780a   /* כתום אזהרה */
+
+/* body.dark — Dark override */
+--bg:   #000000
+--s1:   #1c1c1e
+--s2:   #2c2c2e
+--t1:   #f5f5f7
+--g:    #30d158
+--r:    #ff453a
+--b:    #2997ff
+--o:    #ff9f0a
 ```
 
 ### btn-primary
 ```css
-background: linear-gradient(135deg, #3fe56c, #00c853);
-color: #002e0f;
+background: #0071e3;
+color: #ffffff;
 ```
 
 ### לוגו (בכל המקומות)
-- אייקון SVG: `background: var(--b)` (ירוק), `stroke="#003912"`
-- טקסט "TradeLog": `color: var(--t1)` — **לא** `var(--b)`, לא כחול, לא ירוק
-- SplashScreen ב-App.tsx: אייקון `#3fe56c`, spinner `#3fe56c`
-- Analytics canvas: `const B = '#3fe56c'`
-- PDF export logo: `background:#3fe56c`, `stroke="#003912"`
-- Default strategy color: `'#3fe56c'`
+- אייקון SVG: `background: #0071e3` (כחול Apple), `stroke="#ffffff"`
+- טקסט "TradeLog": `color: var(--t1)` — **לא** צבעוני
+- SplashScreen ב-App.tsx: `background: '#f5f5f7'`, אייקון `#0071e3`, spinner `#0071e3`
+- Analytics canvas: `const B = '#0071e3'`, `G = '#1c8f3a'`, `R = '#d70015'`
+- `isDark` detection: `document.body.classList.contains('dark')` (לא `!contains('light')`)
+
+### form inputs
+```css
+color-scheme: light;  /* native date/time pickers — light style */
+/* body.dark: color-scheme: dark */
+```
 
 ---
 
@@ -208,4 +232,4 @@ VITE_SUPABASE_ANON_KEY=...
 - השוואה שבוע/חודש ב-StatsBar (חץ ↑↓ ליד כל מספר)
 - Keyboard shortcuts (N=עסקה חדשה, Esc=סגור)
 - Onboarding wizard למשתמש חדש
-- שינוי עיצוב כללי (דוגמאות הוצגו: TraderSync Dark Pro, Bloomberg Terminal, Bento Box...)
+- ~~שינוי עיצוב כללי~~ — **הושלם**: עבר ל-Apple Light Design System (white surfaces, #0071e3 accent)
