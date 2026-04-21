@@ -749,7 +749,6 @@ body:not(.dark) .daily-goal-bar { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
   .header-logo {
     position: absolute !important;
     left: 50%; transform: translateX(-50%);
-    pointer-events: none;
   }
 
   /* Hide + button in header on mobile — bottom nav has it */
