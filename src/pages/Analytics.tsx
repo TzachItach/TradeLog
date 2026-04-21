@@ -203,12 +203,13 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
   }, [trades, lang]);
 
   useCanvas(ref, (ctx, W, H) => {
-    const pL = 64, pR = 16, pT = 32, pB = 56, cW = W - pL - pR, cH = H - pT - pB;
+    const pL = 64, pR = 16, pT = 32, pB = 72, cW = W - pL - pR, cH = H - pT - pB;
     const vals = byDay.map((d) => d.pnl);
     const maxAbs = Math.max(Math.max(...vals.map(Math.abs)), 100);
     const zeroY = pT + cH / 2;
     const yOf = (v: number) => pT + cH / 2 - (v / maxAbs) * (cH / 2);
 
+    // Grid lines
     [-1,-0.5,0,0.5,1].forEach((f) => {
       const y = pT + cH / 2 - f * cH / 2;
       ctx.beginPath(); ctx.strokeStyle = f === 0 ? c.zero : c.grid;
@@ -220,6 +221,13 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
       }
     });
 
+    // Separator line between chart and label area
+    ctx.beginPath();
+    ctx.strokeStyle = c.grid;
+    ctx.lineWidth = 1;
+    ctx.moveTo(pL, pT + cH + 8); ctx.lineTo(pL + cW, pT + cH + 8);
+    ctx.stroke();
+
     // Abbreviated: $672 or $2.1k
     const fmtShort = (v: number) => {
       const abs = Math.abs(v);
@@ -227,34 +235,36 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
       return v < 0 ? `-${s}` : `+${s}`;
     };
 
-    const bW = Math.min(44, (cW / 7) * 0.6);
+    const bW = Math.min(48, (cW / 7) * 0.68);
     byDay.forEach((d: { label: string; pnl: number; count: number }, i: number) => {
       const x = pL + (i + 0.5) * (cW / 7);
       const bH = Math.abs(yOf(d.pnl) - zeroY);
       const bY = d.pnl >= 0 ? yOf(d.pnl) : zeroY;
       const col = d.pnl > 0 ? G : d.pnl < 0 ? R : '#545e80';
 
+      // Bar
       const barH = Math.max(bH, 2);
-      ctx.fillStyle = col + (d.count === 0 ? '33' : 'bb');
+      ctx.fillStyle = col + (d.count === 0 ? '33' : 'cc');
       ctx.beginPath();
       ctx.roundRect(x - bW/2, bY, bW, barH, d.pnl >= 0 ? [4,4,0,0] : [0,0,4,4]);
       ctx.fill();
 
-      // Day name
+      // Axis area — 3 lines: day name / P&L / count
+      const axisTop = pT + cH + 16;
       ctx.fillStyle = c.text; ctx.font = '11px system-ui'; ctx.textAlign = 'center';
-      ctx.fillText(d.label, x, H - pB + 14);
+      ctx.fillText(d.label, x, axisTop);
 
-      // P&L value below day name — colored, no overlap with bars
       if (d.count > 0) {
-        ctx.fillStyle = col; ctx.font = 'bold 9px system-ui';
-        ctx.fillText(fmtShort(d.pnl), x, H - pB + 28);
-        ctx.fillStyle = c.text; ctx.font = '9px system-ui';
-        ctx.fillText(`(${d.count})`, x, H - pB + 41);
+        ctx.fillStyle = col; ctx.font = 'bold 10px system-ui';
+        ctx.fillText(fmtShort(d.pnl), x, axisTop + 16);
+        ctx.fillStyle = c.text; ctx.globalAlpha = 0.5; ctx.font = '9px system-ui';
+        ctx.fillText(`${d.count} trades`, x, axisTop + 29);
+        ctx.globalAlpha = 1;
       }
     });
   }, [byDay, c.isDark]);
 
-  return <div style={{ position: 'relative', width: '100%', height: 260 }}>
+  return <div style={{ position: 'relative', width: '100%', height: 320 }}>
     <canvas ref={ref} style={{ width: '100%', height: '100%', display: 'block' }} />
   </div>;
 }
