@@ -744,6 +744,17 @@ body:not(.dark) .daily-goal-bar { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
   .nav-label { opacity: 1 !important; width: auto !important; }
   .logo-text { opacity: 1 !important; width: auto !important; }
 
+  /* Center logo in mobile header */
+  .header { position: relative; }
+  .header-logo {
+    position: absolute !important;
+    left: 50%; transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  /* Hide + button in header on mobile — bottom nav has it */
+  .header-new-trade-btn { display: none !important; }
+
   .form-grid { grid-template-columns: 1fr; }
   .form-grid .s2 { grid-column: 1; }
   .report-cards { grid-template-columns: 1fr; }
@@ -857,3 +868,17 @@ body:not(.dark) .daily-goal-bar { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
   transition: transform .15s, box-shadow .15s;
 }
 .bottom-nav-add:active { transform: scale(.93); box-shadow: 0 2px 8px rgba(29,185,84,.2); }
+
+/* ── Negishot accessibility widget — push above bottom nav on mobile ── */
+@media (max-width: 768px) {
+  /* Negishot renders a fixed button — lift it above the 60px bottom nav */
+  #ngs_widget_btn,
+  #ngs-widget-btn,
+  #ngsWidget,
+  #ngs_widget,
+  .ngs-widget,
+  [id^="ngs_"],
+  [id^="NGS_"] {
+    bottom: 70px !important;
+  }
+}
