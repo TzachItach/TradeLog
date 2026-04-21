@@ -9,7 +9,8 @@ function useColors() {
   const isDark = document.body.classList.contains('dark');
   return {
     isDark,
-    text:  isDark ? '#737373' : '#6A6A6A',
+    text:        isDark ? '#737373' : '#6A6A6A',
+    textPrimary: isDark ? '#FFFFFF' : '#000000',
     grid:  isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)',
     zero:  isDark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.08)',
     bg:    isDark ? '#181818' : '#FAFAFA',
@@ -254,7 +255,7 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
       const row3 = sepY + 50;  // day name (all aligned on same baseline)
 
       if (d.count > 0) {
-        ctx.font = 'bold 10px system-ui'; ctx.textAlign = 'center'; ctx.fillStyle = col;
+        ctx.font = 'bold 10px system-ui'; ctx.textAlign = 'center'; ctx.fillStyle = c.textPrimary;
         ctx.fillText(fmtShort(d.pnl), x, row1);
 
         ctx.fillStyle = c.text; ctx.globalAlpha = 0.45; ctx.font = '9px system-ui';
@@ -306,7 +307,7 @@ function BySymbolChart({ trades }: { trades: Trade[] }) {
       ctx.fill();
 
       // Value
-      ctx.fillStyle = col; ctx.font = 'bold 10px system-ui'; ctx.textAlign = 'left';
+      ctx.fillStyle = c.textPrimary; ctx.font = 'bold 10px system-ui'; ctx.textAlign = 'left';
       ctx.fillText(formatPnL(pnl), pL + bW + 6, y + 4);
     });
   }, [bySymbol, c.isDark]);
@@ -366,7 +367,7 @@ function MonthlyHeatmap({ trades, lang }: { trades: Trade[]; lang: string }) {
                 }}>
                   <div style={{ fontSize: '.65rem', color: 'var(--t3)', marginBottom: 3 }}>{months[mi]}</div>
                   {pnl != null && (
-                    <div style={{ fontSize: '.68rem', fontWeight: 700, color: pnl >= 0 ? 'var(--g)' : 'var(--r)', lineHeight: 1 }}>
+                    <div style={{ fontSize: '.68rem', fontWeight: 700, color: 'var(--t1)', lineHeight: 1 }}>
                       {formatPnL(pnl)}
                     </div>
                   )}
