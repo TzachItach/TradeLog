@@ -319,29 +319,35 @@ export default function TradeModal() {
             {/* Media */}
             <div className="s2">
               <label className="form-label">{T.media}</label>
+
+              {/* Thumbnail gallery — rendered outside the upload zone so it's always visible */}
+              {(existingMediaUrls.length > 0 || mediaPreviews.length > 0) && (
+                <div className="upload-thumb">
+                  {existingMediaUrls.map((src, i) => (
+                    <img key={`existing-${i}`} src={src} alt={`saved-${i}`} onClick={() => setLightboxSrc(src)} />
+                  ))}
+                  {mediaPreviews.map((src, i) => (
+                    <img key={`new-${i}`} src={src} alt={`new-${i}`} onClick={() => setLightboxSrc(src)} />
+                  ))}
+                </div>
+              )}
+
+              {/* Upload zone — compact when photos already added */}
               <div
-                className={`upload-zone${dragOver ? ' drag' : ''}`}
+                className={`upload-zone${dragOver ? ' drag' : ''}${(existingMediaUrls.length + mediaPreviews.length) > 0 ? ' has-media' : ''}`}
                 onClick={() => fileRef.current?.click()}
                 onDragOver={e => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={e => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
               >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                   <rect x="3" y="3" width="18" height="18" rx="2" />
                   <circle cx="8.5" cy="8.5" r="1.5" />
                   <polyline points="21,15 16,10 5,21" />
                 </svg>
-                <div className="upload-text">{T.dragDrop}</div>
-                <div className="upload-sub">{T.clickUpload} · PNG · JPG · SVG</div>
-                {(existingMediaUrls.length > 0 || mediaPreviews.length > 0) && (
-                  <div className="upload-thumb" onClick={e => e.stopPropagation()}>
-                    {existingMediaUrls.map((src, i) => (
-                      <img key={`existing-${i}`} src={src} alt={`saved-${i}`} onClick={() => setLightboxSrc(src)} />
-                    ))}
-                    {mediaPreviews.map((src, i) => (
-                      <img key={`new-${i}`} src={src} alt={`new-${i}`} onClick={() => setLightboxSrc(src)} />
-                    ))}
-                  </div>
+                <div className="upload-text">{(existingMediaUrls.length + mediaPreviews.length) > 0 ? (lang === 'he' ? 'הוסף עוד תמונות' : 'Add more photos') : T.dragDrop}</div>
+                {(existingMediaUrls.length + mediaPreviews.length) === 0 && (
+                  <div className="upload-sub">{T.clickUpload} · PNG · JPG · SVG</div>
                 )}
               </div>
               <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
