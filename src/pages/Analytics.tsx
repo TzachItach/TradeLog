@@ -223,11 +223,11 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
       }
     });
 
-    // Abbreviated: $672 or $2.1k
+    // Abbreviated: $672 or $2.1k (no + prefix — bar color indicates direction)
     const fmtShort = (v: number) => {
       const abs = Math.abs(v);
       const s = abs >= 1000 ? `$${(abs / 1000).toFixed(1)}k` : `$${Math.round(abs)}`;
-      return v < 0 ? `-${s}` : `+${s}`;
+      return v < 0 ? `-${s}` : s;
     };
 
     // Separator between chart area and day-name axis
@@ -255,7 +255,7 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
       const row3 = sepY + 50;  // day name (all aligned on same baseline)
 
       if (d.count > 0) {
-        ctx.font = 'bold 10px system-ui'; ctx.textAlign = 'center'; ctx.fillStyle = c.textPrimary;
+        ctx.font = 'bold 9px system-ui'; ctx.textAlign = 'center'; ctx.fillStyle = c.textPrimary;
         ctx.fillText(fmtShort(d.pnl), x, row1);
 
         ctx.fillStyle = c.text; ctx.globalAlpha = 0.45; ctx.font = '9px system-ui';
