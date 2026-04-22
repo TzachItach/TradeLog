@@ -963,6 +963,17 @@ body:not(.dark) .daily-goal-bar { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
   .analytics-tabs button { flex-shrink: 0; }
 }
 
+/* ── Analytics 2-column grid (desktop only) ── */
+.analytics-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+@media (max-width: 1023px) {
+  .analytics-grid-2col { grid-template-columns: 1fr; }
+}
+
 /* ── Negishot accessibility widget — push above bottom nav on mobile ── */
 @media (max-width: 768px) {
   #negishot-widget {

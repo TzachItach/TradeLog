@@ -583,14 +583,11 @@ export default function Analytics() {
   const trades = getFilteredTrades().filter((t) => t.pnl != null);
 
   const tabs = [
-    { label: 'Equity Curve',        labelHe: 'עקומת הון' },
-    { label: 'Drawdown',            labelHe: 'Drawdown' },
-    { label: 'P&L by Day',          labelHe: 'P&L לפי יום' },
-    { label: 'P&L by Symbol',       labelHe: 'P&L לפי סמל' },
-    { label: 'Monthly Heatmap',     labelHe: 'מפת חום חודשית' },
-    { label: 'Distribution',        labelHe: 'התפלגות' },
-    { label: 'Risk/Reward',         labelHe: 'Risk/Reward' },
-    { label: 'Streaks',             labelHe: 'רצפים' },
+    { label: 'Time',        labelHe: 'זמן' },
+    { label: 'Performance', labelHe: 'ביצועים' },
+    { label: 'Calendar',    labelHe: 'לוח שנה' },
+    { label: 'Stats',       labelHe: 'סטטיסטיקה' },
+    { label: 'Risk',        labelHe: 'סיכון' },
   ];
 
   if (trades.length === 0) return (
@@ -625,44 +622,53 @@ export default function Analytics() {
         ))}
       </div>
 
+      {/* Tab 0: Time — Equity Curve + Drawdown stacked */}
       {tab === 0 && (
-        <ChartCard title={isHe ? 'עקומת הון' : 'Equity Curve'} subtitle={isHe ? 'P&L מצטבר לאורך הזמן' : 'Cumulative P&L over time'}>
-          <EquityChart trades={trades} />
-        </ChartCard>
+        <>
+          <ChartCard title={isHe ? 'עקומת הון' : 'Equity Curve'} subtitle={isHe ? 'P&L מצטבר לאורך הזמן' : 'Cumulative P&L over time'}>
+            <EquityChart trades={trades} />
+          </ChartCard>
+          <ChartCard title="Drawdown" subtitle={isHe ? 'ירידה מהשיא (%)' : 'Drop from peak (%)'}>
+            <DrawdownChart trades={trades} />
+          </ChartCard>
+        </>
       )}
+
+      {/* Tab 1: Performance — P&L by Day + P&L by Symbol (2-col on desktop) */}
       {tab === 1 && (
-        <ChartCard title="Drawdown" subtitle={isHe ? 'ירידה מהשיא (%)' : 'Drop from peak (%)'}>
-          <DrawdownChart trades={trades} />
-        </ChartCard>
+        <div className="analytics-grid-2col">
+          <ChartCard title={isHe ? 'P&L לפי יום שבוע' : 'P&L by Day of Week'} subtitle={isHe ? 'אילו ימים הכי רווחיים?' : 'Which days are most profitable?'}>
+            <ByDayChart trades={trades} lang={lang} />
+          </ChartCard>
+          <ChartCard title={isHe ? 'P&L לפי סמל' : 'P&L by Symbol'} subtitle={isHe ? 'ביצועים לפי מכשיר מסחר' : 'Performance by instrument'}>
+            <BySymbolChart trades={trades} />
+          </ChartCard>
+        </div>
       )}
+
+      {/* Tab 2: Calendar — Monthly Heatmap full width */}
       {tab === 2 && (
-        <ChartCard title={isHe ? 'P&L לפי יום שבוע' : 'P&L by Day of Week'} subtitle={isHe ? 'אילו ימים הכי רווחיים?' : 'Which days are most profitable?'}>
-          <ByDayChart trades={trades} lang={lang} />
-        </ChartCard>
-      )}
-      {tab === 3 && (
-        <ChartCard title={isHe ? 'P&L לפי סמל' : 'P&L by Symbol'} subtitle={isHe ? 'ביצועים לפי מכשיר מסחר' : 'Performance by instrument'}>
-          <BySymbolChart trades={trades} />
-        </ChartCard>
-      )}
-      {tab === 4 && (
         <ChartCard title={isHe ? 'מפת חום חודשית' : 'Monthly Heatmap'} subtitle={isHe ? 'P&L לפי חודש ושנה' : 'P&L by month and year'}>
           <MonthlyHeatmap trades={trades} lang={lang} />
         </ChartCard>
       )}
-      {tab === 5 && (
-        <ChartCard title={isHe ? 'התפלגות עסקאות' : 'Trade Distribution'} subtitle={isHe ? 'כמה עסקאות בכל טווח P&L' : 'How many trades in each P&L range'}>
-          <DistributionChart trades={trades} />
-        </ChartCard>
+
+      {/* Tab 3: Stats — Distribution + Streaks (2-col on desktop) */}
+      {tab === 3 && (
+        <div className="analytics-grid-2col">
+          <ChartCard title={isHe ? 'התפלגות עסקאות' : 'Trade Distribution'} subtitle={isHe ? 'כמה עסקאות בכל טווח P&L' : 'How many trades in each P&L range'}>
+            <DistributionChart trades={trades} />
+          </ChartCard>
+          <ChartCard title={isHe ? 'ניתוח רצפים' : 'Streak Analysis'} subtitle={isHe ? 'רצפי זכיות והפסדים' : 'Consecutive wins and losses'}>
+            <StreakChart trades={trades} lang={lang} />
+          </ChartCard>
+        </div>
       )}
-      {tab === 6 && (
+
+      {/* Tab 4: Risk — Risk/Reward Scatter full width */}
+      {tab === 4 && (
         <ChartCard title="Risk / Reward" subtitle={isHe ? 'Stop Loss בנקודות מול P&L בפועל' : 'Stop Loss in pts vs actual P&L'}>
           <RRScatterChart trades={trades} />
-        </ChartCard>
-      )}
-      {tab === 7 && (
-        <ChartCard title={isHe ? 'ניתוח רצפים' : 'Streak Analysis'} subtitle={isHe ? 'רצפי זכיות והפסדים' : 'Consecutive wins and losses'}>
-          <StreakChart trades={trades} lang={lang} />
         </ChartCard>
       )}
     </div>
