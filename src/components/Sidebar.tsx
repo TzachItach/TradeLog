@@ -59,7 +59,7 @@ export default function Sidebar() {
 
       <aside className={"sidebar" + (isOpen ? ' mobile-open' : '')}>
         <div className="sidebar-logo" onClick={() => handleNav('/dashboard')}>
-          <img src="/logo.png" alt="TradeLog" style={{ width: 80, height: 80, objectFit: 'contain', flexShrink: 0 }} />
+          <img src="/logo.png" alt="TradeLog" style={{ width: 140, height: 140, objectFit: 'contain', flexShrink: 0 }} />
           <button
             className="btn btn-icon sidebar-close-btn"
             onClick={(e) => { e.stopPropagation(); setSidebarCollapsed(true); }}
