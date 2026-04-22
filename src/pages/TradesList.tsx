@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useStore, formatPnL } from '../store';
 import { useT } from '../i18n';
+import BrokerImport from '../components/BrokerImport';
 
 type SortKey = 'trade_date' | 'symbol' | 'pnl' | 'direction';
 type SortDir = 'asc' | 'desc';
@@ -9,6 +10,7 @@ export default function TradesList() {
   const { lang, getFilteredTrades, strategies, setModal } = useStore();
   const T = useT(lang);
 
+  const [showImport, setShowImport] = useState(false);
   const [search, setSearch] = useState('');
   const [filterDir, setFilterDir] = useState('all');
   const [filterStrategy, setFilterStrategy] = useState('all');
@@ -50,12 +52,21 @@ export default function TradesList() {
     <div className="page-content">
       <div className="page-header">
         <h1 className="page-title">{T.trades}</h1>
-        <button className="btn btn-primary" onClick={() => setModal({ type: 'new' })}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          {T.newTrade}
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-ghost" onClick={() => setShowImport(true)}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            {lang === 'he' ? 'ייבא CSV' : 'Import CSV'}
+          </button>
+          <button className="btn btn-primary" onClick={() => setModal({ type: 'new' })}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            {T.newTrade}
+          </button>
+        </div>
       </div>
 
       <div className="filters-row">
@@ -128,6 +139,7 @@ export default function TradesList() {
           </table>
         </div>
       )}
+      {showImport && <BrokerImport onClose={() => setShowImport(false)} />}
     </div>
   );
 }
