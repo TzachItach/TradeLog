@@ -23,7 +23,7 @@ function SplashScreen() {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       flexDirection: 'column', gap: 16,
     }}>
-      <img src="/logo.png" alt="TradeLog" style={{ width: 96, height: 96, objectFit: 'contain' }} />
+      <img src="/logo.png" alt="TradeLog" style={{ width: 160, height: 160, objectFit: 'contain' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <div style={{ width: 20, height: 20, border: '2px solid rgba(255,255,255,.10)', borderTopColor: '#1DB954', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>

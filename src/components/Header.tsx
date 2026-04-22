@@ -48,8 +48,7 @@ export default function Header() {
         onClick={() => navigate('/dashboard')}
         title={T.appName}
       >
-        <img src="/logo.png" alt="TradeLog" style={{ width: 28, height: 28, objectFit: 'contain', flexShrink: 0 }} />
-        <span style={{ fontWeight: 700, fontSize: '.92rem', color: 'var(--t1)', letterSpacing: '-.02em' }}>{T.appName}</span>
+        <img src="/logo.png" alt="TradeLog" style={{ width: 64, height: 64, objectFit: 'contain', flexShrink: 0 }} />
       </div>
 
       {/* Account tabs */}
