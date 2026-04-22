@@ -39,7 +39,7 @@ export default function Auth() {
 
       <div className="auth-card" dir={lang === 'he' ? 'rtl' : 'ltr'}>
         <div className="auth-logo">
-          <img src="/logo-cropped.png" alt="TradeLog" style={{ width: 160, height: 'auto', objectFit: 'contain', margin: '0 auto 8px', display: 'block' }} />
+          <img src="/logo.png" alt="TradeLog" style={{ width: 180, height: 'auto', objectFit: 'contain', margin: '0 auto 8px', display: 'block' }} />
         </div>
 
         <div className="auth-title">{T.welcomeBack}</div>

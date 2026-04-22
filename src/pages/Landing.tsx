@@ -32,8 +32,7 @@ export default function Landing() {
       <header className="lp-nav" dir="ltr">
         <div className="lp-nav-inner">
           <a className="lp-logo" href="/">
-            <img src="/logo-icon.png" alt="TradeLog" style={{ height: 36, width: 'auto', objectFit: 'contain' }} />
-            <span>TradeLog</span>
+            <img src="/logo.png" alt="TradeLog" style={{ height: 44, width: 'auto', objectFit: 'contain' }} />
           </a>
           <nav>
             <ul className="lp-nav-links">
@@ -91,8 +90,7 @@ export default function Landing() {
                 {/* Sidebar */}
                 <div className="lp-mockup-sidebar">
                   <div className="lp-mockup-logo">
-                    <img src="/logo-icon.png" alt="TradeLog" style={{ height: 22, width: 'auto', objectFit: 'contain' }} />
-                    <span style={{ fontSize: '.65rem', fontWeight: 700, color: '#FFFFFF' }}>TradeLog</span>
+                    <img src="/logo.png" alt="TradeLog" style={{ height: 36, width: 'auto', objectFit: 'contain' }} />
                   </div>
                   {[
                     { label: 'Calendar', active: true },
@@ -393,8 +391,7 @@ export default function Landing() {
       <footer className="lp-footer">
         <div className="lp-footer-inner">
           <div className="lp-footer-logo">
-            <img src="/logo-icon.png" alt="TradeLog" style={{ height: 28, width: 'auto', objectFit: 'contain' }} />
-            TradeLog
+            <img src="/logo.png" alt="TradeLog" style={{ height: 48, width: 'auto', objectFit: 'contain' }} />
           </div>
           <ul className="lp-footer-links">
             <li><a href="/terms">Terms</a></li>

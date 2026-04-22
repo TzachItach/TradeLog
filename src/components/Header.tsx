@@ -49,7 +49,7 @@ export default function Header() {
         onClick={() => navigate('/dashboard')}
         title={T.appName}
       >
-        <img src={darkMode ? '/logo-cropped.png' : '/logo-light-cropped.png'} alt="TradeLog" style={{ height: 72, width: 'auto', objectFit: 'contain', flexShrink: 0 }} />
+        <img src={darkMode ? '/logo.png' : '/logo-light.png'} alt="TradeLog" style={{ height: 80, width: 'auto', objectFit: 'contain', flexShrink: 0 }} />
       </div>
 
       {/* Account tabs */}

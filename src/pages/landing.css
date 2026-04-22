@@ -23,7 +23,7 @@
 }
 .lp-nav-inner {
   max-width: 1040px; margin: 0 auto;
-  padding: 0 24px; height: 56px;
+  padding: 0 24px; height: 64px;
   display: flex; align-items: center; justify-content: space-between;
 }
 .lp-logo {
