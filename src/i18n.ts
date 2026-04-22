@@ -118,6 +118,13 @@ const translations = {
     maxLossHit: 'גבול הפסד!',
     noGoalSet: 'לא הוגדר יעד יומי',
     setGoalPrompt: 'הגדר יעדים בהגדרות',
+    thisQuarter: 'הרבעון',
+    bestTrade: 'עסקה מובילה',
+    worstTrade: 'עסקה גרועה',
+    byStrategy: 'לפי אסטרטגיה',
+    bySymbol: 'לפי סמל',
+    trades: 'עסקאות',
+    count: 'כמות',
   },
   en: {
     appName: 'TradeLog',
@@ -236,6 +243,13 @@ const translations = {
     maxLossHit: 'Max loss hit!',
     noGoalSet: 'No daily goal set',
     setGoalPrompt: 'Set goals in Settings',
+    thisQuarter: 'This Quarter',
+    bestTrade: 'Best Trade',
+    worstTrade: 'Worst Trade',
+    byStrategy: 'By Strategy',
+    bySymbol: 'By Symbol',
+    trades: 'Trades',
+    count: 'Count',
   },
 } as const;
 
