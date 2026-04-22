@@ -23,12 +23,7 @@ function SplashScreen() {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       flexDirection: 'column', gap: 16,
     }}>
-      <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#1DB954', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.8" strokeLinecap="round">
-          <polyline points="3,17 9,11 13,15 21,6" />
-        </svg>
-      </div>
-      <div style={{ color: '#FFFFFF', fontSize: '1rem', fontWeight: 700, fontFamily: 'system-ui, -apple-system, Helvetica, sans-serif', letterSpacing: '-0.03em' }}>TradeLog</div>
+      <img src="/logo.png" alt="TradeLog" style={{ width: 96, height: 96, objectFit: 'contain' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <div style={{ width: 20, height: 20, border: '2px solid rgba(255,255,255,.10)', borderTopColor: '#1DB954', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>

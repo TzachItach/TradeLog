@@ -48,14 +48,7 @@ export default function Header() {
         onClick={() => navigate('/dashboard')}
         title={T.appName}
       >
-        <div style={{
-          width: 28, height: 28, borderRadius: '50%', background: 'var(--g)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.8" strokeLinecap="round">
-            <polyline points="3,17 9,11 13,15 21,6" />
-          </svg>
-        </div>
+        <img src="/logo.png" alt="TradeLog" style={{ width: 28, height: 28, objectFit: 'contain', flexShrink: 0 }} />
         <span style={{ fontWeight: 700, fontSize: '.92rem', color: 'var(--t1)', letterSpacing: '-.02em' }}>{T.appName}</span>
       </div>
 

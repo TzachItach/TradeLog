@@ -59,11 +59,7 @@ export default function Sidebar() {
 
       <aside className={"sidebar" + (isOpen ? ' mobile-open' : '')}>
         <div className="sidebar-logo" onClick={() => handleNav('/dashboard')}>
-          <div className="logo-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.8" strokeLinecap="round">
-              <polyline points="3,17 9,11 13,15 21,6" />
-            </svg>
-          </div>
+          <img src="/logo.png" alt="TradeLog" style={{ width: 36, height: 36, objectFit: 'contain', flexShrink: 0 }} />
           <span className="logo-text">{T.appName}</span>
           <button
             className="btn btn-icon sidebar-close-btn"
