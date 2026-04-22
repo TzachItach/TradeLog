@@ -32,12 +32,7 @@ export default function Landing() {
       <header className="lp-nav" dir="ltr">
         <div className="lp-nav-inner">
           <a className="lp-logo" href="/">
-            <div className="lp-logo-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.8" strokeLinecap="round">
-                <polyline points="3,17 9,11 13,15 21,6" />
-              </svg>
-            </div>
-            TradeLog
+            <img src="/logo.png" alt="TradeLog" style={{ height: 52, objectFit: 'contain' }} />
           </a>
           <nav>
             <ul className="lp-nav-links">
@@ -95,12 +90,7 @@ export default function Landing() {
                 {/* Sidebar */}
                 <div className="lp-mockup-sidebar">
                   <div className="lp-mockup-logo">
-                    <div style={{ width: 22, height: 22, background: '#1DB954', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round">
-                        <polyline points="3,17 9,11 13,15 21,6" />
-                      </svg>
-                    </div>
-                    <span style={{ fontSize: '.65rem', fontWeight: 700, color: '#FFFFFF' }}>TradeLog</span>
+                    <img src="/logo.png" alt="TradeLog" style={{ height: 44, objectFit: 'contain' }} />
                   </div>
                   {[
                     { label: 'Calendar', active: true },
@@ -401,12 +391,7 @@ export default function Landing() {
       <footer className="lp-footer">
         <div className="lp-footer-inner">
           <div className="lp-footer-logo">
-            <div style={{ width: 28, height: 28, background: '#1DB954', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round">
-                <polyline points="3,17 9,11 13,15 21,6"/>
-              </svg>
-            </div>
-            TradeLog
+            <img src="/logo.png" alt="TradeLog" style={{ height: 56, objectFit: 'contain' }} />
           </div>
           <ul className="lp-footer-links">
             <li><a href="/terms">Terms</a></li>

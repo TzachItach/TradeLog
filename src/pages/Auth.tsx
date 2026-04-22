@@ -39,12 +39,7 @@ export default function Auth() {
 
       <div className="auth-card" dir={lang === 'he' ? 'rtl' : 'ltr'}>
         <div className="auth-logo">
-          <div style={{ width: 52, height: 52, background: '#1DB954', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.8" strokeLinecap="round">
-              <polyline points="3,17 9,11 13,15 21,6" />
-            </svg>
-          </div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--t1)', letterSpacing: '-.03em' }}>TradeLog</div>
+          <img src="/logo.png" alt="TradeLog" style={{ width: 120, height: 120, objectFit: 'contain', margin: '0 auto 8px', display: 'block' }} />
         </div>
 
         <div className="auth-title">{T.welcomeBack}</div>
