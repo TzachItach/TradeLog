@@ -19,6 +19,7 @@ function ThemeToggle({ darkMode, onClick }: { darkMode: boolean; onClick: () => 
 
 export default function Header() {
   const { lang, setLang, accounts, selectedAccount, setSelectedAccount, setModal, user, sidebarCollapsed, setSidebarCollapsed, darkMode, setDarkMode } = useStore();
+  const logoSrc = darkMode ? '/logo.png' : '/logo-light.png';
   const T = useT(lang);
   const navigate = useNavigate();
 
@@ -48,7 +49,7 @@ export default function Header() {
         onClick={() => navigate('/dashboard')}
         title={T.appName}
       >
-        <img src="/logo.png" alt="TradeLog" style={{ width: 96, height: 96, objectFit: 'contain', flexShrink: 0 }} />
+        <img src={logoSrc} alt="TradeLog" style={{ width: 96, height: 96, objectFit: 'contain', flexShrink: 0 }} />
       </div>
 
       {/* Account tabs */}

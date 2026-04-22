@@ -24,7 +24,7 @@ const icons: Record<string, JSX.Element> = {
 };
 
 export default function Sidebar() {
-  const { lang, sidebarCollapsed, setSidebarCollapsed } = useStore();
+  const { lang, sidebarCollapsed, setSidebarCollapsed, darkMode } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
   const T = useT(lang);
@@ -59,7 +59,7 @@ export default function Sidebar() {
 
       <aside className={"sidebar" + (isOpen ? ' mobile-open' : '')}>
         <div className="sidebar-logo" onClick={() => handleNav('/dashboard')}>
-          <img src="/logo.png" alt="TradeLog" style={{ width: 140, height: 140, objectFit: 'contain', flexShrink: 0 }} />
+          <img src={darkMode ? '/logo.png' : '/logo-light.png'} alt="TradeLog" style={{ width: 140, height: 140, objectFit: 'contain', flexShrink: 0 }} />
           <button
             className="btn btn-icon sidebar-close-btn"
             onClick={(e) => { e.stopPropagation(); setSidebarCollapsed(true); }}
