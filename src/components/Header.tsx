@@ -26,7 +26,7 @@ export default function Header() {
   const T = useT(lang);
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [menuPos, setMenuPos] = useState({ top: 0, right: 0 });
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
   const avatarRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -37,10 +37,10 @@ export default function Header() {
   useLayoutEffect(() => {
     if (!menuOpen || !avatarRef.current) return;
     const r = avatarRef.current.getBoundingClientRect();
-    setMenuPos({
-      top: r.bottom + 8,
-      right: window.innerWidth - r.right,
-    });
+    const menuWidth = 210;
+    const margin = 8;
+    const left = Math.max(margin, Math.min(r.right - menuWidth, window.innerWidth - menuWidth - margin));
+    setMenuPos({ top: r.bottom + 8, left });
   }, [menuOpen]);
 
   useEffect(() => {
@@ -142,7 +142,7 @@ export default function Header() {
           <div
             ref={menuRef}
             className="avatar-menu"
-            style={{ position: 'fixed', top: menuPos.top, right: menuPos.right }}
+            style={{ position: 'fixed', top: menuPos.top, left: menuPos.left }}
           >
             <div className="avatar-menu-profile">
               <div className="avatar-menu-name">{user?.name ?? '—'}</div>
