@@ -802,8 +802,8 @@ body:not(.dark) .daily-goal-bar { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
 /* Blend-mode erases the solid background: screen=erase black, multiply=erase white */
 body.dark .app-logo        { mix-blend-mode: screen; }
 body:not(.dark) .app-logo  { mix-blend-mode: multiply; }
-/* Sidebar is always black — always use screen regardless of theme */
-.sidebar .app-logo         { mix-blend-mode: screen; }
+/* Sidebar bg is #000 = exact match for logo.png bg — no blending needed */
+.sidebar .app-logo         { mix-blend-mode: normal; }
 .app-logo--lg {
   height: 160px;
   width: 160px;
