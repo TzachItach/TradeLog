@@ -343,9 +343,9 @@ function EntryModal({
   };
 
   const inputStyle: React.CSSProperties = {
-    width: '100%', padding: '9px 12px', borderRadius: 8,
+    width: '100%', height: 44, padding: '0 12px', borderRadius: 8,
     border: '1px solid var(--bd2)', background: 'var(--s1)', color: 'var(--t1)',
-    fontSize: '.88rem', boxSizing: 'border-box',
+    fontSize: '.88rem', boxSizing: 'border-box', appearance: 'none',
   };
   const labelStyle: React.CSSProperties = { fontSize: '.75rem', color: 'var(--t3)', marginBottom: 4, display: 'block' };
 
@@ -421,8 +421,8 @@ function EntryModal({
         )}
 
         <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
-          <button className="btn btn-ghost" style={{ flex: 1 }} onClick={onClose}>{isHe ? 'ביטול' : 'Cancel'}</button>
-          <button className="btn btn-primary" style={{ flex: 2 }} onClick={handleSave}>{isHe ? 'שמור' : 'Save'}</button>
+          <button className="btn btn-ghost" style={{ flex: 1, minWidth: 0 }} onClick={onClose}>{isHe ? 'ביטול' : 'Cancel'}</button>
+          <button className="btn btn-primary" style={{ flex: 1, minWidth: 0 }} onClick={handleSave}>{isHe ? 'שמור' : 'Save'}</button>
         </div>
       </div>
     </div>
