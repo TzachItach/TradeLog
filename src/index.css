@@ -796,10 +796,12 @@ body:not(.dark) .daily-goal-bar { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
   flex-shrink: 0;
   user-select: none;
   height: 48px;
-  width: 48px;        /* 1:1 — prevents layout shift (logos are 1024×1024) */
+  width: 48px;
   aspect-ratio: 1;
-  border-radius: 8px; /* softens the solid-bg corners */
 }
+/* Blend-mode erases the solid background: screen=erase black, multiply=erase white */
+body.dark .app-logo  { mix-blend-mode: screen; }
+body:not(.dark) .app-logo { mix-blend-mode: multiply; }
 .app-logo--lg {
   height: 160px;
   width: 160px;
