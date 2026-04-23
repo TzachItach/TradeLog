@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Account, Trade, Strategy, Language, ModalState } from './types';
-import { MOCK_ACCOUNTS, MOCK_TRADES, MOCK_STRATEGIES, TURTLE_SOUP_CHECKBOXES } from './mockData';
+import type { Account, Trade, Strategy, Language, ModalState, PropExpense, PropPayout } from './types';
+import { MOCK_ACCOUNTS, MOCK_TRADES, MOCK_STRATEGIES, MOCK_EXPENSES, MOCK_PAYOUTS, TURTLE_SOUP_CHECKBOXES } from './mockData';
 import {
   loadUserData, dbSaveAccount, dbDeleteAccount,
   dbSaveTrade, dbDeleteTrade, dbSaveStrategy, dbDeleteStrategy, dbSeedNewUser,
-  dbSaveProfile,
+  dbSaveProfile, dbSaveExpense, dbDeleteExpense, dbSavePayout, dbDeletePayout,
 } from './lib/db';
 
 export function createDefaultStrategies(): Strategy[] {
@@ -38,6 +38,8 @@ interface AppState {
   accounts: Account[];
   trades: Trade[];
   strategies: Strategy[];
+  expenses: PropExpense[];
+  payouts: PropPayout[];
   lang: Language;
   selectedAccount: string;
   currentYear: number;
@@ -78,6 +80,14 @@ interface AppState {
   updateStrategy: (s: Strategy) => void;
   deleteStrategy: (id: string) => void;
 
+  addExpense: (e: PropExpense) => void;
+  updateExpense: (e: PropExpense) => void;
+  deleteExpense: (id: string) => void;
+
+  addPayout: (p: PropPayout) => void;
+  updatePayout: (p: PropPayout) => void;
+  deletePayout: (id: string) => void;
+
   setFontSize: (v: number) => void;
   setHighContrast: (v: boolean) => void;
   setGrayscale: (v: boolean) => void;
@@ -102,6 +112,8 @@ export const useStore = create<AppState>()(
       accounts: [],
       trades: [],
       strategies: [],
+      expenses: [],
+      payouts: [],
       lang: 'he',
       selectedAccount: 'all',
       currentYear: now.getFullYear(),
@@ -174,6 +186,37 @@ export const useStore = create<AppState>()(
         dbDeleteAccount(id);
       },
 
+      // ── הוצאות ותשלומים — שמור גם ב-Supabase ──
+      addExpense: (e: PropExpense) => {
+        set((st: AppState) => ({ expenses: [e, ...st.expenses] }));
+        const userId = get().user?.id;
+        if (userId) dbSaveExpense(e, userId);
+      },
+      updateExpense: (e: PropExpense) => {
+        set((st: AppState) => ({ expenses: st.expenses.map((x: PropExpense) => (x.id === e.id ? e : x)) }));
+        const userId = get().user?.id;
+        if (userId) dbSaveExpense(e, userId);
+      },
+      deleteExpense: (id: string) => {
+        set((st: AppState) => ({ expenses: st.expenses.filter((x: PropExpense) => x.id !== id) }));
+        dbDeleteExpense(id);
+      },
+
+      addPayout: (p: PropPayout) => {
+        set((st: AppState) => ({ payouts: [p, ...st.payouts] }));
+        const userId = get().user?.id;
+        if (userId) dbSavePayout(p, userId);
+      },
+      updatePayout: (p: PropPayout) => {
+        set((st: AppState) => ({ payouts: st.payouts.map((x: PropPayout) => (x.id === p.id ? p : x)) }));
+        const userId = get().user?.id;
+        if (userId) dbSavePayout(p, userId);
+      },
+      deletePayout: (id: string) => {
+        set((st: AppState) => ({ payouts: st.payouts.filter((x: PropPayout) => x.id !== id) }));
+        dbDeletePayout(id);
+      },
+
       // ── אסטרטגיות — שמור גם ב-Supabase ──
       addStrategy: (s) => {
         set((st) => ({ strategies: [...st.strategies, s] }));
@@ -197,6 +240,7 @@ export const useStore = create<AppState>()(
 
       loadDemoData: () => set({
         accounts: MOCK_ACCOUNTS, trades: MOCK_TRADES, strategies: MOCK_STRATEGIES,
+        expenses: MOCK_EXPENSES, payouts: MOCK_PAYOUTS,
         isDemo: true, lastUserId: null,
         user: { id: 'demo', name: 'Demo User', email: 'demo@tradelog.app' },
       }),
@@ -212,7 +256,7 @@ export const useStore = create<AppState>()(
         }, 8000);
 
         try {
-          const { accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss } = await loadUserData(userId);
+          const { accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss } = await loadUserData(userId);
           clearTimeout(timeout);
           const isNewUser = accounts.length === 0 && strategies.length === 0;
 
@@ -220,16 +264,16 @@ export const useStore = create<AppState>()(
             const defAccount = createDefaultAccount();
             const defStrategies = createDefaultStrategies();
             await dbSeedNewUser(userId, defAccount, defStrategies);
-            set({ accounts: [defAccount], strategies: defStrategies, trades: [], lastUserId: userId, selectedAccount: 'all' });
+            set({ accounts: [defAccount], strategies: defStrategies, trades: [], expenses: [], payouts: [], lastUserId: userId, selectedAccount: 'all' });
           } else {
-            set({ accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss, lastUserId: userId, selectedAccount: 'all' });
+            set({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, lastUserId: userId, selectedAccount: 'all' });
           }
         } catch (err) {
           clearTimeout(timeout);
           console.error('initRealUser error:', err);
           const defAccount = createDefaultAccount();
           const defStrategies = createDefaultStrategies();
-          set({ accounts: [defAccount], strategies: defStrategies, trades: [], lastUserId: userId, selectedAccount: 'all' });
+          set({ accounts: [defAccount], strategies: defStrategies, trades: [], expenses: [], payouts: [], lastUserId: userId, selectedAccount: 'all' });
         } finally {
           set({ dataLoading: false });
         }
@@ -238,7 +282,7 @@ export const useStore = create<AppState>()(
       // טעינת נתונים ברקע — לא חוסם את הממשק
       loadDataInBackground: (userId, name, email) => {
         set({ user: { id: userId, name, email }, isDemo: false });
-        loadUserData(userId).then(({ accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss }) => {
+        loadUserData(userId).then(({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss }) => {
           // Guard: never treat empty Supabase response as "new user" if we've seen this
           // userId before — empty data likely means an RLS / session issue, not a new user.
           const isKnownUser = get().lastUserId === userId;
@@ -248,11 +292,11 @@ export const useStore = create<AppState>()(
             const defAccount = createDefaultAccount();
             const defStrategies = createDefaultStrategies();
             dbSeedNewUser(userId, defAccount, defStrategies);
-            set({ accounts: [defAccount], strategies: defStrategies, trades: [], lastUserId: userId });
+            set({ accounts: [defAccount], strategies: defStrategies, trades: [], expenses: [], payouts: [], lastUserId: userId });
           } else if (accounts.length > 0) {
             // Only overwrite state when Supabase actually returned data.
             // Reset selectedAccount to 'all' so stale account filters never hide trades.
-            set({ accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss, lastUserId: userId, selectedAccount: 'all' });
+            set({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, lastUserId: userId, selectedAccount: 'all' });
           } else {
             // Known user but got 0 accounts — keep localStorage cache
             console.warn('[Store] Known user returned 0 accounts — keeping cache');
@@ -268,9 +312,9 @@ export const useStore = create<AppState>()(
         if (!userId) return;
         set({ dataLoading: true });
         try {
-          const { accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss } = await loadUserData(userId);
+          const { accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss } = await loadUserData(userId);
           if (accounts.length > 0) {
-            set({ accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss, selectedAccount: 'all' });
+            set({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, selectedAccount: 'all' });
           }
         } catch (err) {
           console.error('[Store] reloadFromCloud failed:', err);
@@ -315,6 +359,7 @@ export const useStore = create<AppState>()(
         dailyGoalTarget: s.dailyGoalTarget, dailyMaxLoss: s.dailyMaxLoss,
         // שמור נתונים ב-localStorage רק כ-cache — Supabase הוא source of truth
         accounts: s.accounts, trades: s.trades, strategies: s.strategies,
+        expenses: s.expenses, payouts: s.payouts,
         selectedAccount: s.selectedAccount, isDemo: s.isDemo,
         lastUserId: s.lastUserId, user: s.user,
       }),

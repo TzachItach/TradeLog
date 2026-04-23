@@ -13,6 +13,7 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Accessibility from './pages/Accessibility';
 import PropFirm from './pages/PropFirm';
+import BusinessManager from './pages/BusinessManager';
 import Landing from './pages/Landing';
 
 /* מסך טעינה קצר — רק לבדיקת session ראשונית */
@@ -151,6 +152,7 @@ export default function App() {
           <Route path="analytics" element={<Analytics />} />
           <Route path="reports" element={<Reports />} />
           <Route path="propfirm" element={<PropFirm />} />
+          <Route path="business" element={<BusinessManager />} />
           <Route path="settings" element={<Settings />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

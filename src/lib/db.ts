@@ -1,5 +1,5 @@
 import { supabase, DEMO_MODE } from './supabase';
-import type { Account, Trade, Strategy } from '../types';
+import type { Account, Trade, Strategy, PropExpense, PropPayout } from '../types';
 
 // לוג שגיאות Supabase בצורה ברורה
 function logErr(fn: string, error: { message: string; code?: string } | null) {
@@ -9,9 +9,10 @@ function logErr(fn: string, error: { message: string; code?: string } | null) {
 // ─── LOAD ────────────────────────────────────────────────────
 export async function loadUserData(userId: string): Promise<{
   accounts: Account[]; strategies: Strategy[]; trades: Trade[];
+  expenses: PropExpense[]; payouts: PropPayout[];
   dailyGoalTarget: number; dailyMaxLoss: number;
 }> {
-  if (DEMO_MODE || !supabase) return { accounts: [], strategies: [], trades: [], dailyGoalTarget: 0, dailyMaxLoss: 0 };
+  if (DEMO_MODE || !supabase) return { accounts: [], strategies: [], trades: [], expenses: [], payouts: [], dailyGoalTarget: 0, dailyMaxLoss: 0 };
 
   // צור profile אם לא קיים (fallback על המקרה שה-trigger לא רץ)
   const { error: pe } = await supabase
@@ -19,17 +20,21 @@ export async function loadUserData(userId: string): Promise<{
     .upsert({ id: userId }, { onConflict: 'id' });
   if (pe) logErr('profiles.upsert', pe);
 
-  const [profileRes, accRes, stratRes, tradeRes] = await Promise.all([
+  const [profileRes, accRes, stratRes, tradeRes, expRes, payRes] = await Promise.all([
     supabase.from('profiles').select('daily_goal_target, daily_max_loss').eq('id', userId).single(),
     supabase.from('accounts').select('*').eq('user_id', userId).order('created_at'),
     supabase.from('strategies').select('*, strategy_fields(*)').eq('user_id', userId).order('created_at'),
     supabase.from('trades').select('*, trade_media(*)').eq('user_id', userId).order('trade_date', { ascending: false }),
+    supabase.from('prop_expenses').select('*').eq('user_id', userId).order('date', { ascending: false }),
+    supabase.from('prop_payouts').select('*').eq('user_id', userId).order('date', { ascending: false }),
   ]);
 
   logErr('profiles.select', profileRes.error);
   logErr('accounts.select', accRes.error);
   logErr('strategies.select', stratRes.error);
   logErr('trades.select', tradeRes.error);
+  logErr('prop_expenses.select', expRes.error);
+  logErr('prop_payouts.select', payRes.error);
 
   // If the accounts query failed (e.g. expired session, RLS), throw so the caller's
   // .catch() keeps the localStorage cache instead of treating it as a new user.
@@ -82,8 +87,60 @@ export async function loadUserData(userId: string): Promise<{
     })),
   }));
 
-  console.log(`[DB] Loaded: ${accounts.length} accounts, ${strategies.length} strategies, ${trades.length} trades`);
-  return { accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss };
+  const expenses: PropExpense[] = (expRes.data ?? []).map((r: Record<string, unknown>) => ({
+    id: r.id as string, user_id: r.user_id as string,
+    account_id: (r.account_id as string | null) ?? undefined,
+    prop_firm: r.prop_firm as string, account_size: (r.account_size as number) ?? 0,
+    fee_type: r.fee_type as PropExpense['fee_type'], amount: (r.amount as number) ?? 0,
+    date: r.date as string, notes: (r.notes as string | null) ?? undefined,
+  }));
+
+  const payouts: PropPayout[] = (payRes.data ?? []).map((r: Record<string, unknown>) => ({
+    id: r.id as string, user_id: r.user_id as string,
+    account_id: (r.account_id as string | null) ?? undefined,
+    prop_firm: r.prop_firm as string, amount: (r.amount as number) ?? 0,
+    date: r.date as string, notes: (r.notes as string | null) ?? undefined,
+  }));
+
+  console.log(`[DB] Loaded: ${accounts.length} accounts, ${strategies.length} strategies, ${trades.length} trades, ${expenses.length} expenses, ${payouts.length} payouts`);
+  return { accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss };
+}
+
+// ─── PROP EXPENSES ───────────────────────────────────────────────────────────
+export async function dbSaveExpense(expense: PropExpense, userId: string) {
+  if (DEMO_MODE || !supabase) return;
+  const { error } = await supabase.from('prop_expenses').upsert({
+    id: expense.id, user_id: userId,
+    account_id: expense.account_id ?? null,
+    prop_firm: expense.prop_firm, account_size: expense.account_size,
+    fee_type: expense.fee_type, amount: expense.amount,
+    date: expense.date, notes: expense.notes ?? null,
+  });
+  logErr('prop_expenses.upsert', error);
+}
+
+export async function dbDeleteExpense(id: string) {
+  if (DEMO_MODE || !supabase) return;
+  const { error } = await supabase.from('prop_expenses').delete().eq('id', id);
+  logErr('prop_expenses.delete', error);
+}
+
+// ─── PROP PAYOUTS ─────────────────────────────────────────────────────────────
+export async function dbSavePayout(payout: PropPayout, userId: string) {
+  if (DEMO_MODE || !supabase) return;
+  const { error } = await supabase.from('prop_payouts').upsert({
+    id: payout.id, user_id: userId,
+    account_id: payout.account_id ?? null,
+    prop_firm: payout.prop_firm, amount: payout.amount,
+    date: payout.date, notes: payout.notes ?? null,
+  });
+  logErr('prop_payouts.upsert', error);
+}
+
+export async function dbDeletePayout(id: string) {
+  if (DEMO_MODE || !supabase) return;
+  const { error } = await supabase.from('prop_payouts').delete().eq('id', id);
+  logErr('prop_payouts.delete', error);
 }
 
 // ─── PROFILE ─────────────────────────────────────────────────

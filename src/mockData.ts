@@ -1,4 +1,4 @@
-import type { Account, Strategy, Trade } from './types';
+import type { Account, Strategy, Trade, PropExpense, PropPayout } from './types';
 
 export const MOCK_ACCOUNTS: Account[] = [
   { id: 'a1', name: 'חשבון אישי', account_type: 'personal', broker: 'manual', initial_balance: 50000, currency: 'USD', is_active: true },
@@ -79,4 +79,31 @@ export const MOCK_TRADES: Trade[] = [
   { id: 't18', account_id: 'a1', strategy_id: 's3', symbol: 'GC',  direction: 'long',  trade_date: d(23), pnl:  1100, size: 1, stop_loss_pts: 15, take_profit_pts: 35, htf_pd_array: '1D FVG', psychology: 'Good',    notes: '', confirmations: {}, field_values: {}, source: 'manual' },
   { id: 't19', account_id: 'a2', strategy_id: 's1', symbol: 'NQ',  direction: 'short', trade_date: d(28), pnl: -2200, size: 2, stop_loss_pts: 22, take_profit_pts: 55, htf_pd_array: '4H OB',  psychology: 'Overconfident', notes: 'Counter trend — mistake', confirmations: {}, field_values: {}, source: 'auto' },
   { id: 't20', account_id: 'a1', strategy_id: 's1', symbol: 'ES',  direction: 'long',  trade_date: d(29), pnl:   780, size: 1, stop_loss_pts: 12, take_profit_pts: 30, htf_pd_array: '4H FVG', psychology: 'Calm',    notes: '', confirmations: { 'Turtle Soup': true, 'OTE': true }, field_values: {}, source: 'manual' },
+];
+
+// Helper: date N months ago
+const pastMonth = (monthsAgo: number, day: number) => {
+  const dt = new Date();
+  dt.setDate(day);
+  dt.setMonth(dt.getMonth() - monthsAgo);
+  return dt.toISOString().slice(0, 10);
+};
+
+export const MOCK_EXPENSES: PropExpense[] = [
+  { id: 'exp-1',  prop_firm: 'TopstepX', account_size: 100000, fee_type: 'challenge',   amount: 165, date: pastMonth(5, 3),  notes: 'First attempt' },
+  { id: 'exp-2',  prop_firm: 'TopstepX', account_size: 100000, fee_type: 'reset',       amount: 99,  date: pastMonth(4, 15), notes: 'Blew day 8' },
+  { id: 'exp-3',  prop_firm: 'TopstepX', account_size: 100000, fee_type: 'challenge',   amount: 165, date: pastMonth(4, 16), notes: 'Second attempt' },
+  { id: 'exp-4',  prop_firm: 'Apex',     account_size: 50000,  fee_type: 'challenge',   amount: 97,  date: pastMonth(3, 2),  notes: '' },
+  { id: 'exp-5',  prop_firm: 'TopstepX', account_size: 100000, fee_type: 'activation',  amount: 149, date: pastMonth(3, 20), notes: 'Passed! Activation fee' },
+  { id: 'exp-6',  prop_firm: 'Apex',     account_size: 50000,  fee_type: 'reset',       amount: 67,  date: pastMonth(2, 5),  notes: '' },
+  { id: 'exp-7',  prop_firm: 'Apex',     account_size: 50000,  fee_type: 'challenge',   amount: 97,  date: pastMonth(2, 6),  notes: 'Third try' },
+  { id: 'exp-8',  prop_firm: 'TopstepX', account_size: 100000, fee_type: 'data_fee',    amount: 85,  date: pastMonth(1, 1),  notes: 'Monthly data' },
+  { id: 'exp-9',  prop_firm: 'Apex',     account_size: 50000,  fee_type: 'activation',  amount: 85,  date: pastMonth(1, 10), notes: 'Passed 50k!' },
+  { id: 'exp-10', prop_firm: 'TopstepX', account_size: 150000, fee_type: 'challenge',   amount: 375, date: pastMonth(0, 4),  notes: 'Scaling up' },
+];
+
+export const MOCK_PAYOUTS: PropPayout[] = [
+  { id: 'pay-1', prop_firm: 'TopstepX', account_id: 'a2', amount: 1200, date: pastMonth(2, 28), notes: 'First withdrawal' },
+  { id: 'pay-2', prop_firm: 'Apex',     amount: 800,  date: pastMonth(1, 22), notes: '' },
+  { id: 'pay-3', prop_firm: 'TopstepX', account_id: 'a2', amount: 2400, date: pastMonth(0, 15), notes: 'Best month yet' },
 ];

@@ -105,3 +105,27 @@ export interface BrokerConnection {
   is_active: boolean;
   last_synced_at?: string;
 }
+
+export type ExpenseFeeType = 'challenge' | 'reset' | 'activation' | 'data_fee' | 'other';
+
+export interface PropExpense {
+  id: string;
+  user_id?: string;
+  account_id?: string;     // optional link to a specific account
+  prop_firm: string;       // e.g. "TopstepX", "Apex"
+  account_size: number;    // e.g. 50000, 100000, 150000
+  fee_type: ExpenseFeeType;
+  amount: number;          // USD, always positive
+  date: string;            // ISO date YYYY-MM-DD
+  notes?: string;
+}
+
+export interface PropPayout {
+  id: string;
+  user_id?: string;
+  account_id?: string;
+  prop_firm: string;
+  amount: number;          // net payout after firm split, USD
+  date: string;            // ISO date
+  notes?: string;
+}
