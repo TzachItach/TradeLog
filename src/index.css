@@ -800,8 +800,10 @@ body:not(.dark) .daily-goal-bar { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
   aspect-ratio: 1;
 }
 /* Blend-mode erases the solid background: screen=erase black, multiply=erase white */
-body.dark .app-logo  { mix-blend-mode: screen; }
-body:not(.dark) .app-logo { mix-blend-mode: multiply; }
+body.dark .app-logo        { mix-blend-mode: screen; }
+body:not(.dark) .app-logo  { mix-blend-mode: multiply; }
+/* Sidebar is always black — always use screen regardless of theme */
+.sidebar .app-logo         { mix-blend-mode: screen; }
 .app-logo--lg {
   height: 160px;
   width: 160px;
