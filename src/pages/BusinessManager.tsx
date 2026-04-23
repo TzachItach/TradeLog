@@ -95,6 +95,7 @@ function MonthlyChart({ monthly, isHe }: { monthly: ReturnType<typeof calcBusine
     function draw() {
       if (!canvas) return;
       const { width: W, height: H } = canvas.getBoundingClientRect();
+      if (W === 0 || H === 0) return;
       canvas.width = W * devicePixelRatio;
       canvas.height = H * devicePixelRatio;
       const ctx = canvas.getContext('2d');
@@ -106,17 +107,31 @@ function MonthlyChart({ monthly, isHe }: { monthly: ReturnType<typeof calcBusine
       const GREEN = '#1DB954';
       const RED = '#E91429';
 
-      const pT = 20, pB = 36, pL = 52, pR = 16;
+      const pT = 20, pB = 32, pL = 52, pR = 16;
       const chartW = W - pL - pR;
       const chartH = H - pT - pB;
 
-      const maxVal = Math.max(...monthly.flatMap((m) => [m.expenses, m.payouts]), 1);
+      const realMax = Math.max(...monthly.flatMap((m) => [m.expenses, m.payouts]));
+
+      // Empty state
+      if (realMax === 0) {
+        ctx.fillStyle = textColor;
+        ctx.font = `13px system-ui`;
+        ctx.textAlign = 'center';
+        ctx.fillText(isHe ? 'אין נתונים עדיין' : 'No data yet', W / 2, H / 2);
+        return;
+      }
+
+      const maxVal = realMax;
       const n = monthly.length;
       const groupW = chartW / n;
       const barW = Math.max(4, Math.min(14, groupW * 0.32));
       const gap = 3;
 
-      // Grid lines
+      // How many labels fit without overlap (~36px per label)
+      const labelStep = Math.ceil((n * 38) / chartW);
+
+      // Grid lines + Y-axis labels
       ctx.strokeStyle = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)';
       ctx.lineWidth = 1;
       for (let i = 0; i <= 4; i++) {
@@ -124,38 +139,40 @@ function MonthlyChart({ monthly, isHe }: { monthly: ReturnType<typeof calcBusine
         ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(W - pR, y); ctx.stroke();
         const val = maxVal * (1 - i / 4);
         ctx.fillStyle = textColor;
-        ctx.font = `${Math.round(10 * devicePixelRatio) / devicePixelRatio}px system-ui`;
+        ctx.font = `10px system-ui`;
         ctx.textAlign = 'right';
-        ctx.fillText(val >= 1000 ? `$${(val / 1000).toFixed(0)}k` : `$${val.toFixed(0)}`, pL - 4, y + 4);
+        ctx.fillText(val >= 1000 ? `$${(val / 1000).toFixed(val >= 10000 ? 0 : 1)}k` : `$${Math.round(val)}`, pL - 4, y + 4);
       }
 
-      // Bars
+      // Bars + X-axis labels
       monthly.forEach((m, i) => {
         const cx = pL + groupW * i + groupW / 2;
-        const expH = (m.expenses / maxVal) * chartH;
-        const payH = (m.payouts / maxVal) * chartH;
+        const expH = Math.max(0, (m.expenses / maxVal) * chartH);
+        const payH = Math.max(0, (m.payouts / maxVal) * chartH);
 
-        // Expense bar (red)
-        const expX = cx - barW - gap / 2;
-        const expY = pT + chartH - expH;
-        ctx.fillStyle = RED;
-        ctx.beginPath();
-        ctx.roundRect(expX, expY, barW, expH, [3, 3, 0, 0]);
-        ctx.fill();
+        if (expH > 0) {
+          const expX = cx - barW - gap / 2;
+          ctx.fillStyle = RED;
+          ctx.beginPath();
+          ctx.roundRect(expX, pT + chartH - expH, barW, expH, [3, 3, 0, 0]);
+          ctx.fill();
+        }
 
-        // Payout bar (green)
-        const payX = cx + gap / 2;
-        const payY = pT + chartH - payH;
-        ctx.fillStyle = GREEN;
-        ctx.beginPath();
-        ctx.roundRect(payX, payY, barW, payH, [3, 3, 0, 0]);
-        ctx.fill();
+        if (payH > 0) {
+          const payX = cx + gap / 2;
+          ctx.fillStyle = GREEN;
+          ctx.beginPath();
+          ctx.roundRect(payX, pT + chartH - payH, barW, payH, [3, 3, 0, 0]);
+          ctx.fill();
+        }
 
-        // Month label
-        ctx.fillStyle = textColor;
-        ctx.font = `${Math.round(10 * devicePixelRatio) / devicePixelRatio}px system-ui`;
-        ctx.textAlign = 'center';
-        ctx.fillText(m.label, cx, H - pB + 16);
+        // Only draw label every labelStep months to avoid overlap
+        if (i % labelStep === 0) {
+          ctx.fillStyle = textColor;
+          ctx.font = `10px system-ui`;
+          ctx.textAlign = 'center';
+          ctx.fillText(m.label, cx, H - pB + 14);
+        }
       });
     }
   }, [monthly]);
