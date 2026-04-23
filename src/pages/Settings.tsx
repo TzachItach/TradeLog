@@ -513,7 +513,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
 
 /* ── דף ראשי ── */
 export default function Settings() {
-  const { lang, accounts, strategies, user, dailyGoalTarget, dailyMaxLoss, setDailyGoalTarget, setDailyMaxLoss, addAccount, updateAccount, deleteAccount, addStrategy, updateStrategy, deleteStrategy, setUser } = useStore();
+  const { lang, accounts, strategies, user, dailyGoalTarget, dailyMaxLoss, dataLoading, setDailyGoalTarget, setDailyMaxLoss, addAccount, updateAccount, deleteAccount, addStrategy, updateStrategy, deleteStrategy, setUser, reloadFromCloud } = useStore();
   const T = useT(lang);
   const navigate = useNavigate();
   const [accForm, setAccForm] = useState<'new' | string | null>(null);
@@ -670,14 +670,28 @@ export default function Settings() {
             <div className="list-card-meta">{user?.email ?? ''}</div>
           </div>
           {!DEMO_MODE && (
-            <button className="btn btn-danger" onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16,17 21,12 16,7"/>
-                <line x1="21" y1="12" x2="9" y2="12"/>
-              </svg>
-              {T.logout}
-            </button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                className="btn"
+                onClick={reloadFromCloud}
+                disabled={dataLoading}
+                style={{ display: 'flex', alignItems: 'center', gap: 7, border: '1px solid var(--bd2)', color: 'var(--t2)' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <polyline points="1,4 1,10 7,10"/>
+                  <path d="M3.51 15a9 9 0 1 0 .49-3.17"/>
+                </svg>
+                {dataLoading ? '...' : (lang === 'he' ? 'סנכרן' : 'Sync')}
+              </button>
+              <button className="btn btn-danger" onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16,17 21,12 16,7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                {T.logout}
+              </button>
+            </div>
           )}
         </div>
       </div>

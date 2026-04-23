@@ -86,6 +86,7 @@ interface AppState {
   loadDemoData: () => void;
   initRealUser: (userId: string, name: string, email: string) => Promise<void>;
   loadDataInBackground: (userId: string, name: string, email: string) => void;
+  reloadFromCloud: () => Promise<void>;
   getFilteredTrades: () => Trade[];
   getStats: () => { totalPnL: number; winRate: number; totalTrades: number; avgWin: number; avgLoss: number; profitFactor: number };
 }
@@ -249,8 +250,9 @@ export const useStore = create<AppState>()(
             dbSeedNewUser(userId, defAccount, defStrategies);
             set({ accounts: [defAccount], strategies: defStrategies, trades: [], lastUserId: userId });
           } else if (accounts.length > 0) {
-            // Only overwrite state when Supabase actually returned data
-            set({ accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss, lastUserId: userId });
+            // Only overwrite state when Supabase actually returned data.
+            // Reset selectedAccount to 'all' so stale account filters never hide trades.
+            set({ accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss, lastUserId: userId, selectedAccount: 'all' });
           } else {
             // Known user but got 0 accounts — keep localStorage cache
             console.warn('[Store] Known user returned 0 accounts — keeping cache');
@@ -259,6 +261,22 @@ export const useStore = create<AppState>()(
           console.warn('[Store] Background load failed, using cache:', err);
           // נשאר עם הנתונים מה-localStorage
         });
+      },
+
+      reloadFromCloud: async () => {
+        const userId = get().user?.id;
+        if (!userId) return;
+        set({ dataLoading: true });
+        try {
+          const { accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss } = await loadUserData(userId);
+          if (accounts.length > 0) {
+            set({ accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss, selectedAccount: 'all' });
+          }
+        } catch (err) {
+          console.error('[Store] reloadFromCloud failed:', err);
+        } finally {
+          set({ dataLoading: false });
+        }
       },
 
       getFilteredTrades: () => {
