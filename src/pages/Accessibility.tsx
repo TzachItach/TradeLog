@@ -53,14 +53,14 @@ export default function Accessibility() {
             <div className="legal-section">
               <h2>4. פנייה בנושאי נגישות</h2>
               <p>נתקלת בבעיית נגישות? אנחנו רוצים לדעת ולתקן. פנה אלינו:</p>
-              <p>מייל: <a href="mailto:tradelog@gmail.com" style={{color:'var(--b)'}}>tradelog@gmail.com</a></p>
+              <p>מייל: <a href="mailto:tradelogisr@gmail.com" style={{color:'var(--b)'}}>tradelogisr@gmail.com</a></p>
               <p>נשתדל לחזור תוך 5 ימי עסקים.</p>
             </div>
 
             <div className="legal-section">
               <h2>5. רכז נגישות</h2>
               <p>רכז הנגישות: <strong>צח איטח</strong></p>
-              <p>לפנייה: <a href="mailto:tradelog@gmail.com" style={{color:'var(--b)'}}>tradelog@gmail.com</a></p>
+              <p>לפנייה: <a href="mailto:tradelogisr@gmail.com" style={{color:'var(--b)'}}>tradelogisr@gmail.com</a></p>
             </div>
           </>
         ) : (
@@ -98,14 +98,14 @@ export default function Accessibility() {
             <div className="legal-section">
               <h2>4. Accessibility Feedback</h2>
               <p>Encountered an accessibility issue? We want to know and fix it. Contact us:</p>
-              <p>Email: <a href="mailto:tradelog@gmail.com" style={{color:'var(--b)'}}>tradelog@gmail.com</a></p>
+              <p>Email: <a href="mailto:tradelogisr@gmail.com" style={{color:'var(--b)'}}>tradelogisr@gmail.com</a></p>
               <p>We aim to respond within 5 business days.</p>
             </div>
 
             <div className="legal-section">
               <h2>5. Accessibility Coordinator</h2>
               <p>Accessibility Coordinator: <strong>Tzach Itach</strong></p>
-              <p>Contact: <a href="mailto:tradelog@gmail.com" style={{color:'var(--b)'}}>tradelog@gmail.com</a></p>
+              <p>Contact: <a href="mailto:tradelogisr@gmail.com" style={{color:'var(--b)'}}>tradelogisr@gmail.com</a></p>
             </div>
           </>
         )}
