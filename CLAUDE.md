@@ -20,6 +20,12 @@
 ```
 src/
   App.tsx                  — Router, AuthListener, AppEffects, SplashScreen
+supabase/
+  functions/
+    broker-oauth/index.ts  — Edge Function: מאמת API key מול ProjectX, שומר credentials ב-broker_connections
+    topstepx-sync/index.ts — Edge Function: מאמת, מושך עסקאות (90 יום אחרונים / מ-last_synced_at), מכניס ל-trades
+  migrations/
+    topstepx_broker_connections.sql — הוספת עמודות + unique constraint + RLS ל-broker_connections
   store.ts                 — Zustand store + Supabase sync
   i18n.ts                  — עברית/אנגלית (80+ מחרוזות)
   types.ts                 — TypeScript interfaces
@@ -54,7 +60,7 @@ src/
                              Heatmap, Distribution, RR Scatter, Streaks
     PropFirm.tsx           — Prop Firm Tracker: כרטיסי חשבון עם מדים
     Reports.tsx            — Export PDF + CSV
-    Settings.tsx           — חשבונות + אסטרטגיות + CSV Import + logout + כפתור סנכרן
+    Settings.tsx           — חשבונות + אסטרטגיות + BrokerSection (TopstepX connect/sync) + logout + כפתור סנכרן
     AppLogo.tsx            — קומפוננטת לוגו responsive עם dark/light switching
     Auth.tsx               — Google OAuth בלבד
     Accessibility.tsx      — הצהרת נגישות עב/en (מתייחסת ל-Negishot)
@@ -83,6 +89,17 @@ src/
 
 ## Database Schema
 טבלאות: `profiles`, `accounts`, `strategies`, `strategy_fields`, `trades`, `trade_media`, `broker_connections`, `sync_log`
+
+**`broker_connections`** — עמודות רלוונטיות לTopstepX:
+```
+id, user_id, account_id, broker,
+api_username (text),          -- TopstepX login email
+api_key (text),               -- TopstepX API key
+projectx_account_id (int),    -- numeric ID מה-ProjectX API
+is_active (bool),
+last_synced_at (timestamptz)  -- נקודת התחלה לסנכרון הבא
+UNIQUE (user_id, account_id, broker)
+```
 
 **חשוב**: כל `id` חייב להיות **UUID** (`crypto.randomUUID()`) — לא `t-${Date.now()}`!
 
@@ -276,6 +293,22 @@ VITE_SUPABASE_ANON_KEY=...
 8. **Trade Media**: bucket `trade-media` ב-Supabase Storage (private). טבלת `trade_media`: `id, trade_id, user_id, storage_path, label, created_at`
 9. **Currency**: USD בלבד — `formatPnL()` משתמש ב-`$`. אין ₪ בשום מקום
 10. **Design**: Spotify Dark — אין #0071e3, אין Apple Light. Accent = `#1DB954`
+
+---
+
+### TopstepX Auto Import (ProjectX Gateway API)
+- **API Base**: `https://api.topstepx.projectx.com` (env var `TOPSTEPX_BASE_URL`)
+- **Auth endpoint**: `POST /api/Auth/loginKey` → `{userName, apiKey}` → `{token}`
+- **Accounts**: `POST /api/Account/search` → `{onlyActiveAccounts: true}` → `{accounts[].id}`
+- **Trades**: `POST /api/Trade/search` → `{accountId, startTimestamp, endTimestamp}` → `{trades[]}`
+  - `profitAndLoss === null` = half-turn (לא עסקה שלמה) — מדלגים
+  - `voided === true` — מדלגים
+  - `side: 0` (sell=סגר long) → `direction: 'long'` | `side: 1` (buy=סגר short) → `direction: 'short'`
+  - `contractId` נורמלי: `CON.F.US.MNQ.M25` → `MNQ` | `MNQM5` → `MNQ`
+  - `pnl = profitAndLoss - fees`
+  - `broker_trade_id = topstepx-{id}`
+- **Flow בSettings**: Enter API Key → Connect (קורא `broker-oauth`) → Sync Now (קורא `topstepx-sync`)
+- **Deployed**: שתי Edge Functions פרוסות ב-Supabase project `mxzyfmuktsyazkfxglzb`
 
 ---
 
