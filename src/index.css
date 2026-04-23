@@ -796,14 +796,16 @@ body:not(.dark) .daily-goal-bar { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
   flex-shrink: 0;
   user-select: none;
   height: 48px;
-  width: auto;
+  width: 48px;        /* 1:1 — prevents layout shift (logos are 1024×1024) */
+  aspect-ratio: 1;
+  border-radius: 8px; /* softens the solid-bg corners */
 }
 .app-logo--lg {
-  height: auto;
+  height: 160px;
   width: 160px;
 }
 @media (max-width: 768px) {
-  .app-logo--md { height: 32px; }
+  .app-logo--md { height: 32px; width: 32px; }
 }
 
 
