@@ -361,15 +361,22 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
 
   const connectTopstepX = async (accountId: string) => {
     if (!topstepKey.trim()) return;
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
     try {
       const res = await fetch(
-        `${supabaseUrl}/functions/v1/broker-oauth?broker=topstepx&user_id=${user?.id}&account_id=${accountId}&api_token=${encodeURIComponent(topstepKey)}&api_username=${encodeURIComponent(user?.email ?? '')}`
+        `${supabaseUrl}/functions/v1/broker-oauth?broker=topstepx&user_id=${user?.id}&account_id=${accountId}&api_token=${encodeURIComponent(topstepKey)}&api_username=${encodeURIComponent(user?.email ?? '')}`,
+        { headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` } }
       );
-      if (res.ok || res.redirected) {
+      if (res.ok) {
         setTxConn((c) => ({ ...c, [accountId]: true }));
         setShowTopstepInput(false);
         setTopstepKey('');
         alert(isHe ? 'TopstepX חובר בהצלחה!' : 'TopstepX connected!');
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(isHe
+          ? `שגיאה בחיבור TopstepX: ${data.error ?? res.status}`
+          : `TopstepX connection failed: ${data.error ?? res.status}`);
       }
     } catch {
       alert(isHe ? 'שגיאה בחיבור TopstepX' : 'TopstepX connection failed');
