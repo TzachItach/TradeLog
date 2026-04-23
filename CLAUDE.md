@@ -54,7 +54,8 @@ src/
                              Heatmap, Distribution, RR Scatter, Streaks
     PropFirm.tsx           — Prop Firm Tracker: כרטיסי חשבון עם מדים
     Reports.tsx            — Export PDF + CSV
-    Settings.tsx           — חשבונות + אסטרטגיות + CSV Import + logout
+    Settings.tsx           — חשבונות + אסטרטגיות + CSV Import + logout + כפתור סנכרן
+    AppLogo.tsx            — קומפוננטת לוגו responsive עם dark/light switching
     Auth.tsx               — Google OAuth בלבד
     Accessibility.tsx      — הצהרת נגישות עב/en (מתייחסת ל-Negishot)
     Terms.tsx / Privacy.tsx — דפים משפטיים עב/en
@@ -70,6 +71,13 @@ src/
   2. `loadDataInBackground(userId)` → Supabase async → update store
   3. `lastUserId` ב-localStorage מונע reset
 - כל שמירה → localStorage + Supabase במקביל
+
+### הגנות חשובות ב-loadDataInBackground
+- אם שאילתת `accounts` נכשלת ב-Supabase → **throw** (לא מחזיר [] בשקט) → `.catch()` שומר cache
+- `isNewUser` נבדק רק אם `lastUserId !== userId` — משתמש מוכר **לעולם לא** מקבל seeding מחדש
+- עדכון state רק כשחזרו נתונים אמיתיים (`accounts.length > 0`)
+- מאפס `selectedAccount: 'all'` בכל טעינה מוצלחת — פילטר חשבון לא מסתיר עסקאות
+- כפתור **"סנכרן"** ב-Settings → `reloadFromCloud()` — טעינה מחדש בלי רענון דף
 
 ---
 
@@ -99,6 +107,8 @@ RLS: כל טבלה עם `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = u
 - תמחור: USD (לא ₪) — $19/mo | $159/yr | $349 lifetime
 - כפתורים: "התחל עכשיו" → `/auth`, "נסה דמו" → demo data + `/dashboard`
 - Route `*` מפנה ל-`/` (לא ל-`/dashboard`)
+- **לוגואים**: Nav=56px, Footer=52px, Mockup sidebar=36px — כולם `/logo.png` עם `mix-blend-mode:screen` inline
+- **Mockup**: משתמש ב-`/logo.png` (לא `/logo-icon.png` שלא קיים)
 
 ### CalendarView
 - Grid: `32px (ראשון מוקטן + מעומעם) + repeat(6,1fr) + 100px (שבוע)`
@@ -182,9 +192,20 @@ NQ=$20, MNQ=$2, ES=$50, MES=$5, CL=$1000, GC=$100, SI=$5000...
 .btn-primary { background: var(--g); color: #000000; border-radius: var(--rad-pill); }
 ```
 
-### לוגו (בכל המקומות)
-- עיגול: `background: var(--g)` (#1DB954), SVG chart icon, `stroke="#000000"`
-- טקסט "TradeLog": `color: var(--t1)`
+### לוגו (`AppLogo.tsx`)
+- קבצים: `public/logo.png` (לבן על שחור — dark mode), `public/logo-light.png` (שחור על לבן — light mode)
+- קומפוננטה: `<AppLogo size="md|lg" forceLight? onClick? />`
+  - `forceLight=true` → תמיד `logo.png` (ל-sidebar שתמיד שחור)
+  - `size="md"` → 48px desktop / 52px mobile + border-radius 10px
+  - `size="lg"` → 160px (ב-sidebar)
+- **Mix-blend-mode** (מוחק רקע מוצק):
+  ```css
+  body.dark .app-logo        { mix-blend-mode: screen; }   /* מוחק שחור */
+  body:not(.dark) .app-logo  { mix-blend-mode: multiply; } /* מוחק לבן */
+  .sidebar .app-logo         { mix-blend-mode: normal !important; } /* sidebar=#000, אין צורך */
+  ```
+  - **שים לב**: `body:not(.dark) .app-logo` specificity = 0,2,1 (כולל element) → חייב `!important` לסידבר
+- **Landing page**: לוגואים עם `mix-blend-mode: screen` (inline) — הרקע תמיד `#121212`
 - SplashScreen: `background: #121212`, spinner `#1DB954`
 
 ### Analytics Canvas Colors
@@ -215,7 +236,7 @@ const G = '#1DB954';  const R = '#E91429';  const B = '#1DB954';  const O = '#F5
 - Content: `padding-bottom: 60px`
 
 ### Header במובייל
-- לוגו: `position: absolute; left: 50%; transform: translateX(-50%)`
+- לוגו: `position: absolute; left: 50%; transform: translateX(-50%)`, 52px + border-radius 10px
 - כפתור "+ New Trade": מוסתר (`.header-new-trade-btn { display: none }`)
 
 ### Negishot Accessibility Widget
