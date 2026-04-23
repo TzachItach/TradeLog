@@ -238,17 +238,25 @@ export const useStore = create<AppState>()(
       loadDataInBackground: (userId, name, email) => {
         set({ user: { id: userId, name, email }, isDemo: false });
         loadUserData(userId).then(({ accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss }) => {
-          const isNewUser = accounts.length === 0 && strategies.length === 0;
+          // Guard: never treat empty Supabase response as "new user" if we've seen this
+          // userId before — empty data likely means an RLS / session issue, not a new user.
+          const isKnownUser = get().lastUserId === userId;
+          const isNewUser = !isKnownUser && accounts.length === 0 && strategies.length === 0;
+
           if (isNewUser) {
             const defAccount = createDefaultAccount();
             const defStrategies = createDefaultStrategies();
             dbSeedNewUser(userId, defAccount, defStrategies);
             set({ accounts: [defAccount], strategies: defStrategies, trades: [], lastUserId: userId });
-          } else {
+          } else if (accounts.length > 0) {
+            // Only overwrite state when Supabase actually returned data
             set({ accounts, strategies, trades, dailyGoalTarget, dailyMaxLoss, lastUserId: userId });
+          } else {
+            // Known user but got 0 accounts — keep localStorage cache
+            console.warn('[Store] Known user returned 0 accounts — keeping cache');
           }
         }).catch((err) => {
-          console.warn('Background load failed, using cache:', err);
+          console.warn('[Store] Background load failed, using cache:', err);
           // נשאר עם הנתונים מה-localStorage
         });
       },

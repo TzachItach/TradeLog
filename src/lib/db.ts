@@ -31,6 +31,10 @@ export async function loadUserData(userId: string): Promise<{
   logErr('strategies.select', stratRes.error);
   logErr('trades.select', tradeRes.error);
 
+  // If the accounts query failed (e.g. expired session, RLS), throw so the caller's
+  // .catch() keeps the localStorage cache instead of treating it as a new user.
+  if (accRes.error) throw new Error(`accounts fetch failed: ${accRes.error.message}`);
+
   const dailyGoalTarget = profileRes.data?.daily_goal_target ?? 0;
   const dailyMaxLoss = profileRes.data?.daily_max_loss ?? 0;
 
