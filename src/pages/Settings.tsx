@@ -363,7 +363,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
     if (!topstepKey.trim()) return;
     try {
       const res = await fetch(
-        `${supabaseUrl}/functions/v1/broker-oauth?broker=topstepx&user_id=${user?.id}&account_id=${accountId}&api_token=${encodeURIComponent(topstepKey)}`
+        `${supabaseUrl}/functions/v1/broker-oauth?broker=topstepx&user_id=${user?.id}&account_id=${accountId}&api_token=${encodeURIComponent(topstepKey)}&api_username=${encodeURIComponent(user?.email ?? '')}`
       );
       if (res.ok || res.redirected) {
         setTxConn((c) => ({ ...c, [accountId]: true }));
@@ -382,6 +382,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
       const res = await fetch(`${supabaseUrl}/functions/v1/${broker}-sync`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user?.id }),
       });
       const data = await res.json();
       setLastSync((s) => ({ ...s, [broker]: new Date().toLocaleTimeString() }));
@@ -660,6 +661,11 @@ export default function Settings() {
             : '💡 Set 0 to disable a goal. Goals appear on the dashboard with a progress bar for today.'}
         </div>
       </div>
+
+      {/* חיבורי ברוקר */}
+      {!DEMO_MODE && (
+        <BrokerSection lang={lang} accounts={accounts} user={user} />
+      )}
 
       {/* פרופיל + התנתקות */}
       <div className="settings-section">
