@@ -1,6 +1,7 @@
 import { useMemo, useRef, useEffect, useState } from 'react';
 import { useStore } from '../store';
 import { calcBusinessStats } from '../lib/business';
+import type { MonthlySnapshot } from '../lib/business';
 import type { PropExpense, PropPayout, ExpenseFeeType } from '../types';
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
@@ -80,22 +81,30 @@ function GamblingMeter({ score, isHe }: { score: number; isHe: boolean }) {
 
 // ─── Monthly Bar Chart (Canvas) ───────────────────────────────────────────────
 
-function MonthlyChart({ monthly, isHe }: { monthly: ReturnType<typeof calcBusinessStats>['monthly']; isHe: boolean }) {
+function MonthlyChart({ monthly, isHe, hasAnyData }: {
+  monthly: ReturnType<typeof calcBusinessStats>['monthly'];
+  isHe: boolean;
+  hasAnyData: boolean;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Keep latest monthly/isHe/hasAnyData accessible inside the stable ResizeObserver callback
+  const dataRef = useRef<{ monthly: MonthlySnapshot[]; isHe: boolean; hasAnyData: boolean }>({ monthly, isHe, hasAnyData });
+  dataRef.current = { monthly, isHe, hasAnyData };
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ro = new ResizeObserver(() => draw());
-    ro.observe(canvas);
-    draw();
-    return () => ro.disconnect();
-
-    function draw() {
+    const draw = () => {
       if (!canvas) return;
       const { width: W, height: H } = canvas.getBoundingClientRect();
-      if (W === 0 || H === 0) return;
+      if (W === 0 || H === 0) {
+        // Layout not ready — retry after next paint
+        requestAnimationFrame(draw);
+        return;
+      }
+      const { monthly: m, isHe: he, hasAnyData: hasData } = dataRef.current;
+
       canvas.width = W * devicePixelRatio;
       canvas.height = H * devicePixelRatio;
       const ctx = canvas.getContext('2d');
@@ -111,24 +120,20 @@ function MonthlyChart({ monthly, isHe }: { monthly: ReturnType<typeof calcBusine
       const chartW = W - pL - pR;
       const chartH = H - pT - pB;
 
-      const realMax = Math.max(...monthly.flatMap((m) => [m.expenses, m.payouts]));
-
-      // Empty state
-      if (realMax === 0) {
+      // Only show "no data" when there are genuinely zero records
+      if (!hasData) {
         ctx.fillStyle = textColor;
         ctx.font = `13px system-ui`;
         ctx.textAlign = 'center';
-        ctx.fillText(isHe ? 'אין נתונים עדיין' : 'No data yet', W / 2, H / 2);
+        ctx.fillText(he ? 'הוסף הוצאה או משיכה כדי לראות גרף' : 'Add an expense or payout to see the chart', W / 2, H / 2);
         return;
       }
 
-      const maxVal = realMax;
-      const n = monthly.length;
+      const realMax = Math.max(...m.flatMap((x) => [x.expenses, x.payouts]), 1);
+      const n = m.length;
       const groupW = chartW / n;
       const barW = Math.max(4, Math.min(14, groupW * 0.32));
       const gap = 3;
-
-      // How many labels fit without overlap (~36px per label)
       const labelStep = Math.ceil((n * 38) / chartW);
 
       // Grid lines + Y-axis labels
@@ -137,7 +142,7 @@ function MonthlyChart({ monthly, isHe }: { monthly: ReturnType<typeof calcBusine
       for (let i = 0; i <= 4; i++) {
         const y = pT + (chartH / 4) * i;
         ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(W - pR, y); ctx.stroke();
-        const val = maxVal * (1 - i / 4);
+        const val = realMax * (1 - i / 4);
         ctx.fillStyle = textColor;
         ctx.font = `10px system-ui`;
         ctx.textAlign = 'right';
@@ -145,37 +150,124 @@ function MonthlyChart({ monthly, isHe }: { monthly: ReturnType<typeof calcBusine
       }
 
       // Bars + X-axis labels
-      monthly.forEach((m, i) => {
+      m.forEach((snap, i) => {
         const cx = pL + groupW * i + groupW / 2;
-        const expH = Math.max(0, (m.expenses / maxVal) * chartH);
-        const payH = Math.max(0, (m.payouts / maxVal) * chartH);
+        const expH = Math.max(0, (snap.expenses / realMax) * chartH);
+        const payH = Math.max(0, (snap.payouts / realMax) * chartH);
 
         if (expH > 0) {
-          const expX = cx - barW - gap / 2;
           ctx.fillStyle = RED;
           ctx.beginPath();
-          ctx.roundRect(expX, pT + chartH - expH, barW, expH, [3, 3, 0, 0]);
+          ctx.roundRect(cx - barW - gap / 2, pT + chartH - expH, barW, expH, [3, 3, 0, 0]);
           ctx.fill();
         }
-
         if (payH > 0) {
-          const payX = cx + gap / 2;
           ctx.fillStyle = GREEN;
           ctx.beginPath();
-          ctx.roundRect(payX, pT + chartH - payH, barW, payH, [3, 3, 0, 0]);
+          ctx.roundRect(cx + gap / 2, pT + chartH - payH, barW, payH, [3, 3, 0, 0]);
           ctx.fill();
         }
 
-        // Only draw label every labelStep months to avoid overlap
         if (i % labelStep === 0) {
           ctx.fillStyle = textColor;
           ctx.font = `10px system-ui`;
           ctx.textAlign = 'center';
-          ctx.fillText(m.label, cx, H - pB + 14);
+          ctx.fillText(snap.label, cx, H - pB + 14);
         }
       });
+    };
+
+    // Stable ResizeObserver — always reads latest data from ref
+    const ro = new ResizeObserver(draw);
+    ro.observe(canvas);
+    // Use rAF for initial draw so layout is complete before we measure
+    const raf = requestAnimationFrame(draw);
+    return () => { ro.disconnect(); cancelAnimationFrame(raf); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // setup once — data changes flow through dataRef
+
+  // Trigger a redraw whenever data or theme changes
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const { width: W, height: H } = canvas.getBoundingClientRect();
+    if (W > 0 && H > 0) {
+      requestAnimationFrame(() => {
+        const draw = () => {
+          if (!canvas) return;
+          const { width: W2, height: H2 } = canvas.getBoundingClientRect();
+          if (W2 === 0 || H2 === 0) return;
+          const { monthly: m, isHe: he, hasAnyData: hasData } = dataRef.current;
+
+          canvas.width = W2 * devicePixelRatio;
+          canvas.height = H2 * devicePixelRatio;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+          ctx.scale(devicePixelRatio, devicePixelRatio);
+
+          const isDark = document.body.classList.contains('dark');
+          const textColor = isDark ? 'rgba(255,255,255,.55)' : 'rgba(0,0,0,.45)';
+          const GREEN = '#1DB954';
+          const RED = '#E91429';
+          const pT = 20, pB = 32, pL = 52, pR = 16;
+          const chartW = W2 - pL - pR;
+          const chartH = H2 - pT - pB;
+
+          if (!hasData) {
+            ctx.fillStyle = textColor;
+            ctx.font = `13px system-ui`;
+            ctx.textAlign = 'center';
+            ctx.fillText(he ? 'הוסף הוצאה או משיכה כדי לראות גרף' : 'Add an expense or payout to see the chart', W2 / 2, H2 / 2);
+            return;
+          }
+
+          const realMax = Math.max(...m.flatMap((x) => [x.expenses, x.payouts]), 1);
+          const n = m.length;
+          const groupW = chartW / n;
+          const barW = Math.max(4, Math.min(14, groupW * 0.32));
+          const gap = 3;
+          const labelStep = Math.ceil((n * 38) / chartW);
+
+          ctx.strokeStyle = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)';
+          ctx.lineWidth = 1;
+          for (let i = 0; i <= 4; i++) {
+            const y = pT + (chartH / 4) * i;
+            ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(W2 - pR, y); ctx.stroke();
+            const val = realMax * (1 - i / 4);
+            ctx.fillStyle = textColor;
+            ctx.font = `10px system-ui`;
+            ctx.textAlign = 'right';
+            ctx.fillText(val >= 1000 ? `$${(val / 1000).toFixed(val >= 10000 ? 0 : 1)}k` : `$${Math.round(val)}`, pL - 4, y + 4);
+          }
+
+          m.forEach((snap, i) => {
+            const cx = pL + groupW * i + groupW / 2;
+            const expH = Math.max(0, (snap.expenses / realMax) * chartH);
+            const payH = Math.max(0, (snap.payouts / realMax) * chartH);
+            if (expH > 0) {
+              ctx.fillStyle = RED;
+              ctx.beginPath();
+              ctx.roundRect(cx - barW - gap / 2, pT + chartH - expH, barW, expH, [3, 3, 0, 0]);
+              ctx.fill();
+            }
+            if (payH > 0) {
+              ctx.fillStyle = GREEN;
+              ctx.beginPath();
+              ctx.roundRect(cx + gap / 2, pT + chartH - payH, barW, payH, [3, 3, 0, 0]);
+              ctx.fill();
+            }
+            if (i % labelStep === 0) {
+              ctx.fillStyle = textColor;
+              ctx.font = `10px system-ui`;
+              ctx.textAlign = 'center';
+              ctx.fillText(snap.label, cx, H2 - pB + 14);
+            }
+          });
+        };
+        draw();
+      });
     }
-  }, [monthly]);
+  }, [monthly, isHe, hasAnyData]);
 
   return (
     <div style={{ background: 'var(--s2)', border: '1px solid var(--bd)', borderRadius: 14, padding: '22px 24px' }}>
@@ -710,7 +802,7 @@ export default function BusinessManager() {
 
       {/* Monthly chart */}
       <div style={{ marginBottom: 20 }}>
-        <MonthlyChart monthly={stats.monthly} isHe={isHe} />
+        <MonthlyChart monthly={stats.monthly} isHe={isHe} hasAnyData={expenses.length > 0 || payouts.length > 0} />
       </div>
 
       {/* Logs */}
