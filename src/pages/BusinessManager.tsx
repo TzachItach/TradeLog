@@ -190,7 +190,7 @@ function MonthlyChart({ monthly, isHe }: { monthly: ReturnType<typeof calcBusine
           </span>
           <span style={{ fontSize: '.72rem', color: 'var(--t3)', display: 'flex', alignItems: 'center', gap: 5 }}>
             <span style={{ width: 10, height: 10, borderRadius: 2, background: '#1DB954', display: 'inline-block' }} />
-            {isHe ? 'תשלומים' : 'Payouts'}
+            {isHe ? 'משיכות' : 'Payouts'}
           </span>
         </div>
       </div>
@@ -223,7 +223,7 @@ function InsightsPanel({ stats, isHe }: { stats: ReturnType<typeof calcBusinessS
       color: 'var(--b)',
       bg: 'rgba(29,185,84,.08)',
       border: 'rgba(29,185,84,.3)',
-      title: isHe ? 'מצב סיכון נמוך — יש תשלום ממתין' : 'Low-Risk Mode — Payout Pending',
+      title: isHe ? 'מצב סיכון נמוך — יש משיכה ממתינה' : 'Low-Risk Mode — Payout Pending',
       body: isHe
         ? 'חשבון ממומן פעיל זוהה. הגן על ההון שלך — הימנע מסיכונים גבוהים ושמור על ה-drawdown לצורך משיכת הרווח.'
         : 'An active funded account detected. Protect your capital — avoid elevated risk and preserve drawdown to secure your payout.',
@@ -373,7 +373,7 @@ function EntryModal({
         <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--t1)', marginBottom: 20 }}>
           {mode === 'expense'
             ? (editExpense ? (isHe ? 'ערוך הוצאה' : 'Edit Expense') : (isHe ? '+ הוצאה חדשה' : '+ New Expense'))
-            : (editPayout ? (isHe ? 'ערוך תשלום' : 'Edit Payout') : (isHe ? '+ תשלום חדש' : '+ New Payout'))}
+            : (editPayout ? (isHe ? 'ערוך משיכה' : 'Edit Payout') : (isHe ? '+ משיכה חדשה' : '+ New Payout'))}
         </div>
 
         {mode === 'expense' ? (
@@ -482,7 +482,7 @@ function LogsSection({
           {isHe ? `הוצאות (${expenses.length})` : `Expenses (${expenses.length})`}
         </button>
         <button style={tabStyle(tab === 'payouts')} onClick={() => setTab('payouts')}>
-          {isHe ? `תשלומים (${payouts.length})` : `Payouts (${payouts.length})`}
+          {isHe ? `משיכות (${payouts.length})` : `Payouts (${payouts.length})`}
         </button>
       </div>
 
@@ -541,7 +541,7 @@ function LogsSection({
       {tab === 'payouts' && (
         payouts.length === 0 ? (
           <div style={{ padding: '32px 20px', textAlign: 'center', color: 'var(--t3)', fontSize: '.84rem' }}>
-            {isHe ? 'אין תשלומים רשומים' : 'No payouts logged'}
+            {isHe ? 'אין משיכות רשומות' : 'No payouts logged'}
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
@@ -635,7 +635,7 @@ export default function BusinessManager() {
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
           <button className="btn btn-ghost" onClick={() => setModal({ mode: 'payout' })}>
-            + {isHe ? 'תשלום' : 'Payout'}
+            + {isHe ? 'משיכה' : 'Payout'}
           </button>
           <button className="btn btn-primary" onClick={() => setModal({ mode: 'expense' })}>
             + {isHe ? 'הוצאה' : 'Expense'}
