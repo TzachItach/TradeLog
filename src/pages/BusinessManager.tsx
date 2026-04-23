@@ -350,9 +350,9 @@ function EntryModal({
   const labelStyle: React.CSSProperties = { fontSize: '.75rem', color: 'var(--t3)', marginBottom: 4, display: 'block' };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16 }}
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16, boxSizing: 'border-box' }}
       onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div style={{ background: 'var(--s2)', borderRadius: 16, padding: '28px 24px', width: '100%', maxWidth: 420, boxShadow: '0 24px 60px rgba(0,0,0,.5)' }}>
+      <div style={{ background: 'var(--s2)', borderRadius: 16, padding: '28px 24px', width: '100%', maxWidth: 420, boxShadow: '0 24px 60px rgba(0,0,0,.5)', boxSizing: 'border-box', maxHeight: 'calc(100vh - 32px)', overflowY: 'auto' }}>
         <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--t1)', marginBottom: 20 }}>
           {mode === 'expense'
             ? (editExpense ? (isHe ? 'ערוך הוצאה' : 'Edit Expense') : (isHe ? '+ הוצאה חדשה' : '+ New Expense'))
