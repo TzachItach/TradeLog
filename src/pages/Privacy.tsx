@@ -78,7 +78,7 @@ export default function Privacy() {
             <div className="legal-section">
               <h2>8. צור קשר</h2>
               <p>לשאלות בנוגע למדיניות הפרטיות, לממש זכויות, או לכל פנייה אחרת:</p>
-              <p>מייל: <a href="mailto:support@tradelog.app" style={{color:'var(--b)'}}>support@tradelog.app</a></p>
+              <p>מייל: <a href="mailto:tradelogisr@gmail.com" style={{color:'var(--b)'}}>tradelogisr@gmail.com</a></p>
             </div>
           </>
         ) : (
@@ -141,7 +141,7 @@ export default function Privacy() {
             <div className="legal-section">
               <h2>8. Contact</h2>
               <p>For privacy questions, to exercise your rights, or for any other inquiry:</p>
-              <p>Email: <a href="mailto:support@tradelog.app" style={{color:'var(--b)'}}>support@tradelog.app</a></p>
+              <p>Email: <a href="mailto:tradelogisr@gmail.com" style={{color:'var(--b)'}}>tradelogisr@gmail.com</a></p>
             </div>
           </>
         )}

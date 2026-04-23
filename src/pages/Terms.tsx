@@ -26,7 +26,7 @@ export default function Terms() {
               <h2>1. פרטי בעל השירות</h2>
               <p>השירות מופעל על ידי: <strong>צח איטח</strong>, ע"מ: <strong>203461470</strong>.</p>
               <p>כתובת: <strong>יהודה הלוי 21, יבנה</strong>.</p>
-              <p>יצירת קשר: <a href="mailto:support@tradelog.app" style={{color:'var(--b)'}}>support@tradelog.app</a></p>
+              <p>יצירת קשר: <a href="mailto:tradelogisr@gmail.com" style={{color:'var(--b)'}}>tradelogisr@gmail.com</a></p>
             </div>
             <div className="legal-section">
               <h2>2. קבלת התנאים</h2>
@@ -77,7 +77,7 @@ export default function Terms() {
               <h2>1. Service Operator</h2>
               <p>The Service is operated by: <strong>Tzach Itach</strong>, Business ID: <strong>203461470</strong>.</p>
               <p>Address: <strong>Yehuda Halevi 21, Yavne, Israel</strong>.</p>
-              <p>Contact: <a href="mailto:support@tradelog.app" style={{color:'var(--b)'}}>support@tradelog.app</a></p>
+              <p>Contact: <a href="mailto:tradelogisr@gmail.com" style={{color:'var(--b)'}}>tradelogisr@gmail.com</a></p>
             </div>
             <div className="legal-section">
               <h2>2. Acceptance of Terms</h2>
