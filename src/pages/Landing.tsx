@@ -90,7 +90,7 @@ export default function Landing() {
                 {/* Sidebar */}
                 <div className="lp-mockup-sidebar">
                   <div className="lp-mockup-logo">
-                    <img src="/logo.png" alt="TradeLog" style={{ height: 36, width: 'auto', objectFit: 'contain' }} />
+                    <img src="/logo-icon.png" alt="TradeLog" style={{ height: 32, width: 32, objectFit: 'contain' }} />
                   </div>
                   {[
                     { label: 'Calendar', active: true },

@@ -14,7 +14,7 @@ const GoogleIcon = () => (
 );
 
 export default function Auth() {
-  const { lang, setLang, loadDemoData, setUser } = useStore();
+  const { lang, setLang, loadDemoData, setUser, darkMode } = useStore();
   const T = useT(lang);
   const navigate = useNavigate();
   const [agreed, setAgreed] = useState(false);
@@ -39,7 +39,7 @@ export default function Auth() {
 
       <div className="auth-card" dir={lang === 'he' ? 'rtl' : 'ltr'}>
         <div className="auth-logo">
-          <img src="/logo.png" alt="TradeLog" style={{ width: 180, height: 'auto', objectFit: 'contain', margin: '0 auto 8px', display: 'block' }} />
+          <img src={darkMode ? '/logo.png' : '/logo-light.png'} alt="TradeLog" style={{ width: 180, height: 'auto', objectFit: 'contain', margin: '0 auto 8px', display: 'block' }} />
         </div>
 
         <div className="auth-title">{T.welcomeBack}</div>
