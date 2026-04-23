@@ -789,6 +789,23 @@ body:not(.dark) .daily-goal-bar { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
 .sidebar-close-btn { display: none; }
 .sidebar-backdrop { display: none; }
 
+/* ── AppLogo component ── */
+.app-logo {
+  display: block;
+  object-fit: contain;
+  flex-shrink: 0;
+  user-select: none;
+  height: 48px;
+  width: auto;
+}
+.app-logo--lg {
+  height: auto;
+  width: 160px;
+}
+@media (max-width: 768px) {
+  .app-logo--md { height: 32px; }
+}
+
 .header-logo {
   display: none; align-items: center; gap: 7px;
   cursor: pointer; flex-shrink: 0; user-select: none;

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { useT } from '../i18n';
+import AppLogo from './AppLogo';
 
 /** Half-dark / half-light split circle button */
 function ThemeToggle({ darkMode, onClick }: { darkMode: boolean; onClick: () => void }) {
@@ -19,7 +20,6 @@ function ThemeToggle({ darkMode, onClick }: { darkMode: boolean; onClick: () => 
 
 export default function Header() {
   const { lang, setLang, accounts, selectedAccount, setSelectedAccount, setModal, user, sidebarCollapsed, setSidebarCollapsed, darkMode, setDarkMode } = useStore();
-  const logoSrc = darkMode ? '/logo.png' : '/logo-light.png';
   const T = useT(lang);
   const navigate = useNavigate();
 
@@ -46,10 +46,9 @@ export default function Header() {
       {/* Logo — mobile only */}
       <div
         className="header-logo"
-        onClick={() => navigate('/dashboard')}
         title={T.appName}
       >
-        <img src={darkMode ? '/logo.png' : '/logo-light.png'} alt="TradeLog" style={{ height: 80, width: 'auto', objectFit: 'contain', flexShrink: 0 }} />
+        <AppLogo size="md" onClick={() => navigate('/dashboard')} />
       </div>
 
       {/* Account tabs */}

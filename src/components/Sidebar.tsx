@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store';
 import { useT } from '../i18n';
+import AppLogo from './AppLogo';
 
 const icons: Record<string, JSX.Element> = {
   '/dashboard': (
@@ -59,7 +60,7 @@ export default function Sidebar() {
 
       <aside className={"sidebar" + (isOpen ? ' mobile-open' : '')}>
         <div className="sidebar-logo" onClick={() => handleNav('/dashboard')}>
-          <img src="/logo.png" alt="TradeLog" style={{ width: 160, height: 'auto', objectFit: 'contain', flexShrink: 0 }} />
+          <AppLogo size="lg" forceLight />
           <button
             className="btn btn-icon sidebar-close-btn"
             onClick={(e) => { e.stopPropagation(); setSidebarCollapsed(true); }}
