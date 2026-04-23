@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom';
+import { useRef, useState, useEffect } from 'react';
 import { useStore } from '../store';
 import { useT } from '../i18n';
 import AppLogo from './AppLogo';
+import { signOut } from '../lib/supabase';
 
 /** Half-dark / half-light split circle button */
 function ThemeToggle({ darkMode, onClick }: { darkMode: boolean; onClick: () => void }) {
@@ -22,10 +24,34 @@ export default function Header() {
   const { lang, setLang, accounts, selectedAccount, setSelectedAccount, setModal, user, sidebarCollapsed, setSidebarCollapsed, darkMode, setDarkMode } = useStore();
   const T = useT(lang);
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const initials = user?.name
     ? user.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
     : 'U';
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [menuOpen]);
+
+  async function handleLogout() {
+    setMenuOpen(false);
+    await signOut();
+    navigate('/');
+  }
+
+  function handleSwitchAccount() {
+    setMenuOpen(false);
+    navigate('/auth');
+  }
 
   return (
     <header className="header">
@@ -87,7 +113,42 @@ export default function Header() {
           <span className="new-trade-label">{T.newTrade}</span>
         </button>
 
-        <div className="avatar" title={user?.name ?? 'User'}>{initials}</div>
+        <div className="avatar-wrapper" ref={menuRef}>
+          <div
+            className="avatar"
+            title={user?.name ?? 'User'}
+            onClick={() => setMenuOpen((o) => !o)}
+            style={{ cursor: 'pointer' }}
+          >
+            {initials}
+          </div>
+          {menuOpen && (
+            <div className="avatar-menu">
+              <div className="avatar-menu-profile">
+                <div className="avatar-menu-name">{user?.name ?? '—'}</div>
+                <div className="avatar-menu-email">{user?.email ?? '—'}</div>
+              </div>
+              <div className="avatar-menu-divider" />
+              <button className="avatar-menu-item" onClick={handleSwitchAccount}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                {lang === 'he' ? 'החלף משתמש' : 'Switch account'}
+              </button>
+              <button className="avatar-menu-item avatar-menu-logout" onClick={handleLogout}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                {T.logout}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
