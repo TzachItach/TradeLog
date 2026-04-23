@@ -806,12 +806,6 @@ body:not(.dark) .daily-goal-bar { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
   .app-logo--md { height: 32px; }
 }
 
-/* Remove white background from dark-mode logo (white logo on dark bg) */
-body.dark .app-logo { mix-blend-mode: screen; }
-/* Remove black/dark background from light-mode logo (dark logo on light bg) */
-body:not(.dark) .app-logo { mix-blend-mode: multiply; }
-/* Sidebar is always black — always use screen blend */
-.sidebar .app-logo { mix-blend-mode: screen; }
 
 .header-logo {
   display: none; align-items: center; gap: 7px;
