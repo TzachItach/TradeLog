@@ -97,20 +97,27 @@ function parseTradovateCSV(text: string): ParseResult {
     return -1;
   };
 
-  const iSymbol     = idx(['symbol']);
-  const iBuyFillId  = idx(['buyfillid']);
-  const iQty        = idx(['qty', 'quantity']);
-  const iBuyPrice   = idx(['buyprice']);
-  const iSellPrice  = idx(['sellprice']);
-  const iPnL        = idx(['pnl']);
-  const iBoughtTime = idx(['boughttimestamp', 'boughttime']);
-  const iSoldTime   = idx(['soldtimestamp', 'soldtime', 'selltimestamp']);
+  const iSymbol      = idx(['symbol']);
+  const iBuyFillId   = idx(['buyfillid']);
+  const iSellFillId  = idx(['sellfillid']);
+  const iQty         = idx(['qty', 'quantity']);
+  const iBuyPrice    = idx(['buyprice']);
+  const iSellPrice   = idx(['sellprice']);
+  const iPnL         = idx(['pnl']);
+  const iBoughtTime  = idx(['boughttimestamp', 'boughttime']);
+  const iSoldTime    = idx(['soldtimestamp', 'soldtime', 'selltimestamp']);
 
   if (iSymbol < 0 || iPnL < 0 || iBoughtTime < 0) {
     return { trades: [], errors: [{ row: 0, reason: `Missing required columns. Detected: ${headers.slice(0, 6).join(', ')}` }] };
   }
 
-  interface Fill { symbol: string; buyFillId: string; qty: number; buyPrice: number; sellPrice: number; pnl: number; tradeDate: string; boughtTs: string; soldTs: string; }
+  // כיוון נקבע per-row לפי timestamps: boughtTs < soldTs = long, אחרת short
+  function fillDirection(boughtTs: string, soldTs: string, buyPrice: number, sellPrice: number): 'long' | 'short' {
+    if (boughtTs && soldTs) return boughtTs <= soldTs ? 'long' : 'short';
+    return buyPrice <= sellPrice ? 'long' : 'short'; // fallback
+  }
+
+  interface Fill { symbol: string; buyFillId: string; sellFillId: string; qty: number; buyPrice: number; sellPrice: number; pnl: number; tradeDate: string; boughtTs: string; soldTs: string; direction: 'long' | 'short'; }
   const fills: Fill[] = [];
 
   for (let i = 1; i < rawLines.length; i++) {
@@ -122,41 +129,40 @@ function parseTradovateCSV(text: string): ParseResult {
     if (!rawSymbol) { errors.push({ row: i + 1, reason: 'Missing symbol' }); continue; }
     const tradeDate = parseDate(rawDate);
     if (!tradeDate) { errors.push({ row: i + 1, reason: `Invalid date: "${rawDate}"` }); continue; }
+    const boughtTs = cols[iBoughtTime] ?? '';
+    const soldTs   = iSoldTime >= 0 ? (cols[iSoldTime] ?? '') : '';
+    const buyPrice  = parseFloat(cols[iBuyPrice]  ?? '0') || 0;
+    const sellPrice = parseFloat(cols[iSellPrice] ?? '0') || 0;
     fills.push({
-      symbol:    normalizeSymbol(rawSymbol),
-      buyFillId: cols[iBuyFillId] ?? `fill-${i}`,
-      qty:       parseFloat(cols[iQty] ?? '1') || 1,
-      buyPrice:  parseFloat(cols[iBuyPrice] ?? '0') || 0,
-      sellPrice: parseFloat(cols[iSellPrice] ?? '0') || 0,
+      symbol:     normalizeSymbol(rawSymbol),
+      buyFillId:  cols[iBuyFillId]  ?? `fill-${i}`,
+      sellFillId: iSellFillId >= 0 ? (cols[iSellFillId] ?? `sfill-${i}`) : `sfill-${i}`,
+      qty:        parseFloat(cols[iQty] ?? '1') || 1,
+      buyPrice, sellPrice,
       pnl:       parseTradovatePnL(cols[iPnL] ?? ''),
-      tradeDate,
-      boughtTs:  cols[iBoughtTime] ?? '',
-      soldTs:    iSoldTime >= 0 ? (cols[iSoldTime] ?? '') : '',
+      tradeDate, boughtTs, soldTs,
+      direction: fillDirection(boughtTs, soldTs, buyPrice, sellPrice),
     });
   }
 
+  // גיווס: לונג → לפי buyFillId (fill פותח), שורט → לפי sellFillId (fill פותח)
   const tradeMap = new Map<string, Fill[]>();
   for (const fill of fills) {
-    const key = `${fill.symbol}|${fill.buyFillId}`;
+    const openingId = fill.direction === 'long' ? fill.buyFillId : fill.sellFillId;
+    const key = `${fill.symbol}|${fill.direction}|${openingId}`;
     if (!tradeMap.has(key)) tradeMap.set(key, []);
     tradeMap.get(key)!.push(fill);
   }
 
   const trades: ParsedTrade[] = [];
   for (const [, group] of tradeMap) {
-    const first    = group[0];
-    const totalQty = group.reduce((s, f) => s + f.qty, 0);
-    const totalPnL = group.reduce((s, f) => s + f.pnl, 0);
-    const avgBuy   = group.reduce((s, f) => s + f.buyPrice * f.qty, 0) / totalQty;
-    const avgSell  = group.reduce((s, f) => s + f.sellPrice * f.qty, 0) / totalQty;
-    // קביעת כיוון: אם יש timestamps — bought לפני sold = long, אחרת = short.
-    // fallback: השוואת מחירים (פחות אמין לעסקאות מפסידות).
-    const boughtTs = first.boughtTs;
-    const soldTs   = first.soldTs;
-    const direction: 'long' | 'short' = (boughtTs && soldTs)
-      ? (boughtTs <= soldTs ? 'long' : 'short')
-      : (avgBuy <= avgSell ? 'long' : 'short');
-    const entry = direction === 'long' ? avgBuy : avgSell;
+    const first      = group[0];
+    const direction  = first.direction;
+    const totalQty   = group.reduce((s, f) => s + f.qty, 0);
+    const totalPnL   = group.reduce((s, f) => s + f.pnl, 0);
+    const avgBuy     = group.reduce((s, f) => s + f.buyPrice  * f.qty, 0) / totalQty;
+    const avgSell    = group.reduce((s, f) => s + f.sellPrice * f.qty, 0) / totalQty;
+    const entry = direction === 'long' ? avgBuy  : avgSell;
     const exit  = direction === 'long' ? avgSell : avgBuy;
     trades.push({
       symbol:          first.symbol,
