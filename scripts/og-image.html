@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1200px; height: 630px; overflow: hidden;
+    background: #121212;
+    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    color: #fff;
+    position: relative;
+  }
+
+  /* Background grid lines */
+  .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(29,185,84,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(29,185,84,.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* Glow blobs */
+  .blob1 {
+    position: absolute; top: -120px; right: 80px;
+    width: 500px; height: 500px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(29,185,84,.18) 0%, transparent 70%);
+  }
+  .blob2 {
+    position: absolute; bottom: -100px; left: 60px;
+    width: 400px; height: 400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(29,185,84,.10) 0%, transparent 70%);
+  }
+
+  .inner {
+    position: relative; z-index: 1;
+    display: flex; height: 100%;
+    padding: 56px 72px;
+    gap: 60px;
+    align-items: center;
+  }
+
+  /* LEFT */
+  .left { flex: 1; display: flex; flex-direction: column; gap: 24px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(29,185,84,.12);
+    border: 1px solid rgba(29,185,84,.30);
+    border-radius: 999px; padding: 6px 14px;
+    font-size: 13px; color: #1DB954; font-weight: 500;
+    width: fit-content;
+  }
+  .badge-dot { width: 7px; height: 7px; border-radius: 50%; background: #1DB954; }
+
+  .logo-row { display: flex; align-items: center; gap: 14px; }
+  .logo-box {
+    width: 56px; height: 56px; border-radius: 12px;
+    background: #1DB954;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 900; color: #000; letter-spacing: -1px;
+  }
+  .logo-name { font-size: 32px; font-weight: 800; letter-spacing: -.5px; }
+  .logo-name span { color: #1DB954; }
+
+  h1 { font-size: 52px; font-weight: 800; line-height: 1.12; letter-spacing: -1.5px; }
+  h1 em { font-style: normal; color: #1DB954; }
+
+  .sub { font-size: 18px; color: rgba(255,255,255,.55); line-height: 1.5; max-width: 420px; }
+
+  /* KPI row */
+  .kpis { display: flex; gap: 28px; margin-top: 8px; }
+  .kpi { display: flex; flex-direction: column; gap: 3px; }
+  .kpi-val { font-size: 26px; font-weight: 800; letter-spacing: -.5px; }
+  .kpi-val.green { color: #1DB954; }
+  .kpi-val.red { color: #ff4d60; }
+  .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.35); }
+
+  .divider { width: 1px; height: 60px; background: rgba(255,255,255,.07); align-self: center; }
+
+  /* RIGHT — mini dashboard card */
+  .right {
+    width: 360px; flex-shrink: 0;
+    background: #1a1a1a; border: 1px solid rgba(255,255,255,.08);
+    border-radius: 16px; padding: 24px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  .card-title { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.35); }
+
+  /* Equity chart */
+  .chart-wrap { position: relative; }
+
+  /* Calendar mini */
+  .cal { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+  .cal-day {
+    height: 30px; border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700;
+  }
+
+  .features {
+    display: flex; flex-direction: column; gap: 8px; margin-top: 4px;
+  }
+  .feat {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: rgba(255,255,255,.60);
+  }
+  .feat-dot { width: 6px; height: 6px; border-radius: 50%; background: #1DB954; flex-shrink: 0; }
+
+  .url {
+    font-size: 14px; color: rgba(255,255,255,.25);
+    letter-spacing: .03em; margin-top: auto;
+  }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="blob1"></div>
+  <div class="blob2"></div>
+
+  <div class="inner">
+    <!-- LEFT -->
+    <div class="left">
+      <div class="badge"><div class="badge-dot"></div> Free 14-day trial</div>
+
+      <div class="logo-row">
+        <div class="logo-box">TL</div>
+        <div class="logo-name">Trade<span>Log</span></div>
+      </div>
+
+      <h1>The futures trading<br/>journal that <em>actually</em><br/>improves your edge</h1>
+
+      <p class="sub">Auto-import from Tradovate & TopstepX. 8 analytics charts. Prop firm tracker.</p>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kpi-val green">+$4,280</div>
+          <div class="kpi-label">This month</div>
+        </div>
+        <div class="divider"></div>
+        <div class="kpi">
+          <div class="kpi-val green">68%</div>
+          <div class="kpi-label">Win rate</div>
+        </div>
+        <div class="divider"></div>
+        <div class="kpi">
+          <div class="kpi-val">142</div>
+          <div class="kpi-label">Trades logged</div>
+        </div>
+      </div>
+
+      <div class="url">tradelog.co.il</div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+      <div class="card-title">Equity Curve — April</div>
+
+      <!-- SVG Chart -->
+      <svg width="312" height="110" viewBox="0 0 312 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="eq" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#1DB954" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#1DB954" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- Grid lines -->
+        <line x1="0" y1="27" x2="312" y2="27" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+        <line x1="0" y1="55" x2="312" y2="55" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+        <line x1="0" y1="83" x2="312" y2="83" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+        <!-- Fill -->
+        <polygon points="0,90 40,78 80,72 120,55 160,60 200,38 240,30 280,18 312,10 312,110 0,110" fill="url(#eq)"/>
+        <!-- Line -->
+        <polyline points="0,90 40,78 80,72 120,55 160,60 200,38 240,30 280,18 312,10"
+          stroke="#1DB954" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- End dot -->
+        <circle cx="312" cy="10" r="4" fill="#1DB954"/>
+        <circle cx="312" cy="10" r="7" fill="rgba(29,185,84,.25)"/>
+      </svg>
+
+      <!-- Calendar -->
+      <div class="card-title" style="margin-top:4px">Trading Calendar</div>
+      <div class="cal">
+        <div class="cal-day" style="background:rgba(29,185,84,.25); color:#1DB954">+480</div>
+        <div class="cal-day" style="background:rgba(255,77,96,.20); color:#ff4d60">-220</div>
+        <div class="cal-day" style="background:rgba(29,185,84,.35); color:#1DB954">+840</div>
+        <div class="cal-day" style="background:rgba(29,185,84,.15); color:#1DB954">+190</div>
+        <div class="cal-day" style="background:rgba(255,77,96,.15); color:#ff4d60">-110</div>
+        <div class="cal-day" style="background:rgba(29,185,84,.50); color:#1DB954">+1,240</div>
+        <div class="cal-day" style="background:#282828; color:rgba(255,255,255,.2)">—</div>
+        <div class="cal-day" style="background:rgba(29,185,84,.30); color:#1DB954">+560</div>
+        <div class="cal-day" style="background:rgba(29,185,84,.20); color:#1DB954">+310</div>
+        <div class="cal-day" style="background:rgba(255,77,96,.25); color:#ff4d60">-380</div>
+      </div>
+
+      <div class="features">
+        <div class="feat"><div class="feat-dot"></div> Auto-import: Tradovate · TopstepX</div>
+        <div class="feat"><div class="feat-dot"></div> 8 analytics charts · Prop firm tracker</div>
+        <div class="feat"><div class="feat-dot"></div> 50+ futures contracts · PDF export</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
