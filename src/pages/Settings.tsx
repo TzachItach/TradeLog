@@ -376,7 +376,11 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
         alert(isHe ? 'Tradovate חובר בהצלחה!' : 'Tradovate connected!');
       } else {
         const data = await res.json().catch(() => ({}));
-        const errMsg = data.detail ? `${data.error}\n${data.detail}` : (data.error ?? res.status);
+        const errMsg = data.detail
+          ? `${data.error}\n${data.detail}`
+          : data.tradovateStatus
+            ? `${data.error} (HTTP ${data.tradovateStatus})`
+            : (data.error ?? res.status);
         alert(isHe
           ? `שגיאה בחיבור Tradovate: ${errMsg}`
           : `Tradovate connection failed: ${errMsg}`);
