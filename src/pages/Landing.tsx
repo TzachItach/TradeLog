@@ -12,11 +12,132 @@ const calColors = [
 ];
 
 const equityPoints = '0,110 40,95 80,100 120,78 160,82 200,60 240,65 280,42 320,48 360,28 400,15';
-const equityFill = equityPoints + ' 400,130 0,130';
+const equityFill   = equityPoints + ' 400,130 0,130';
+
+/* ── Translations ─────────────────────────────────────────── */
+const T = {
+  he: {
+    nav: { features: 'פיצ׳רים', pricing: 'מחירים', tools: 'כלים', signin: 'התחבר', start: 'התחל בחינם' },
+    badge: '14 ימי ניסיון · ללא כרטיס אשראי',
+    h1a: 'סחר כמו מקצוען,',
+    h1b: 'נתח כמו מכונה',
+    heroSub: 'יומן המסחר המתקדם ביותר לטריידרים בחוזים עתידיים. עקוב אחרי כל עסקה, שלוט בפסיכולוגיה, וחדד את היתרון שלך.',
+    ctaPrimary: 'התחל ניסיון חינם — 14 יום',
+    ctaDemo: 'דמו חי',
+    importsFrom: 'ייבוא מ-',
+    featuresTitle: 'כלים שעובדים בשבילך',
+    featuresSub: 'כל מה שצריך כדי לנתח, להשתפר ולשלוט בביצועי המסחר שלך.',
+    card1Title: 'ייבוא אוטומטי',
+    card1Desc: 'סנכרן את נתוני הביצוע מ-Tradovate ו-TopstepX בלחיצה אחת. בלי הקלדה ידנית, בלי טעויות.',
+    card2Title: 'Analytics מקצועי',
+    card2Desc: '8 גרפים מתקדמים: Equity Curve, Drawdown, P&L לפי יום וסמל, Heatmap, R:R Scatter ועוד — בזמן אמת.',
+    card3Title: 'לוח שנה ויזואלי',
+    card3Desc: 'זהה דפוסים בביצועים שלך. ראה באילו ימים אתה מצטיין ואילו סשנים עדיף להימנע מהם.',
+    advTitle: 'כלי פרו',
+    advSub: 'בנוי לטריידרים רציניים שצריכים כלי דיוק לניהול סיכונים והערכות Prop Firm.',
+    adv1Title: 'ניהול סיכונים מתקדם',
+    adv1Desc: 'מחשבון R:R מדויק לכל חוזה עתידי. מעקב בזמן אמת אחרי Max Drawdown, הפסד יומי וחשיפה.',
+    adv2Title: 'Prop Firm Tracker',
+    adv2Desc: 'מעקב ייעודי ל-Topstep, Apex ו-MyFundedFutures. ניטור Trailing Drawdown בדיוק מלא.',
+    adv3Title: '50+ חוזים עתידיים',
+    adv3Desc: 'NQ, ES, CL, GC, SI ועוד — עם Point Values מדויקים לכל סמל לחישוב R:R אוטומטי.',
+    adv4Title: 'ייצוא PDF ו-CSV',
+    adv4Desc: 'ייצא דוחות מקצועיים לשיתוף עם מנטור, מוסד מימון, או לארכיון אישי.',
+    pricingTitle: 'תמחור פשוט ושקוף',
+    pricingSub: '14 ימי ניסיון חינם לכל משתמש חדש. ללא כרטיס אשראי.',
+    planMonthly: 'חודשי',
+    planYearly: 'שנתי — חיסכון 29%',
+    planLifetime: 'לכל החיים',
+    planMonthlySub: 'חיוב חודשי',
+    planYearlySub: 'כ-$13/חודש · 14 ימי ניסיון',
+    planLifetimeSub: 'תשלום חד-פעמי, גישה לתמיד',
+    planPopular: 'הכי פופולרי',
+    feat1: 'ייבוא עסקאות ללא הגבלה',
+    feat2: 'כל 8 גרפי האנליטיקס',
+    feat3: 'לוח שנה ויזואלי',
+    feat4: 'ייצוא PDF ו-CSV',
+    featY1: 'כל מה שבחודשי',
+    featY2: 'Prop Firm Tracker מתקדם',
+    featY3: 'גישה מוקדמת לפיצ׳רים חדשים',
+    featY4: 'תמיכה מועדפת',
+    featL1: 'הכל כלול',
+    featL2: 'כל העדכונים העתידיים',
+    featL3: 'תמיכה בעדיפות גבוהה ביותר',
+    featL4: 'תג חבר מייסד',
+    planBtn: 'התחל ניסיון חינם',
+    planBtnLifetime: 'קבל גישה לכל החיים',
+    ctaTitle: 'מוכן לשפר את המסחר שלך?',
+    ctaSub: 'ללא כרטיס אשראי. 14 ימים חינם לגמרי. ביטול בכל עת.',
+    footerTerms: 'תנאי שימוש',
+    footerPrivacy: 'פרטיות',
+    footerAccess: 'נגישות',
+    footerCopy: (y: number) => `© ${y} TradeLog. כל הזכויות שמורות.`,
+  },
+  en: {
+    nav: { features: 'Features', pricing: 'Pricing', tools: 'Tools', signin: 'Sign in', start: 'Start free' },
+    badge: '14-day free trial · No credit card required',
+    h1a: 'Trade like a pro,',
+    h1b: 'analyze like a machine',
+    heroSub: 'The most advanced trading journal for futures traders. Track every trade, master your psychology, and sharpen your edge.',
+    ctaPrimary: 'Start free trial — 14 days',
+    ctaDemo: 'Live demo',
+    importsFrom: 'Imports from',
+    featuresTitle: 'Tools that work for you',
+    featuresSub: 'Everything you need to analyze, improve, and take control of your trading performance.',
+    card1Title: 'Automated Trade Import',
+    card1Desc: 'Sync your execution data from Tradovate and TopstepX in one click. No manual entry, no errors.',
+    card2Title: 'Professional Analytics',
+    card2Desc: '8 advanced charts: Equity Curve, Drawdown, P&L by day & symbol, Heatmap, R:R scatter and more — in real time.',
+    card3Title: 'Visual Trading Calendar',
+    card3Desc: 'Identify patterns in your performance. See which days you excel and which sessions to avoid.',
+    advTitle: 'Pro-level tools',
+    advSub: 'Built for serious traders who need precision tools for risk management and Prop Firm evaluations.',
+    adv1Title: 'Advanced Risk Management',
+    adv1Desc: 'Precise R:R calculator for every futures contract. Real-time tracking of Max Drawdown, Daily Loss, and exposure.',
+    adv2Title: 'Prop Firm Tracker',
+    adv2Desc: 'Dedicated tracking for Topstep, Apex, and MyFundedFutures. Trailing Drawdown monitoring with full precision.',
+    adv3Title: '50+ Futures Contracts',
+    adv3Desc: 'NQ, ES, CL, GC, SI and more — with exact Point Values per symbol for automatic R:R calculations.',
+    adv4Title: 'PDF & CSV Export',
+    adv4Desc: 'Export professional reports for sharing with a mentor, funding institution, or personal archive.',
+    pricingTitle: 'Simple, transparent pricing',
+    pricingSub: '14-day free trial for all new users. No credit card required.',
+    planMonthly: 'Monthly',
+    planYearly: 'Annual — save 29%',
+    planLifetime: 'Lifetime',
+    planMonthlySub: 'Billed monthly',
+    planYearlySub: 'About $13/month · 14-day free trial',
+    planLifetimeSub: 'One-time payment, forever access',
+    planPopular: 'Most popular',
+    feat1: 'Unlimited trade imports',
+    feat2: 'All 8 analytics charts',
+    feat3: 'Visual trading calendar',
+    feat4: 'PDF & CSV export',
+    featY1: 'Everything in Monthly',
+    featY2: 'Advanced Prop Firm tracker',
+    featY3: 'Early access to new features',
+    featY4: 'Priority support',
+    featL1: 'Everything included',
+    featL2: 'All future updates',
+    featL3: 'Highest priority support',
+    featL4: 'Founding member badge',
+    planBtn: 'Start free trial',
+    planBtnLifetime: 'Get lifetime access',
+    ctaTitle: 'Ready to level up your trading?',
+    ctaSub: 'No credit card. 14 days completely free. Cancel anytime.',
+    footerTerms: 'Terms',
+    footerPrivacy: 'Privacy',
+    footerAccess: 'Accessibility',
+    footerCopy: (y: number) => `© ${y} TradeLog. All rights reserved.`,
+  },
+};
 
 export default function Landing() {
   const navigate = useNavigate();
-  const { loadDemoData, setUser } = useStore();
+  const { loadDemoData, setUser, lang, setLang } = useStore();
+  const isHe = lang === 'he';
+  const t = isHe ? T.he : T.en;
+  const dir = isHe ? 'rtl' : 'ltr';
 
   const goAuth = () => navigate('/auth');
 
@@ -27,8 +148,8 @@ export default function Landing() {
   };
 
   return (
-    <div className="lp" dir="rtl">
-      {/* Nav */}
+    <div className="lp" dir={dir}>
+      {/* Nav — always LTR internally for layout */}
       <header className="lp-nav" dir="ltr">
         <div className="lp-nav-inner">
           <a className="lp-logo" href="/">
@@ -36,14 +157,25 @@ export default function Landing() {
           </a>
           <nav>
             <ul className="lp-nav-links">
-              <li><a href="#features">Features</a></li>
-              <li><a href="#pricing">Pricing</a></li>
-              <li><a href="#advanced">Tools</a></li>
+              <li><a href="#features">{t.nav.features}</a></li>
+              <li><a href="#pricing">{t.nav.pricing}</a></li>
+              <li><a href="#advanced">{t.nav.tools}</a></li>
             </ul>
           </nav>
           <div className="lp-nav-actions">
-            <button className="lp-btn-ghost" onClick={goAuth}>Sign in</button>
-            <button className="lp-btn-primary" onClick={goAuth}>Start free</button>
+            {/* Language toggle */}
+            <button
+              onClick={() => setLang(isHe ? 'en' : 'he')}
+              style={{
+                background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.12)',
+                borderRadius: 999, padding: '5px 12px', color: 'rgba(255,255,255,.7)',
+                fontSize: '.78rem', fontWeight: 700, cursor: 'pointer', letterSpacing: '.03em',
+              }}
+            >
+              {isHe ? 'EN' : 'עב'}
+            </button>
+            <button className="lp-btn-ghost" onClick={goAuth}>{t.nav.signin}</button>
+            <button className="lp-btn-primary" onClick={goAuth}>{t.nav.start}</button>
           </div>
         </div>
       </header>
@@ -54,30 +186,27 @@ export default function Landing() {
           <div className="lp-hero-inner">
             <div className="lp-badge">
               <div className="lp-badge-dot" />
-              <span>14-day free trial · No credit card required</span>
+              <span>{t.badge}</span>
             </div>
             <h1>
-              Trade like a pro,<br />
-              <span className="accent">analyze like a machine</span>
+              {t.h1a}<br />
+              <span className="accent">{t.h1b}</span>
             </h1>
-            <p>
-              The most advanced trading journal for futures traders.
-              Track every trade, master your psychology, and sharpen your edge.
-            </p>
-            <div className="lp-hero-ctas">
+            <p>{t.heroSub}</p>
+            <div className="lp-hero-ctas" dir="ltr">
               <button className="lp-btn-hero-primary" onClick={goAuth}>
-                Start free trial — 14 days
+                {t.ctaPrimary}
               </button>
               <button className="lp-btn-hero-secondary" onClick={handleDemo}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <circle cx="12" cy="12" r="10"/>
                   <polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none"/>
                 </svg>
-                Live demo
+                {t.ctaDemo}
               </button>
             </div>
 
-            {/* Dashboard Mockup */}
+            {/* Dashboard Mockup — always LTR */}
             <div className="lp-mockup" dir="ltr" role="img" aria-label="TradeLog dashboard showing trading calendar, equity curve, and P&L statistics for a futures trader">
               <div className="lp-mockup-bar">
                 <div className="lp-mockup-dot" style={{ background: '#ff5f57' }} />
@@ -87,7 +216,6 @@ export default function Landing() {
               </div>
 
               <div className="lp-mockup-app">
-                {/* Sidebar */}
                 <div className="lp-mockup-sidebar">
                   <div className="lp-mockup-logo">
                     <img src="/logo.png" alt="TradeLog" style={{ height: 36, width: 36, objectFit: 'contain', borderRadius: 6, mixBlendMode: 'screen' }} />
@@ -109,10 +237,9 @@ export default function Landing() {
                       {item.label}
                     </div>
                   ))}
-                  {/* Mini KPIs */}
                   <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {[
-                      { label: "Today P&L", val: '+$1,840', color: '#1DB954' },
+                      { label: 'Today P&L', val: '+$1,840', color: '#1DB954' },
                       { label: 'Win Rate',  val: '68%',     color: '#1DB954' },
                       { label: 'Max DD',    val: '-4.2%',   color: '#ff4d60' },
                     ].map(k => (
@@ -124,15 +251,13 @@ export default function Landing() {
                   </div>
                 </div>
 
-                {/* Main content */}
                 <div className="lp-mockup-main">
-                  {/* KPI strip */}
                   <div className="lp-mockup-kpi-row">
                     {[
-                      { label: 'Total P&L',     val: '+$18,420', color: '#1DB954' },
-                      { label: 'Win Rate',       val: '68%',      color: '#1DB954' },
-                      { label: 'Profit Factor',  val: '2.84',     color: '#1DB954' },
-                      { label: 'Trades',         val: '142',      color: '#FFFFFF' },
+                      { label: 'Total P&L',    val: '+$18,420', color: '#1DB954' },
+                      { label: 'Win Rate',      val: '68%',      color: '#1DB954' },
+                      { label: 'Profit Factor', val: '2.84',     color: '#1DB954' },
+                      { label: 'Trades',        val: '142',      color: '#FFFFFF' },
                     ].map(k => (
                       <div key={k.label} className="lp-mockup-kpi">
                         <div style={{ fontSize: '.46rem', textTransform: 'uppercase', letterSpacing: '.07em', color: 'rgba(255,255,255,.40)', marginBottom: 3 }}>{k.label}</div>
@@ -141,7 +266,6 @@ export default function Landing() {
                     ))}
                   </div>
 
-                  {/* Charts row */}
                   <div className="lp-mockup-charts">
                     <div className="lp-mockup-chart-panel">
                       <div style={{ fontSize: '.50rem', color: 'rgba(255,255,255,.40)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.07em' }}>Equity Curve</div>
@@ -157,7 +281,6 @@ export default function Landing() {
                         <circle cx="400" cy="15" r="4" fill="#1DB954"/>
                       </svg>
                     </div>
-
                     <div className="lp-mockup-chart-panel">
                       <div style={{ fontSize: '.50rem', color: 'rgba(255,255,255,.40)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.07em' }}>Calendar</div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
@@ -168,7 +291,6 @@ export default function Landing() {
                     </div>
                   </div>
 
-                  {/* Trade rows */}
                   <div className="lp-mockup-trades">
                     {[
                       { sym: 'NQ',  dir: 'Long',  pnl: '+$920', pos: true  },
@@ -190,8 +312,8 @@ export default function Landing() {
 
         {/* Social Proof */}
         <section className="lp-social">
-          <div className="lp-social-inner">
-            <span className="lp-social-label">Imports from</span>
+          <div className="lp-social-inner" dir="ltr">
+            <span className="lp-social-label">{t.importsFrom}</span>
             <div className="lp-brokers">
               <div className="lp-broker">Tradovate</div>
               <div className="lp-broker">TopstepX</div>
@@ -204,16 +326,13 @@ export default function Landing() {
         {/* Features */}
         <section className="lp-features" id="features">
           <div className="lp-features-inner">
-            <h2>Tools that work for you</h2>
-            <p className="sub">Everything you need to analyze, improve, and take control of your trading performance.</p>
+            <h2>{t.featuresTitle}</h2>
+            <p className="sub">{t.featuresSub}</p>
             <div className="lp-features-grid">
               <div className="lp-card">
                 <div className="lp-card-icon">📥</div>
-                <h3>Automated Trade Import</h3>
-                <p>
-                  Sync your execution data from Tradovate and TopstepX in one click.
-                  No manual entry, no errors.
-                </p>
+                <h3>{t.card1Title}</h3>
+                <p>{t.card1Desc}</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                   {[85,60,92,45,78].map((w, i) => (
                     <div key={i} style={{ height: 5, borderRadius: 3, background: `rgba(29,185,84,${w / 130})`, width: `${w}%` }} />
@@ -223,38 +342,27 @@ export default function Landing() {
 
               <div className="lp-card featured">
                 <div className="lp-card-icon">📊</div>
-                <h3>Professional Analytics</h3>
-                <p>
-                  8 advanced charts: Equity Curve, Drawdown, P&amp;L by day &amp; symbol,
-                  Heatmap, R:R scatter and more — in real time.
-                </p>
+                <h3>{t.card2Title}</h3>
+                <p>{t.card2Desc}</p>
                 <div className="lp-metrics">
-                  <div className="lp-metric">
-                    <div className="lp-metric-label">Profit Factor</div>
-                    <div className="lp-metric-val">2.84</div>
-                  </div>
-                  <div className="lp-metric">
-                    <div className="lp-metric-label">Win Rate</div>
-                    <div className="lp-metric-val">68%</div>
-                  </div>
-                  <div className="lp-metric">
-                    <div className="lp-metric-label">Avg R:R</div>
-                    <div className="lp-metric-val">1.9</div>
-                  </div>
-                  <div className="lp-metric">
-                    <div className="lp-metric-label">Max DD</div>
-                    <div className="lp-metric-val" style={{ color: '#ff4d60' }}>-4.2%</div>
-                  </div>
+                  {[
+                    { label: 'Profit Factor', val: '2.84' },
+                    { label: 'Win Rate',      val: '68%' },
+                    { label: 'Avg R:R',       val: '1.9' },
+                    { label: 'Max DD',        val: '-4.2%', red: true },
+                  ].map(m => (
+                    <div key={m.label} className="lp-metric">
+                      <div className="lp-metric-label">{m.label}</div>
+                      <div className="lp-metric-val" style={m.red ? { color: '#ff4d60' } : {}}>{m.val}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
               <div className="lp-card">
                 <div className="lp-card-icon">📅</div>
-                <h3>Visual Trading Calendar</h3>
-                <p>
-                  Identify patterns in your performance. See which days you excel
-                  and which sessions to avoid.
-                </p>
+                <h3>{t.card3Title}</h3>
+                <p>{t.card3Desc}</p>
                 <div className="lp-mini-cal">
                   {calColors.map((c, i) => (
                     <div key={i} className="lp-mini-day" style={{ background: c }} />
@@ -268,51 +376,23 @@ export default function Landing() {
         {/* Advanced */}
         <section className="lp-advanced" id="advanced">
           <div className="lp-advanced-inner">
-            <h2>Pro-level tools</h2>
-            <p className="sub">
-              Built for serious traders who need precision tools for risk management and Prop Firm evaluations.
-            </p>
+            <h2>{t.advTitle}</h2>
+            <p className="sub">{t.advSub}</p>
             <div className="lp-adv-grid">
-              <div className="lp-adv-item">
-                <div className="lp-adv-icon">🛡️</div>
-                <div>
-                  <h4>Advanced Risk Management</h4>
-                  <p>
-                    Precise R:R calculator for every futures contract. Real-time tracking of
-                    Max Drawdown, Daily Loss, and exposure.
-                  </p>
+              {[
+                { icon: '🛡️', title: t.adv1Title, desc: t.adv1Desc },
+                { icon: '🏢', title: t.adv2Title, desc: t.adv2Desc },
+                { icon: '📋', title: t.adv3Title, desc: t.adv3Desc },
+                { icon: '📤', title: t.adv4Title, desc: t.adv4Desc },
+              ].map(item => (
+                <div key={item.title} className="lp-adv-item">
+                  <div className="lp-adv-icon">{item.icon}</div>
+                  <div>
+                    <h4>{item.title}</h4>
+                    <p>{item.desc}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="lp-adv-item">
-                <div className="lp-adv-icon">🏢</div>
-                <div>
-                  <h4>Prop Firm Tracker</h4>
-                  <p>
-                    Dedicated tracking for Topstep, Apex, and MyFundedFutures.
-                    Trailing Drawdown monitoring with full precision.
-                  </p>
-                </div>
-              </div>
-              <div className="lp-adv-item">
-                <div className="lp-adv-icon">📋</div>
-                <div>
-                  <h4>50+ Futures Contracts</h4>
-                  <p>
-                    NQ, ES, CL, GC, SI and more — with exact Point Values per symbol
-                    for automatic R:R calculations.
-                  </p>
-                </div>
-              </div>
-              <div className="lp-adv-item">
-                <div className="lp-adv-icon">📤</div>
-                <div>
-                  <h4>PDF &amp; CSV Export</h4>
-                  <p>
-                    Export professional reports for sharing with a mentor, funding institution,
-                    or personal archive.
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
@@ -320,47 +400,38 @@ export default function Landing() {
         {/* Pricing */}
         <section className="lp-pricing" id="pricing">
           <div className="lp-pricing-inner">
-            <h2>Simple, transparent pricing</h2>
-            <p className="sub">14-day free trial for all new users. No credit card required.</p>
-            <div className="lp-pricing-grid">
+            <h2>{t.pricingTitle}</h2>
+            <p className="sub">{t.pricingSub}</p>
+            <div className="lp-pricing-grid" dir="ltr">
               <div className="lp-plan">
-                <div className="lp-plan-name">Monthly</div>
+                <div className="lp-plan-name">{t.planMonthly}</div>
                 <div className="lp-plan-price">$19<span>/mo</span></div>
-                <div className="lp-plan-sub">Billed monthly</div>
+                <div className="lp-plan-sub">{t.planMonthlySub}</div>
                 <ul className="lp-plan-features">
-                  <li>Unlimited trade imports</li>
-                  <li>All 8 analytics charts</li>
-                  <li>Visual trading calendar</li>
-                  <li>PDF &amp; CSV export</li>
+                  <li>{t.feat1}</li><li>{t.feat2}</li><li>{t.feat3}</li><li>{t.feat4}</li>
                 </ul>
-                <button className="lp-plan-btn" onClick={goAuth}>Start free trial</button>
+                <button className="lp-plan-btn" onClick={goAuth}>{t.planBtn}</button>
               </div>
 
               <div className="lp-plan popular">
-                <div className="lp-plan-badge">Most popular</div>
-                <div className="lp-plan-name">Annual — save 29%</div>
+                <div className="lp-plan-badge">{t.planPopular}</div>
+                <div className="lp-plan-name">{t.planYearly}</div>
                 <div className="lp-plan-price">$159<span>/yr</span></div>
-                <div className="lp-plan-sub">About $13/month · 14-day free trial</div>
+                <div className="lp-plan-sub">{t.planYearlySub}</div>
                 <ul className="lp-plan-features">
-                  <li>Everything in Monthly</li>
-                  <li>Advanced Prop Firm tracker</li>
-                  <li>Early access to new features</li>
-                  <li>Priority support</li>
+                  <li>{t.featY1}</li><li>{t.featY2}</li><li>{t.featY3}</li><li>{t.featY4}</li>
                 </ul>
-                <button className="lp-plan-btn" onClick={goAuth}>Start free trial</button>
+                <button className="lp-plan-btn" onClick={goAuth}>{t.planBtn}</button>
               </div>
 
               <div className="lp-plan">
-                <div className="lp-plan-name">Lifetime</div>
-                <div className="lp-plan-price">$349<span> once</span></div>
-                <div className="lp-plan-sub">One-time payment, forever access</div>
+                <div className="lp-plan-name">{t.planLifetime}</div>
+                <div className="lp-plan-price">$349<span> {isHe ? 'חד-פעמי' : 'once'}</span></div>
+                <div className="lp-plan-sub">{t.planLifetimeSub}</div>
                 <ul className="lp-plan-features">
-                  <li>Everything included</li>
-                  <li>All future updates</li>
-                  <li>Highest priority support</li>
-                  <li>Founding member badge</li>
+                  <li>{t.featL1}</li><li>{t.featL2}</li><li>{t.featL3}</li><li>{t.featL4}</li>
                 </ul>
-                <button className="lp-plan-btn" onClick={goAuth}>Get lifetime access</button>
+                <button className="lp-plan-btn" onClick={goAuth}>{t.planBtnLifetime}</button>
               </div>
             </div>
           </div>
@@ -369,18 +440,16 @@ export default function Landing() {
         {/* CTA */}
         <section className="lp-cta">
           <div className="lp-cta-inner">
-            <h2>Ready to level up your trading?</h2>
-            <p>No credit card. 14 days completely free. Cancel anytime.</p>
-            <div className="lp-cta-btns">
-              <button className="lp-btn-hero-primary" onClick={goAuth}>
-                Start free trial — 14 days
-              </button>
+            <h2>{t.ctaTitle}</h2>
+            <p>{t.ctaSub}</p>
+            <div className="lp-cta-btns" dir="ltr">
+              <button className="lp-btn-hero-primary" onClick={goAuth}>{t.ctaPrimary}</button>
               <button className="lp-btn-hero-secondary" onClick={handleDemo}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <circle cx="12" cy="12" r="10"/>
                   <polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none"/>
                 </svg>
-                Live demo
+                {t.ctaDemo}
               </button>
             </div>
           </div>
@@ -394,11 +463,11 @@ export default function Landing() {
             <img src="/logo.png" alt="TradeLog" style={{ height: 52, width: 52, objectFit: 'contain', borderRadius: 10, mixBlendMode: 'screen' }} />
           </div>
           <ul className="lp-footer-links">
-            <li><a href="/terms">Terms</a></li>
-            <li><a href="/privacy">Privacy</a></li>
-            <li><a href="/accessibility">Accessibility</a></li>
+            <li><a href="/terms">{t.footerTerms}</a></li>
+            <li><a href="/privacy">{t.footerPrivacy}</a></li>
+            <li><a href="/accessibility">{t.footerAccess}</a></li>
           </ul>
-          <div className="lp-footer-copy">© {new Date().getFullYear()} TradeLog. All rights reserved.</div>
+          <div className="lp-footer-copy">{t.footerCopy(new Date().getFullYear())}</div>
         </div>
       </footer>
     </div>
