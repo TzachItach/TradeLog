@@ -4,7 +4,6 @@ import { useT } from '../i18n';
 import type { Trade } from '../types';
 import DailySummary from './DailySummary';
 import SymbolPicker from './SymbolPicker';
-import TradeChart from './TradeChart';
 import { getPointValue } from '../lib/futures';
 import { dbUploadTradeMedia, dbGetTradeMediaUrls } from '../lib/db';
 
@@ -49,7 +48,6 @@ export default function TradeModal() {
           defaultAccId
         )
   );
-  const [tab, setTab] = useState<'details' | 'chart' | 'media'>('details');
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
   const [existingMediaUrls, setExistingMediaUrls] = useState<string[]>([]);
@@ -141,33 +139,7 @@ export default function TradeModal() {
             <button className="btn-close" onClick={() => setModal(null)}>×</button>
           </div>
 
-          {/* ── Tab bar (edit mode only) ── */}
-          {!isNew && (
-            <div style={{
-              display: 'flex', gap: 2, marginBottom: 14,
-              borderBottom: '1px solid var(--bd)', paddingBottom: 0,
-            }}>
-              {([
-                ['details', isHe ? 'פרטים' : 'Details', '📋'],
-                ['chart',   isHe ? 'גרף'   : 'Chart',   '📈'],
-                ['media',   isHe ? 'מדיה'  : 'Media',   '🖼'],
-              ] as const).map(([id, label]) => (
-                <button key={id} onClick={() => setTab(id)}
-                  style={{
-                    padding: '7px 16px', border: 'none', cursor: 'pointer',
-                    background: 'none', fontSize: '.8rem', fontWeight: 700,
-                    color: tab === id ? '#1DB954' : 'var(--t3)',
-                    borderBottom: `2px solid ${tab === id ? '#1DB954' : 'transparent'}`,
-                    marginBottom: -1, transition: 'all .15s',
-                  }}>
-                  {label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* ── Details tab ── */}
-          {(isNew || tab === 'details') && <div className="form-grid">
+          <div className="form-grid">
             {/* Date */}
             <div>
               <label className="form-label">{T.date}</label>
@@ -344,100 +316,11 @@ export default function TradeModal() {
                 value={form.notes ?? ''} onChange={e => set('notes', e.target.value)} />
             </div>
 
-            {/* ── Entry / Exit levels (optional) ── */}
+            {/* Media */}
             <div className="s2">
-              <label className="form-label" style={{ marginBottom: 8, display: 'block' }}>
-                {isHe ? 'מחירי כניסה / יציאה (אופציונלי)' : 'Entry / Exit Levels (optional)'}
-              </label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8 }}>
-                <div>
-                  <div style={{ fontSize: '.65rem', color: 'var(--t3)', marginBottom: 4 }}>
-                    {isHe ? 'מחיר כניסה' : 'Entry Price'}
-                  </div>
-                  <input type="number" className="form-input" placeholder="e.g. 21250"
-                    value={form.entry_price ?? ''}
-                    onChange={e => set('entry_price', e.target.value ? Number(e.target.value) : undefined)} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '.65rem', color: 'var(--t3)', marginBottom: 4 }}>
-                    {isHe ? 'מחיר יציאה' : 'Exit Price'}
-                  </div>
-                  <input type="number" className="form-input" placeholder="e.g. 21450"
-                    value={form.exit_price ?? ''}
-                    onChange={e => set('exit_price', e.target.value ? Number(e.target.value) : undefined)} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '.65rem', color: 'var(--t3)', marginBottom: 4 }}>
-                    {isHe ? 'שעת כניסה' : 'Entry Time'}
-                  </div>
-                  <input type="time" className="form-input"
-                    value={form.entry_time ?? ''}
-                    onChange={e => set('entry_time', e.target.value || undefined)} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '.65rem', color: 'var(--t3)', marginBottom: 4 }}>
-                    {isHe ? 'שעת יציאה' : 'Exit Time'}
-                  </div>
-                  <input type="time" className="form-input"
-                    value={form.exit_time ?? ''}
-                    onChange={e => set('exit_time', e.target.value || undefined)} />
-                </div>
-              </div>
-              {(form.entry_price || form.exit_price) && (
-                <div style={{ fontSize: '.65rem', color: '#1DB954', marginTop: 6 }}>
-                  {isHe ? '✓ מחירים אלו יסומנו על הגרף' : '✓ These levels will be marked on the chart'}
-                </div>
-              )}
-            </div>
+              <label className="form-label">{T.media}</label>
 
-            {/* Media — shown in new-trade mode (edit mode uses its own tab) */}
-            {isNew && (
-              <div className="s2">
-                <label className="form-label">{T.media}</label>
-                {(existingMediaUrls.length > 0 || mediaPreviews.length > 0) && (
-                  <div className="upload-thumb">
-                    {existingMediaUrls.map((src, i) => (
-                      <img key={`existing-${i}`} src={src} alt={`saved-${i}`} onClick={() => setLightboxSrc(src)} />
-                    ))}
-                    {mediaPreviews.map((src, i) => (
-                      <img key={`new-${i}`} src={src} alt={`new-${i}`} onClick={() => setLightboxSrc(src)} />
-                    ))}
-                  </div>
-                )}
-                <div
-                  className={`upload-zone${dragOver ? ' drag' : ''}${(existingMediaUrls.length + mediaPreviews.length) > 0 ? ' has-media' : ''}`}
-                  onClick={() => fileRef.current?.click()}
-                  onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={e => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <polyline points="21,15 16,10 5,21" />
-                  </svg>
-                  <div className="upload-text">{(existingMediaUrls.length + mediaPreviews.length) > 0 ? (lang === 'he' ? 'הוסף עוד תמונות' : 'Add more photos') : T.dragDrop}</div>
-                  {(existingMediaUrls.length + mediaPreviews.length) === 0 && (
-                    <div className="upload-sub">{T.clickUpload} · PNG · JPG · SVG</div>
-                  )}
-                </div>
-                <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
-                  onChange={e => handleFiles(e.target.files)} />
-              </div>
-            )}
-          </div>}
-
-          {/* ── Chart tab ── */}
-          {!isNew && tab === 'chart' && existingTrade && (
-            <div style={{ padding: '0 2px' }}>
-              <TradeChart trade={{ ...form, id: existingTrade.id }} lang={lang} />
-            </div>
-          )}
-
-          {/* ── Media tab ── */}
-          {!isNew && tab === 'media' && (
-            <div style={{ padding: '4px 0' }}>
-              <label className="form-label" style={{ marginBottom: 10, display: 'block' }}>{T.media}</label>
+              {/* Thumbnail gallery — rendered outside the upload zone so it's always visible */}
               {(existingMediaUrls.length > 0 || mediaPreviews.length > 0) && (
                 <div className="upload-thumb">
                   {existingMediaUrls.map((src, i) => (
@@ -448,6 +331,8 @@ export default function TradeModal() {
                   ))}
                 </div>
               )}
+
+              {/* Upload zone — compact when photos already added */}
               <div
                 className={`upload-zone${dragOver ? ' drag' : ''}${(existingMediaUrls.length + mediaPreviews.length) > 0 ? ' has-media' : ''}`}
                 onClick={() => fileRef.current?.click()}
@@ -468,17 +353,14 @@ export default function TradeModal() {
               <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
                 onChange={e => handleFiles(e.target.files)} />
             </div>
-          )}
+          </div>
 
-          {/* ── Actions (hidden in chart tab) ── */}
-          {tab !== 'chart' && (
-            <div className="modal-actions">
-              {!isNew && <button className="btn btn-danger" onClick={handleDelete}>{T.delete}</button>}
-              <div style={{ flex: 1 }} />
-              <button className="btn btn-ghost" onClick={() => setModal(null)}>{T.cancel}</button>
-              <button className="btn btn-primary" onClick={save}>{T.save}</button>
-            </div>
-          )}
+          <div className="modal-actions">
+            {!isNew && <button className="btn btn-danger" onClick={handleDelete}>{T.delete}</button>}
+            <div style={{ flex: 1 }} />
+            <button className="btn btn-ghost" onClick={() => setModal(null)}>{T.cancel}</button>
+            <button className="btn btn-primary" onClick={save}>{T.save}</button>
+          </div>
         </div>
       </div>
 

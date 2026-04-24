@@ -58,10 +58,6 @@ export interface Trade {
   size?: number;
   stop_loss_pts?: number;
   take_profit_pts?: number;
-  entry_price?: number;
-  exit_price?: number;
-  entry_time?: string;  // "HH:mm"
-  exit_time?: string;   // "HH:mm"
   htf_pd_array?: string;
   psychology?: string;
   notes?: string;
