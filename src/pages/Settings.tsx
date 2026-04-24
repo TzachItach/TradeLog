@@ -346,29 +346,27 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
   const [syncing, setSyncing] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<{ [k: string]: string }>({});
 
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL as string ?? '';
 
   const connectTradovate = async (accountId: string) => {
     if (!tradovateUser.trim() || !tradovatePass.trim()) return;
+    if (!supabase) return;
     const { data: { session } } = await supabase.auth.getSession();
     const jwt = session?.access_token;
     if (!jwt) return alert(isHe ? 'לא מחובר' : 'Not authenticated');
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
     try {
-      const res = await fetch(
-        `${supabaseUrl}/functions/v1/tradovate-auth`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
-          body: JSON.stringify({
-            user_id: user?.id,
-            account_id: accountId,
-            api_username: tradovateUser,
-            api_password: tradovatePass,
-            env: tradovateEnv,
-          }),
-        },
-      );
+      const res = await fetch('/api/tradovate-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+        body: JSON.stringify({
+          user_id: user?.id,
+          account_id: accountId,
+          api_username: tradovateUser,
+          api_password: tradovatePass,
+          env: tradovateEnv,
+        }),
+      });
       if (res.ok) {
         setTxConn((c) => ({ ...c, [accountId]: true }));
         setShowTradovateInput(false);
@@ -378,9 +376,10 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
         alert(isHe ? 'Tradovate חובר בהצלחה!' : 'Tradovate connected!');
       } else {
         const data = await res.json().catch(() => ({}));
+        const errMsg = data.detail ? `${data.error}\n${data.detail}` : (data.error ?? res.status);
         alert(isHe
-          ? `שגיאה בחיבור Tradovate: ${data.error ?? res.status}`
-          : `Tradovate connection failed: ${data.error ?? res.status}`);
+          ? `שגיאה בחיבור Tradovate: ${errMsg}`
+          : `Tradovate connection failed: ${errMsg}`);
       }
     } catch {
       alert(isHe ? 'שגיאה בחיבור Tradovate' : 'Tradovate connection failed');
@@ -389,6 +388,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
 
   const connectTopstepX = async (accountId: string) => {
     if (!topstepKey.trim()) return;
+    if (!supabase) return;
     const { data: { session } } = await supabase.auth.getSession();
     const jwt = session?.access_token;
     if (!jwt) return alert(isHe ? 'לא מחובר' : 'Not authenticated');
@@ -426,6 +426,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
 
   const triggerSync = async (broker: 'tradovate' | 'topstepx') => {
     setSyncing(broker);
+    if (!supabase) { setSyncing(null); return; }
     const { data: { session } } = await supabase.auth.getSession();
     const jwt = session?.access_token;
     if (!jwt) { setSyncing(null); return alert(isHe ? 'לא מחובר' : 'Not authenticated'); }

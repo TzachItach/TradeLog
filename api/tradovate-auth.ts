@@ -1,30 +1,27 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from '@supabase/supabase-js';
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const LIVE_BASE = 'https://live.tradovate.com/v1';
+const DEMO_BASE = 'https://demo.tradovate.com/v1';
 
-const LIVE_BASE  = 'https://live.tradovate.com/v1';
-const DEMO_BASE  = 'https://demo.tradovate.com/v1';
-
-const APP_ID      = Deno.env.get('TRADOVATE_APP_ID')      ?? 'TradeLog';
-const APP_VERSION = Deno.env.get('TRADOVATE_APP_VERSION') ?? '1.0';
-const CID         = parseInt(Deno.env.get('TRADOVATE_CID') ?? '0');
-const SEC         = Deno.env.get('TRADOVATE_SEC')          ?? '';
+const APP_ID      = process.env.TRADOVATE_APP_ID      ?? 'TradeLog';
+const APP_VERSION = process.env.TRADOVATE_APP_VERSION ?? '1.0';
+const CID         = parseInt(process.env.TRADOVATE_CID ?? '0');
+const SEC         = process.env.TRADOVATE_SEC          ?? '';
 const DEVICE_ID   = 'tradelog-server-v1';
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Content-Type': 'application/json',
+};
+
 function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...CORS, 'Content-Type': 'application/json' },
-  });
+  return new Response(JSON.stringify(body), { status, headers: CORS_HEADERS });
 }
 
 async function authenticate(baseUrl: string, username: string, password: string) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+  const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const res = await fetch(`${baseUrl}/auth/accesstokenrequest`, {
       method: 'POST',
@@ -41,37 +38,42 @@ async function authenticate(baseUrl: string, username: string, password: string)
       }),
     });
     const data = await res.json();
-    return data.accessToken ? (data.accessToken as string) : null;
+    return { token: data.accessToken as string | undefined, status: res.status };
   } finally {
     clearTimeout(timeout);
   }
 }
 
-serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
+export default async function handler(request: Request) {
+  if (request.method === 'OPTIONS') {
+    return new Response('ok', { headers: CORS_HEADERS });
+  }
 
-  // ── 0. Parse body (POST JSON) ──────────────────────────────
-  const body       = await req.json().catch(() => ({}));
-  const userId     = body.user_id    as string | undefined;
-  const accountId  = body.account_id as string | undefined;
-  const username   = body.api_username as string | undefined;
-  const password   = body.api_password as string | undefined;
-  const env        = body.env === 'demo' ? 'demo' : 'live';
-  const baseUrl    = env === 'demo' ? DEMO_BASE : LIVE_BASE;
+  if (request.method !== 'POST') {
+    return json({ error: 'Method not allowed' }, 405);
+  }
+
+  // Parse body
+  const body = await request.json().catch(() => ({})) as Record<string, unknown>;
+  const userId    = body.user_id     as string | undefined;
+  const accountId = body.account_id  as string | undefined;
+  const username  = body.api_username as string | undefined;
+  const password  = body.api_password as string | undefined;
+  const env       = body.env === 'demo' ? 'demo' : 'live';
+  const baseUrl   = env === 'demo' ? DEMO_BASE : LIVE_BASE;
 
   if (!userId || !accountId || !username || !password) {
     return json({ error: 'Missing required parameters' }, 400);
   }
 
-  // ── 1. Verify JWT — caller must be the same user ───────────
-  const authHeader = req.headers.get('Authorization');
+  // Verify JWT
+  const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
     return json({ error: 'Unauthorized' }, 401);
   }
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-  );
+  const supabaseUrl  = process.env.VITE_SUPABASE_URL!;
+  const supabaseKey  = process.env.VITE_SUPABASE_ANON_KEY!;
+  const supabase     = createClient(supabaseUrl, supabaseKey);
   const { data: { user }, error: authErr } = await supabase.auth.getUser(
     authHeader.replace('Bearer ', ''),
   );
@@ -79,10 +81,17 @@ serve(async (req) => {
     return json({ error: 'Forbidden' }, 403);
   }
 
-  // ── 2. Authenticate with Tradovate ─────────────────────────
-  let accessToken: string | null = null;
+  // Authenticate with Tradovate
+  let accessToken: string | undefined;
   try {
-    accessToken = await authenticate(baseUrl, username, password);
+    const result = await authenticate(baseUrl, username, password);
+    accessToken = result.token;
+    if (!accessToken) {
+      return json({
+        error: 'Invalid Tradovate credentials — check email/password and Live/Demo selection',
+        tradovateStatus: result.status,
+      }, 401);
+    }
   } catch (e) {
     const detail = e instanceof Error ? e.message : String(e);
     const isTimeout = detail.includes('abort') || detail.includes('timeout');
@@ -93,11 +102,7 @@ serve(async (req) => {
     }, 502);
   }
 
-  if (!accessToken) {
-    return json({ error: 'Invalid Tradovate credentials — check email/password and Live/Demo selection' }, 401);
-  }
-
-  // ── 3. Fetch account list ──────────────────────────────────
+  // Fetch account list
   let tradovateAccountId: number | null = null;
   try {
     const acctRes = await fetch(`${baseUrl}/account/list`, {
@@ -109,11 +114,13 @@ serve(async (req) => {
       tradovateAccountId = (active[0] ?? accounts[0]).id ?? null;
     }
   } catch {
-    // Non-fatal — sync will re-fetch if null
+    // Non-fatal
   }
 
-  // ── 4. Store in Supabase ───────────────────────────────────
-  const { error } = await supabase.from('broker_connections').upsert(
+  // Store in Supabase (use service role if available, else anon)
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? supabaseKey;
+  const adminClient = createClient(supabaseUrl, serviceKey);
+  const { error } = await adminClient.from('broker_connections').upsert(
     {
       user_id:              userId,
       account_id:           accountId,
@@ -130,4 +137,4 @@ serve(async (req) => {
   if (error) return json({ error: error.message }, 500);
 
   return json({ success: true, env, tradovateAccountId });
-});
+}
