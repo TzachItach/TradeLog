@@ -6,6 +6,7 @@ import CalendarView from '../components/CalendarView';
 import DailyGoalBar from '../components/DailyGoalBar';
 import MiniEquityChart from '../components/MiniEquityChart';
 import RecentTrades from '../components/RecentTrades';
+import AIInsightsCard from '../components/AIInsightsCard';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -45,6 +46,8 @@ export default function Dashboard() {
           <RecentTrades />
         </div>
       </div>
+
+      <AIInsightsCard />
 
       <div className="disclaimer">{T.disclaimer}</div>
     </div>
