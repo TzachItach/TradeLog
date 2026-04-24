@@ -6,8 +6,8 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const LIVE_BASE  = 'https://live.tradovate.com/v1';
-const DEMO_BASE  = 'https://demo.tradovate.com/v1';
+const LIVE_BASE  = 'https://live.tradovateapi.com/v1';
+const DEMO_BASE  = 'https://demo.tradovateapi.com/v1';
 
 const APP_ID      = Deno.env.get('TRADOVATE_APP_ID')      ?? 'TradeLog';
 const APP_VERSION = Deno.env.get('TRADOVATE_APP_VERSION') ?? '1.0';

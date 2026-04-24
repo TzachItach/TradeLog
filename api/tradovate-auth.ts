@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { IncomingMessage, ServerResponse } from 'http';
 
-const LIVE_BASE = 'https://live.tradovate.com/v1';
-const DEMO_BASE = 'https://demo.tradovate.com/v1';
+const LIVE_BASE = 'https://live.tradovateapi.com/v1';
+const DEMO_BASE = 'https://demo.tradovateapi.com/v1';
 
 const APP_ID      = process.env.TRADOVATE_APP_ID      ?? 'TradeLog';
 const APP_VERSION = process.env.TRADOVATE_APP_VERSION ?? '1.0';
