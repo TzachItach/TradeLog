@@ -474,10 +474,14 @@ body:not(.dark) .cal-wrap { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
   letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px;
 }
 .form-input {
-  width: 100%; background: var(--s2); border: 1.5px solid var(--bd2);
+  width: 100%; min-width: 0; background: var(--s2); border: 1.5px solid var(--bd2);
   color: var(--t1); padding: 10px 13px; border-radius: var(--rad);
   font-size: .87rem; outline: none; transition: border-color .12s, box-shadow .12s;
   color-scheme: light;
+}
+input[type="date"].form-input {
+  -webkit-appearance: none; appearance: none;
+  max-width: 100%; display: block;
 }
 body.dark .form-input { color-scheme: dark; }
 .form-input:focus {
