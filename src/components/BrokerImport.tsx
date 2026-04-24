@@ -104,12 +104,13 @@ function parseTradovateCSV(text: string): ParseResult {
   const iSellPrice  = idx(['sellprice']);
   const iPnL        = idx(['pnl']);
   const iBoughtTime = idx(['boughttimestamp', 'boughttime']);
+  const iSoldTime   = idx(['soldtimestamp', 'soldtime', 'selltimestamp']);
 
   if (iSymbol < 0 || iPnL < 0 || iBoughtTime < 0) {
     return { trades: [], errors: [{ row: 0, reason: `Missing required columns. Detected: ${headers.slice(0, 6).join(', ')}` }] };
   }
 
-  interface Fill { symbol: string; buyFillId: string; qty: number; buyPrice: number; sellPrice: number; pnl: number; tradeDate: string; }
+  interface Fill { symbol: string; buyFillId: string; qty: number; buyPrice: number; sellPrice: number; pnl: number; tradeDate: string; boughtTs: string; soldTs: string; }
   const fills: Fill[] = [];
 
   for (let i = 1; i < rawLines.length; i++) {
@@ -129,6 +130,8 @@ function parseTradovateCSV(text: string): ParseResult {
       sellPrice: parseFloat(cols[iSellPrice] ?? '0') || 0,
       pnl:       parseTradovatePnL(cols[iPnL] ?? ''),
       tradeDate,
+      boughtTs:  cols[iBoughtTime] ?? '',
+      soldTs:    iSoldTime >= 0 ? (cols[iSoldTime] ?? '') : '',
     });
   }
 
@@ -146,7 +149,13 @@ function parseTradovateCSV(text: string): ParseResult {
     const totalPnL = group.reduce((s, f) => s + f.pnl, 0);
     const avgBuy   = group.reduce((s, f) => s + f.buyPrice * f.qty, 0) / totalQty;
     const avgSell  = group.reduce((s, f) => s + f.sellPrice * f.qty, 0) / totalQty;
-    const direction: 'long' | 'short' = avgBuy <= avgSell ? 'long' : 'short';
+    // קביעת כיוון: אם יש timestamps — bought לפני sold = long, אחרת = short.
+    // fallback: השוואת מחירים (פחות אמין לעסקאות מפסידות).
+    const boughtTs = first.boughtTs;
+    const soldTs   = first.soldTs;
+    const direction: 'long' | 'short' = (boughtTs && soldTs)
+      ? (boughtTs <= soldTs ? 'long' : 'short')
+      : (avgBuy <= avgSell ? 'long' : 'short');
     const entry = direction === 'long' ? avgBuy : avgSell;
     const exit  = direction === 'long' ? avgSell : avgBuy;
     trades.push({
