@@ -47,7 +47,12 @@ async function authenticate(baseUrl: string, username: string, password: string)
         sec: SEC,
       }),
     });
-    const data = await res.json() as { accessToken?: string };
+    const text = await res.text();
+    const contentType = res.headers.get('content-type') ?? '';
+    if (!contentType.includes('application/json')) {
+      throw new Error(`Tradovate returned HTTP ${res.status} with non-JSON response: ${text.slice(0, 200)}`);
+    }
+    const data = JSON.parse(text) as { accessToken?: string };
     return { token: data.accessToken, httpStatus: res.status };
   } finally {
     clearTimeout(timeout);
