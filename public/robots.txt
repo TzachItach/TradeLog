@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /auth
+Disallow: /auth/
+Disallow: /api/
+
+Sitemap: https://www.tradelog.co.il/sitemap.xml

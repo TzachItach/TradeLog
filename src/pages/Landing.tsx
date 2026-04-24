@@ -78,7 +78,7 @@ export default function Landing() {
             </div>
 
             {/* Dashboard Mockup */}
-            <div className="lp-mockup" dir="ltr">
+            <div className="lp-mockup" dir="ltr" role="img" aria-label="TradeLog dashboard showing trading calendar, equity curve, and P&L statistics for a futures trader">
               <div className="lp-mockup-bar">
                 <div className="lp-mockup-dot" style={{ background: '#ff5f57' }} />
                 <div className="lp-mockup-dot" style={{ background: '#febc2e' }} />
