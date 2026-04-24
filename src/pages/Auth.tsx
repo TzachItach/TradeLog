@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { useT } from '../i18n';
-import { signInWithGoogle, DEMO_MODE } from '../lib/supabase';
+import { signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword, DEMO_MODE } from '../lib/supabase';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24">
@@ -13,16 +13,57 @@ const GoogleIcon = () => (
   </svg>
 );
 
+type AuthMode = 'signin' | 'signup' | 'reset';
+
 export default function Auth() {
   const { lang, setLang, loadDemoData, setUser, darkMode } = useStore();
   const T = useT(lang);
   const navigate = useNavigate();
   const [agreed, setAgreed] = useState(false);
+  const [mode, setMode] = useState<AuthMode>('signin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
+
+  const isHe = lang === 'he';
 
   const handleDemo = () => {
     loadDemoData();
     setUser({ id: 'demo', name: 'Demo User', email: 'demo@tradelog.app' });
     navigate('/dashboard');
+  };
+
+  const handleEmailAuth = async () => {
+    if (!email.trim() || (!password.trim() && mode !== 'reset')) return;
+    setLoading(true);
+    setError('');
+    setInfo('');
+    try {
+      if (mode === 'reset') {
+        const { error: err } = await resetPassword(email);
+        if (err) setError(err);
+        else setInfo(isHe ? T.resetSent : T.resetSent);
+      } else if (mode === 'signup') {
+        const { error: err } = await signUpWithEmail(email, password);
+        if (err) setError(err);
+        else setInfo(isHe ? T.checkEmail : T.checkEmail);
+      } else {
+        const { error: err } = await signInWithEmail(email, password);
+        if (err) setError(err);
+        else navigate('/dashboard');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const switchMode = (next: AuthMode) => {
+    setMode(next);
+    setError('');
+    setInfo('');
+    setPassword('');
   };
 
   return (
@@ -37,7 +78,7 @@ export default function Auth() {
         </button>
       </div>
 
-      <div className="auth-card" dir={lang === 'he' ? 'rtl' : 'ltr'}>
+      <div className="auth-card" dir={isHe ? 'rtl' : 'ltr'}>
         <div className="auth-logo">
           <img src={darkMode ? '/logo.png' : '/logo-light.png'} alt="TradeLog" style={{ width: 180, height: 'auto', objectFit: 'contain', margin: '0 auto 8px', display: 'block' }} />
         </div>
@@ -54,7 +95,7 @@ export default function Auth() {
             style={{ marginTop: 2, flexShrink: 0, accentColor: 'var(--b)', width: 14, height: 14 }}
           />
           <span>
-            {lang === 'he'
+            {isHe
               ? <>קראתי ואני מסכים/ה ל<a href="/terms" style={{ color: 'var(--b)' }}>תנאי השימוש</a> ול<a href="/privacy" style={{ color: 'var(--b)' }}>מדיניות הפרטיות</a>, לרבות אחסון נתוניי על שרתים בחו"ל.</>
               : <>I have read and agree to the <a href="/terms" style={{ color: 'var(--b)' }}>Terms of Use</a> and <a href="/privacy" style={{ color: 'var(--b)' }}>Privacy Policy</a>, including storage of my data on servers outside Israel.</>
             }
@@ -62,26 +103,99 @@ export default function Auth() {
         </label>
 
         {!DEMO_MODE ? (
-          <button className="btn-oauth" onClick={signInWithGoogle} disabled={!agreed} style={{ marginBottom: 16, opacity: agreed ? 1 : 0.45, cursor: agreed ? 'pointer' : 'not-allowed' }}>
-            <GoogleIcon />
-            {T.loginWith} {T.google}
-          </button>
+          <>
+            {/* Google OAuth */}
+            <button className="btn-oauth" onClick={signInWithGoogle} disabled={!agreed} style={{ marginBottom: 12, opacity: agreed ? 1 : 0.45, cursor: agreed ? 'pointer' : 'not-allowed' }}>
+              <GoogleIcon />
+              {T.loginWith} {T.google}
+            </button>
+
+            <div className="auth-divider">{isHe ? 'או' : 'or'}</div>
+
+            {/* Email / Password form */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 4 }}>
+              <input
+                type="email"
+                placeholder={T.emailLabel}
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                disabled={!agreed}
+                style={{
+                  padding: '9px 12px', borderRadius: 8, border: '1px solid var(--bd2)',
+                  background: 'var(--s2)', color: 'var(--t1)', fontSize: '.88rem',
+                  outline: 'none', opacity: agreed ? 1 : 0.45,
+                }}
+                onKeyDown={e => e.key === 'Enter' && handleEmailAuth()}
+              />
+              {mode !== 'reset' && (
+                <input
+                  type="password"
+                  placeholder={T.passwordLabel}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  disabled={!agreed}
+                  style={{
+                    padding: '9px 12px', borderRadius: 8, border: '1px solid var(--bd2)',
+                    background: 'var(--s2)', color: 'var(--t1)', fontSize: '.88rem',
+                    outline: 'none', opacity: agreed ? 1 : 0.45,
+                  }}
+                  onKeyDown={e => e.key === 'Enter' && handleEmailAuth()}
+                />
+              )}
+
+              {error && <div style={{ fontSize: '.78rem', color: 'var(--r)', padding: '4px 2px' }}>{error}</div>}
+              {info  && <div style={{ fontSize: '.78rem', color: 'var(--g)', padding: '4px 2px' }}>{info}</div>}
+
+              <button
+                className="btn btn-primary"
+                onClick={handleEmailAuth}
+                disabled={!agreed || loading || !email.trim() || (mode !== 'reset' && !password.trim())}
+                style={{ borderRadius: 8, padding: '9px', fontSize: '.9rem', opacity: agreed ? 1 : 0.45 }}
+              >
+                {loading ? '...' : mode === 'reset' ? T.forgotPassword : mode === 'signup' ? T.signUp : T.signIn}
+              </button>
+            </div>
+
+            {/* Mode toggles */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '.76rem', color: 'var(--t3)', marginTop: 6 }}>
+              {mode === 'signin' && (
+                <>
+                  <button onClick={() => switchMode('reset')} style={{ background: 'none', border: 'none', color: 'var(--t3)', cursor: 'pointer', fontSize: '.76rem', padding: 0 }}>
+                    {T.forgotPassword}
+                  </button>
+                  <button onClick={() => switchMode('signup')} style={{ background: 'none', border: 'none', color: 'var(--b)', cursor: 'pointer', fontSize: '.76rem', padding: 0 }}>
+                    {T.noAccount} {T.signUp}
+                  </button>
+                </>
+              )}
+              {mode === 'signup' && (
+                <button onClick={() => switchMode('signin')} style={{ background: 'none', border: 'none', color: 'var(--b)', cursor: 'pointer', fontSize: '.76rem', padding: 0, marginInlineStart: 'auto' }}>
+                  {T.hasAccount} {T.signIn}
+                </button>
+              )}
+              {mode === 'reset' && (
+                <button onClick={() => switchMode('signin')} style={{ background: 'none', border: 'none', color: 'var(--b)', cursor: 'pointer', fontSize: '.76rem', padding: 0 }}>
+                  ← {T.signIn}
+                </button>
+              )}
+            </div>
+          </>
         ) : (
           <div style={{ background: 'rgba(91,143,255,.08)', border: '1px solid rgba(91,143,255,.2)', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: '.8rem', color: 'var(--t2)' }}>
-            {lang === 'he'
+            {isHe
               ? '⚡ מצב הדגמה פעיל — Supabase לא מוגדר.'
               : '⚡ Demo mode active — Supabase not configured.'}
           </div>
         )}
 
-        <div className="auth-divider">{lang === 'he' ? 'או' : 'or'}</div>
+        <div className="auth-divider">{isHe ? 'או' : 'or'}</div>
 
         <button className="btn-demo" onClick={handleDemo} disabled={!agreed} style={{ opacity: agreed ? 1 : 0.45, cursor: agreed ? 'pointer' : 'not-allowed' }}>
           {T.demoMode}
         </button>
 
         <div style={{ marginTop: 24, borderTop: '1px solid var(--bd)', paddingTop: 18, fontSize: '.74rem', color: 'var(--t3)', textAlign: 'center', lineHeight: 1.7 }}>
-          {lang === 'he' ? 'מסחר כרוך בסיכון. לא ייעוץ השקעות.' : 'Trading involves risk. Not investment advice.'}
+          {isHe ? 'מסחר כרוך בסיכון. לא ייעוץ השקעות.' : 'Trading involves risk. Not investment advice.'}
         </div>
       </div>
     </div>

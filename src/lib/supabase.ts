@@ -30,6 +30,30 @@ export async function signInWithApple() {
   });
 }
 
+export async function signInWithEmail(email: string, password: string) {
+  if (!supabase) return { error: 'Demo mode' };
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  return { error: error?.message ?? null };
+}
+
+export async function signUpWithEmail(email: string, password: string) {
+  if (!supabase) return { error: 'Demo mode' };
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+  });
+  return { error: error?.message ?? null };
+}
+
+export async function resetPassword(email: string) {
+  if (!supabase) return { error: 'Demo mode' };
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/dashboard`,
+  });
+  return { error: error?.message ?? null };
+}
+
 export async function signOut() {
   if (!supabase) return;
   await supabase.auth.signOut();
