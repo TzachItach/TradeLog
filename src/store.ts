@@ -55,6 +55,7 @@ interface AppState {
   dataLoading: boolean;
   dailyGoalTarget: number;
   dailyMaxLoss: number;
+  polygonApiKey: string;
 
   setDemo: (v: boolean) => void;
   setUser: (u: AppState['user']) => void;
@@ -67,6 +68,7 @@ interface AppState {
   setDarkMode: (v: boolean) => void;
   setDailyGoalTarget: (v: number) => void;
   setDailyMaxLoss: (v: number) => void;
+  setPolygonApiKey: (v: string) => void;
 
   addTrade: (t: Trade) => void;
   updateTrade: (t: Trade) => void;
@@ -129,6 +131,7 @@ export const useStore = create<AppState>()(
       dataLoading: false,
       dailyGoalTarget: 0,
       dailyMaxLoss: 0,
+      polygonApiKey: '',
 
       setDemo: (v) => set({ isDemo: v }),
       setUser: (u) => set({ user: u }),
@@ -139,6 +142,7 @@ export const useStore = create<AppState>()(
       setActiveView: (v) => set({ activeView: v }),
       setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
       setDarkMode: (v) => set({ darkMode: v }),
+      setPolygonApiKey: (v) => set({ polygonApiKey: v }),
       setDailyGoalTarget: (v) => {
         set({ dailyGoalTarget: v });
         const userId = get().user?.id;

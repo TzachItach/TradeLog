@@ -610,7 +610,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
 
 /* ── דף ראשי ── */
 export default function Settings() {
-  const { lang, accounts, strategies, user, dailyGoalTarget, dailyMaxLoss, dataLoading, setDailyGoalTarget, setDailyMaxLoss, addAccount, updateAccount, deleteAccount, addStrategy, updateStrategy, deleteStrategy, setUser, reloadFromCloud } = useStore();
+  const { lang, accounts, strategies, user, dailyGoalTarget, dailyMaxLoss, dataLoading, polygonApiKey, setPolygonApiKey, setDailyGoalTarget, setDailyMaxLoss, addAccount, updateAccount, deleteAccount, addStrategy, updateStrategy, deleteStrategy, setUser, reloadFromCloud } = useStore();
   const T = useT(lang);
   const navigate = useNavigate();
   const [accForm, setAccForm] = useState<'new' | string | null>(null);
@@ -723,6 +723,61 @@ export default function Settings() {
         )}
       </div>
 
+
+      {/* גרפי עסקאות — Polygon.io */}
+      <div className="settings-section">
+        <div className="section-title">{lang === 'he' ? 'גרפי עסקאות (Polygon.io)' : 'Trade Charts (Polygon.io)'}</div>
+        <div style={{ marginBottom: 12, fontSize: '.78rem', color: 'var(--t2)', lineHeight: 1.6 }}>
+          {lang === 'he'
+            ? 'הוסף API key של Polygon.io כדי לראות נתוני שוק אמיתיים על גרף העסקה. ללא מפתח — מוצגת סימולציה בלבד.'
+            : 'Add a Polygon.io API key to see real market data on the trade chart. Without a key, only a simulation is shown.'}
+        </div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+          <div style={{ flex: 1 }}>
+            <label className="form-label">Polygon.io API Key</label>
+            <input
+              type="password"
+              className="form-input"
+              placeholder={lang === 'he' ? 'הדבק כאן את ה-API key...' : 'Paste your API key here...'}
+              value={polygonApiKey}
+              onChange={e => setPolygonApiKey(e.target.value)}
+              style={{ fontFamily: 'monospace' }}
+            />
+          </div>
+          {polygonApiKey && (
+            <button
+              className="btn"
+              onClick={() => setPolygonApiKey('')}
+              style={{ border: '1px solid var(--bd2)', color: 'var(--t3)', whiteSpace: 'nowrap', marginBottom: 1 }}
+            >
+              {lang === 'he' ? 'נקה' : 'Clear'}
+            </button>
+          )}
+        </div>
+        <div style={{ marginTop: 8, fontSize: '.72rem', color: 'var(--t3)', lineHeight: 1.6 }}>
+          {lang === 'he'
+            ? '💡 חשבון חינמי ב-polygon.io מספיק לרוב הסמלים. לנתוני פיוצ\'רס נדרש מנוי Futures.'
+            : "💡 A free polygon.io account works for most symbols. Futures data requires a Futures subscription."}
+          {' '}
+          <a
+            href="https://polygon.io/dashboard/signup"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: '#1DB954', textDecoration: 'none' }}
+          >
+            {lang === 'he' ? 'הרשם חינם ←' : 'Sign up free ←'}
+          </a>
+        </div>
+        {polygonApiKey && (
+          <div style={{
+            marginTop: 8, fontSize: '.72rem', padding: '5px 10px', borderRadius: 6,
+            background: 'rgba(29,185,84,.08)', border: '1px solid rgba(29,185,84,.2)',
+            color: '#1DB954',
+          }}>
+            {lang === 'he' ? '✓ מפתח שמור — הגרף ינסה לטעון נתונים אמיתיים' : '✓ Key saved — charts will attempt to load real data'}
+          </div>
+        )}
+      </div>
 
       {/* יעדים יומיים */}
       <div className="settings-section">
