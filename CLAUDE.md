@@ -373,3 +373,11 @@ VITE_SUPABASE_ANON_KEY=...
 - השוואה שבוע/חודש ב-StatsBar (חץ ↑↓ ליד כל מספר)
 - Keyboard shortcuts (N=עסקה חדשה, Esc=סגור)
 - Onboarding wizard למשתמש חדש
+
+---
+
+## פיצ'רים שנוסו ובוטלו
+- **גרף עסקה (Trade Chart)** — נבנה ובוטל (אפריל 2026)
+  - נוסה: `lightweight-charts` + סימולציה מבוססת נתוני עסקה + Polygon.io API
+  - הבעיה: גרף סימולציה לא קשור מספיק לעסקה האמיתית, לא סיפר את הסיפור הנכון
+  - **לא לנסות שוב** אלא אם יש גישה לנתוני OHLC אמיתיים לפיוצ'רס (Tradovate historical API / Databento)
