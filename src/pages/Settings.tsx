@@ -574,14 +574,6 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
         </div>
       </div>
 
-      {/* הסבר */}
-      <div style={{ marginTop: 12, padding: '10px 14px', background: 'var(--b-bg)', border: '1px solid var(--b-bd)', borderRadius: 8, fontSize: '.76rem', color: 'var(--t2)', lineHeight: 1.7 }}>
-        <strong style={{ color: 'var(--b)' }}>{isHe ? 'לפעולה מלאה נדרש:' : 'For full operation:'}</strong>
-        <br />
-        {isHe
-          ? '1. פריסת Edge Functions ב-Supabase (ראה README) · 2. הגדרת TRADOVATE_CLIENT_ID, TRADOVATE_CLIENT_SECRET ב-Supabase Secrets'
-          : '1. Deploy Edge Functions to Supabase (see README) · 2. Set TRADOVATE_CLIENT_ID, TRADOVATE_CLIENT_SECRET in Supabase Secrets'}
-      </div>
     </div>
   );
 }
