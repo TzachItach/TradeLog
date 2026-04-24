@@ -366,6 +366,7 @@ export const useStore = create<AppState>()(
         expenses: s.expenses, payouts: s.payouts,
         selectedAccount: s.selectedAccount, isDemo: s.isDemo,
         lastUserId: s.lastUserId, user: s.user,
+        onboardingDone: s.onboardingDone,
       }),
     },
   ),
