@@ -50,126 +50,55 @@ function getPolygonTicker(symbol: string, tradeDate: string): string {
   return `${symbol}${monthCodes[cm]}${String(cy).slice(-2)}`;
 }
 
-interface SimResult {
-  bars: CandlestickData<Time>[];
-  entryBarTime: number;
-  exitBarTime: number;
-}
-
-// ── Simulated OHLC — tells the actual trade story ─────────────────────────
-function generateSimBars(trade: Trade, tf: number): SimResult {
-  const entryPrice = trade.entry_price ?? APPROX_PRICES[trade.symbol] ?? 1000;
+// ── Simulated OHLC data (always available, no API needed) ─────────────────
+function generateSimBars(trade: Trade, tf: number): CandlestickData<Time>[] {
+  const approxBase = trade.entry_price ?? APPROX_PRICES[trade.symbol] ?? 100;
   const pv   = getPointValue(trade.symbol);
   const size = trade.size ?? 1;
+  const pnlPts = pv > 0 ? trade.pnl / (pv * size) : trade.pnl / approxBase * 100;
   const isLong = trade.direction === 'long';
+  const exitPrice = isLong ? approxBase + pnlPts : approxBase - pnlPts;
 
-  // Calculate exact exit price from entry+pnl or use stored exit_price
-  let exitPrice: number;
-  if (trade.exit_price) {
-    exitPrice = trade.exit_price;
-  } else if (pv > 0 && size > 0) {
-    const pnlPts = trade.pnl / (pv * size);
-    exitPrice = isLong ? entryPrice + pnlPts : entryPrice - pnlPts;
-  } else {
-    // Fallback: estimate 0.5% move
-    const sign = (trade.pnl >= 0) ? 1 : -1;
-    exitPrice = isLong
-      ? entryPrice + sign * entryPrice * 0.005
-      : entryPrice - sign * entryPrice * 0.005;
-  }
+  const startHour = 9; // 09:30 EST
+  const startMin  = 30;
+  const date = new Date(tradeDate(trade) + 'T00:00:00Z');
+  date.setUTCHours(startHour + 5, startMin); // convert to UTC ~= EST+5
 
-  // SL / TP price levels
-  const slPrice = trade.stop_loss_pts
-    ? (isLong ? entryPrice - trade.stop_loss_pts : entryPrice + trade.stop_loss_pts)
-    : null;
-  const tpPrice = trade.take_profit_pts
-    ? (isLong ? entryPrice + trade.take_profit_pts : entryPrice - trade.take_profit_pts)
-    : null;
-
-  const date = new Date(trade.trade_date + 'T14:30:00Z'); // 09:30 EST = 14:30 UTC
-  const NUM_BARS  = 78;
+  const NUM_BARS  = 78; // 6.5h session @ 5min
   const intervalS = tf * 60;
-  const ENTRY_IDX = 18;  // entry at ~25% of session
-  const EXIT_IDX  = Math.min(ENTRY_IDX + Math.max(8, Math.floor(NUM_BARS * 0.35)), NUM_BARS - 5);
-  const noise     = entryPrice * 0.0003; // very tight noise — chart looks clean
 
-  // Pre-entry: price approaches entry from opposite of trade direction
-  // (price was below entry for longs, above for shorts — classic breakout approach)
-  const preEntryDrift = isLong ? -entryPrice * 0.002 : entryPrice * 0.002;
-  const preStart = entryPrice + preEntryDrift;
+  const ENTRY_IDX = Math.floor(NUM_BARS * 0.25);
+  const EXIT_IDX  = Math.min(Math.floor(NUM_BARS * 0.70), NUM_BARS - 3);
+  const noise     = approxBase * 0.0008;
 
   const bars: CandlestickData<Time>[] = [];
-  let price = preStart;
+  let price = approxBase * (isLong ? 0.999 : 1.001); // open slightly off entry
 
   for (let i = 0; i < NUM_BARS; i++) {
     const t = Math.floor(date.getTime() / 1000) + i * intervalS;
-    let open: number, close: number, high: number, low: number;
 
-    if (i < ENTRY_IDX) {
-      // Phase 1: pre-entry consolidation approaching entry level
-      const prog = i / ENTRY_IDX;
-      const target = preStart + (entryPrice - preStart) * prog;
-      open  = price;
-      close = target + (Math.random() - 0.5) * noise;
-      high  = Math.max(open, close) + Math.random() * noise * 1.5;
-      low   = Math.min(open, close) - Math.random() * noise * 1.5;
-      price = close;
-
-    } else if (i === ENTRY_IDX) {
-      // Entry bar: opens exactly at entry price, small body
-      open  = entryPrice;
-      close = entryPrice + (isLong ? 1 : -1) * noise * 0.5;
-      high  = Math.max(open, close) + noise;
-      low   = Math.min(open, close) - noise * 0.8;
-      price = close;
-
-    } else if (i > ENTRY_IDX && i < EXIT_IDX) {
-      // Phase 2: price trends toward exit with realistic pullbacks
-      const prog = (i - ENTRY_IDX) / (EXIT_IDX - ENTRY_IDX);
-      // Sigmoid-like curve: fast early, slows near exit
-      const smoothProg = prog < 0.5 ? 2 * prog * prog : 1 - Math.pow(-2 * prog + 2, 2) / 2;
-      const target = entryPrice + (exitPrice - entryPrice) * smoothProg;
-      const pullback = Math.sin(i * 0.9) * noise * 1.2; // wave-like pullbacks
-      open  = price;
-      close = target + pullback + (Math.random() - 0.5) * noise * 0.4;
-      high  = Math.max(open, close) + Math.random() * noise * 1.2;
-      low   = Math.min(open, close) - Math.random() * noise * 1.2;
-      // Clamp: don't breach SL on winning trades
-      if (slPrice !== null && trade.pnl >= 0) {
-        if (isLong) low  = Math.max(low,  slPrice + noise * 0.1);
-        else        high = Math.min(high, slPrice - noise * 0.1);
-      }
-      price = close;
-
-    } else if (i === EXIT_IDX) {
-      // Exit bar: closes exactly at exit price
-      open  = price;
-      close = exitPrice;
-      high  = Math.max(open, close) + noise;
-      low   = Math.min(open, close) - noise;
-      price = close;
-
+    let drift = 0;
+    if (i >= ENTRY_IDX && i <= EXIT_IDX) {
+      const totalMove = exitPrice - approxBase;
+      drift = (totalMove / (EXIT_IDX - ENTRY_IDX)) + (Math.random() - 0.48) * noise;
+    } else if (i > EXIT_IDX) {
+      drift = (Math.random() - 0.5) * noise * 0.5; // chop after exit
     } else {
-      // Phase 3: post-exit chop, no direction
-      open  = price;
-      close = price + (Math.random() - 0.5) * noise * 1.5;
-      high  = Math.max(open, close) + Math.random() * noise;
-      low   = Math.min(open, close) - Math.random() * noise;
-      price = close;
+      drift = (Math.random() - 0.5) * noise;
     }
 
+    const open  = price;
+    const close = price + drift;
+    const high  = Math.max(open, close) + Math.abs((Math.random() - 0.3) * noise);
+    const low   = Math.min(open, close) - Math.abs((Math.random() - 0.3) * noise);
+
     bars.push({ time: t as Time, open, high, low, close });
+    price = close;
   }
-
-  // Suppress TS unused-var warning for slPrice/tpPrice (used for clamping above; tpPrice is reference only)
-  void tpPrice;
-
-  return {
-    bars,
-    entryBarTime: Math.floor(date.getTime() / 1000) + ENTRY_IDX * intervalS,
-    exitBarTime:  Math.floor(date.getTime() / 1000) + EXIT_IDX  * intervalS,
-  };
+  return bars;
 }
+
+function tradeDate(trade: Trade): string { return trade.trade_date; }
 
 // ── Polygon.io fetch ───────────────────────────────────────────────────────
 async function fetchPolygon(
@@ -216,52 +145,42 @@ export default function TradeChart({ trade, lang }: Props) {
   const seriesRef     = useRef<ISeriesApi<'Candlestick'> | null>(null);
   const replayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const [tf, setTf]                   = useState<Timeframe>(5);
-  const [bars, setBars]               = useState<CandlestickData<Time>[]>([]);
-  const [loading, setLoading]         = useState(false);
-  const [dataSource, setDataSource]   = useState<'sim' | 'live' | null>(null);
-  const [error, setError]             = useState<string | null>(null);
-  const [replaying, setReplaying]     = useState(false);
-  const [replayIdx, setReplayIdx]     = useState(0);
-  // Sim marker times (always set in sim mode so markers always appear)
-  const [simEntryTime, setSimEntryTime] = useState<number | null>(null);
-  const [simExitTime,  setSimExitTime]  = useState<number | null>(null);
+  const [tf, setTf]               = useState<Timeframe>(5);
+  const [bars, setBars]           = useState<CandlestickData<Time>[]>([]);
+  const [loading, setLoading]     = useState(false);
+  const [dataSource, setDataSource] = useState<'sim' | 'live' | null>(null);
+  const [error, setError]         = useState<string | null>(null);
+  const [replaying, setReplaying] = useState(false);
+  const [replayIdx, setReplayIdx] = useState(0);
 
   // ── Load data ─────────────────────────────────────────────────────────
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     setReplaying(false);
-    setSimEntryTime(null);
-    setSimExitTime(null);
     if (replayTimerRef.current) clearInterval(replayTimerRef.current);
 
-    let liveBars: CandlestickData<Time>[] | null = null;
+    let result: CandlestickData<Time>[] | null = null;
 
     if (polygonApiKey && trade.symbol) {
       try {
-        liveBars = await fetchPolygon(trade.symbol, trade.trade_date, tf, polygonApiKey);
-        if (liveBars) setDataSource('live');
+        result = await fetchPolygon(trade.symbol, trade.trade_date, tf, polygonApiKey);
+        if (result) setDataSource('live');
       } catch {
         // fall through to simulation
       }
     }
 
-    if (liveBars) {
-      setBars(liveBars);
-      setReplayIdx(liveBars.length);
-    } else {
-      const sim = generateSimBars(trade, tf);
+    if (!result) {
+      result = generateSimBars(trade, tf);
       setDataSource('sim');
-      setSimEntryTime(sim.entryBarTime);
-      setSimExitTime(sim.exitBarTime);
-      setBars(sim.bars);
-      setReplayIdx(sim.bars.length);
     }
 
+    setBars(result);
+    setReplayIdx(result.length);
     setLoading(false);
   }, [trade.symbol, trade.trade_date, trade.pnl, trade.direction, trade.size,
-      trade.entry_price, trade.exit_price, tf, polygonApiKey]);
+      trade.entry_price, tf, polygonApiKey]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
@@ -339,16 +258,12 @@ export default function TradeChart({ trade, lang }: Props) {
       addLine(trade.exit_price, exitColor, isHe ? 'יציאה' : 'Exit');
     }
 
-    // Entry/exit candle markers — use manual times if set, otherwise fall back to sim positions
-    const entryTs = trade.entry_time
-      ? parseTime(trade.trade_date, trade.entry_time)
-      : simEntryTime;
-    const exitTs = trade.exit_time
-      ? parseTime(trade.trade_date, trade.exit_time)
-      : simExitTime;
+    // Entry/exit candle markers (when we have time info)
+    const entryMin = trade.entry_time ? parseTime(trade.trade_date, trade.entry_time) : null;
+    const exitMin  = trade.exit_time  ? parseTime(trade.trade_date, trade.exit_time)  : null;
 
-    if (entryTs) {
-      const bar = displayed.find(b => (b.time as number) >= entryTs);
+    if (entryMin) {
+      const bar = displayed.find(b => (b.time as number) >= entryMin);
       if (bar) markers.push({
         time: bar.time,
         position: trade.direction === 'long' ? 'belowBar' : 'aboveBar',
@@ -358,8 +273,8 @@ export default function TradeChart({ trade, lang }: Props) {
         size: 1.5,
       });
     }
-    if (exitTs) {
-      const bar = displayed.find(b => (b.time as number) >= exitTs);
+    if (exitMin) {
+      const bar = displayed.find(b => (b.time as number) >= exitMin);
       if (bar) markers.push({
         time: bar.time,
         position: trade.direction === 'long' ? 'aboveBar' : 'belowBar',
@@ -375,8 +290,7 @@ export default function TradeChart({ trade, lang }: Props) {
 
     return () => priceLinesCleanup.forEach(fn => fn());
   }, [bars, replayIdx, replaying, darkMode, trade.entry_price, trade.exit_price,
-      trade.entry_time, trade.exit_time, trade.direction, trade.pnl, isHe,
-      simEntryTime, simExitTime]);
+      trade.entry_time, trade.exit_time, trade.direction, trade.pnl, isHe]);
 
   // ── ResizeObserver ────────────────────────────────────────────────────
   useEffect(() => {
