@@ -26,16 +26,19 @@ supabase/
     topstepx-sync/index.ts — Edge Function: מאמת, מושך עסקאות (90 יום אחרונים / מ-last_synced_at), מכניס ל-trades
   migrations/
     topstepx_broker_connections.sql — הוספת עמודות + unique constraint + RLS ל-broker_connections
+    business_manager.sql   — יצירת טבלאות prop_expenses + prop_payouts עם RLS
   store.ts                 — Zustand store + Supabase sync
   i18n.ts                  — עברית/אנגלית (80+ מחרוזות)
-  types.ts                 — TypeScript interfaces
-  mockData.ts              — Demo data
+  types.ts                 — TypeScript interfaces (כולל PropExpense, PropPayout, ExpenseFeeType)
+  mockData.ts              — Demo data (כולל MOCK_EXPENSES, MOCK_PAYOUTS)
   index.css                — Dark/Light themes, RTL, mobile responsive
   lib/
     supabase.ts            — Client + DEMO_MODE
-    db.ts                  — loadUserData, dbSave*, dbSeedNewUser, dbUploadTradeMedia, dbGetTradeMediaUrls
+    db.ts                  — loadUserData, dbSave*, dbSeedNewUser, dbUploadTradeMedia, dbGetTradeMediaUrls,
+                             dbSaveExpense, dbDeleteExpense, dbSavePayout, dbDeletePayout
     futures.ts             — 50+ חוזים עתידיים עם pointValue מדויק
     propfirm.ts            — calcPropFirmStats() → PropFirmStats interface
+    business.ts            — calcBusinessStats() → BusinessStats interface (ניהול עסקי)
   components/
     Layout.tsx             — Shell: Sidebar + Header + Outlet
     Sidebar.tsx            — ניווט + mobile overlay
@@ -59,6 +62,7 @@ supabase/
     Analytics.tsx          — 8 גרפים Canvas: Equity, Drawdown, ByDay, BySymbol,
                              Heatmap, Distribution, RR Scatter, Streaks
     PropFirm.tsx           — Prop Firm Tracker: כרטיסי חשבון עם מדים
+    BusinessManager.tsx    — ניהול עסקי: הוצאות, משיכות, KPIs, גרף, מדד עסקי
     Reports.tsx            — Export PDF + CSV
     Settings.tsx           — חשבונות + אסטרטגיות + BrokerSection (TopstepX connect/sync) + logout + כפתור סנכרן
     AppLogo.tsx            — קומפוננטת לוגו responsive עם dark/light switching
@@ -88,7 +92,7 @@ supabase/
 ---
 
 ## Database Schema
-טבלאות: `profiles`, `accounts`, `strategies`, `strategy_fields`, `trades`, `trade_media`, `broker_connections`, `sync_log`
+טבלאות: `profiles`, `accounts`, `strategies`, `strategy_fields`, `trades`, `trade_media`, `broker_connections`, `sync_log`, `prop_expenses`, `prop_payouts`
 
 **`broker_connections`** — עמודות רלוונטיות לTopstepX:
 ```
@@ -154,6 +158,31 @@ RLS: כל טבלה עם `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = u
   - שורות: `flexWrap: wrap` + `gap` — לא גולשות במובייל
 - **Alerts**: `breached` → banner אדום; `passed` → banner ירוק
 - גם מוצג ב-Dashboard דרך `PropFirmCard.tsx` (mini version)
+
+### Business Manager (`/dashboard/business`)
+- קובץ לוגיקה: `src/lib/business.ts` → `calcBusinessStats(accounts, trades, expenses, payouts): BusinessStats`
+- **BusinessStats** כולל:
+  - `totalExpenses`, `totalPayouts`, `netProfit`
+  - `cpa` (Cost Per Account = totalExpenses / max(fundedAccounts, payoutCycles))
+  - `avgBurnDays`, `fundedAccountCount`
+  - `gamblingMeterScore` (0–100 = min(100, payouts/expenses/2 * 100))
+  - `breakEvenProgress`, `currentMonthExpenses`, `currentMonthPayouts`
+  - `tiltAlert` (≥2 evaluations ב-48h), `payoutPending`, `sizeOptimizationTip`
+  - `monthly: MonthlySnapshot[]` — 12 חודשים אחרונים לגרף
+- **UI** (הכל ב-`BusinessManager.tsx`):
+  - 5 KPI cards: Revenue | Expenses | Net Profit | CPA | Avg Account Life
+  - Break-even progress bar לחודש הנוכחי
+  - GamblingMeter: גרדיאנט אדום→ירוק + מחוג + status text
+    - **חשוב**: `dir="ltr"` על שורת הלייבלים — מונע היפוך בRTL
+  - Revenue vs Expenses bar chart (Canvas) — effect אחד עם `[monthly, isHe, hasAnyData]` deps
+    - `hasAnyData = expenses.length > 0 || payouts.length > 0` (לא תלוי ב-12 חודשים)
+  - Smart Insights: Tilt Alert | Low-Risk Mode | Size Optimization | Break-Even tip
+  - LogsSection עם tabs: הוצאות / משיכות + עריכה/מחיקה
+  - EntryModal: הוצאה (firm, size, fee_type, amount, date, notes) | משיכה (firm, amount, date, notes)
+- **DB**: `prop_expenses` + `prop_payouts` — migration ב-`supabase/migrations/business_manager.sql`
+- **Store**: `expenses[]`, `payouts[]` + 6 CRUD actions: `addExpense`, `updateExpense`, `deleteExpense`, `addPayout`, `updatePayout`, `deletePayout`
+- **מינוח בעברית**: הוצאה = expense, **משיכה** = payout (לא "תשלום")
+- **כותרת הדף**: `'ניהול עסקי'` (עברית) / `'Business Manager'` (אנגלית)
 
 ### Analytics (8 גרפים Canvas — ללא ספריות)
 Tabs: Equity Curve | Drawdown | P&L by Day | P&L by Symbol | Monthly Heatmap | Distribution | Risk/Reward Scatter | Streak Analysis
@@ -284,7 +313,7 @@ VITE_SUPABASE_ANON_KEY=...
 
 ## דברים חשובים לזכור
 1. **UUID בכל מקום** — אף פעם לא `Date.now()` כ-ID
-2. **ResizeObserver** על כל canvas — Analytics + MiniEquityChart
+2. **ResizeObserver** על כל canvas — Analytics + MiniEquityChart + BusinessManager chart
 3. **loadDataInBackground** — פותח UI מיד, Supabase ברקע
 4. **RTL**: `dir={lang === 'he' ? 'rtl' : 'ltr'}` על כל modal
 5. **Sidebar**: מוסתר במובייל, hamburger + overlay
@@ -318,6 +347,7 @@ VITE_SUPABASE_ANON_KEY=...
   - נדרש: `profiles` schema (`subscription_status`, `trial_ends_at`, `lemonsqueezy_customer_id`), webhook handler, `useSubscription` hook, Paywall UI
 - Push notifications במובייל
 - ~~התראות יעד יומי~~ — DailyGoalBar **הושלם** (bar ב-Dashboard)
+- ~~Business Manager~~ — **הושלם** (`/dashboard/business`)
 - השוואה שבוע/חודש ב-StatsBar (חץ ↑↓ ליד כל מספר)
 - Keyboard shortcuts (N=עסקה חדשה, Esc=סגור)
 - Onboarding wizard למשתמש חדש
