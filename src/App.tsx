@@ -15,6 +15,7 @@ import Accessibility from './pages/Accessibility';
 import PropFirm from './pages/PropFirm';
 import BusinessManager from './pages/BusinessManager';
 import Landing from './pages/Landing';
+import OnboardingWizard from './components/OnboardingWizard';
 
 /* מסך טעינה קצר — רק לבדיקת session ראשונית */
 function SplashScreen() {
@@ -115,7 +116,7 @@ function AppEffects() {
 }
 
 function ProtectedRoute({ children, ready, hasUser }: { children: React.ReactNode; ready: boolean; hasUser: boolean }) {
-  const { user } = useStore();
+  const { user, onboardingDone, setOnboardingDone } = useStore();
   const isLoggedIn = hasUser || !!user;
 
   // עדיין בודק session — הצג splash קצר
@@ -125,7 +126,14 @@ function ProtectedRoute({ children, ready, hasUser }: { children: React.ReactNod
   if (!DEMO_MODE && !isLoggedIn) return <Navigate to="/auth" replace />;
 
   // יש משתמש — פתח מיד (נתונים יטענו ברקע)
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      {!DEMO_MODE && isLoggedIn && !onboardingDone && (
+        <OnboardingWizard onDone={setOnboardingDone} />
+      )}
+    </>
+  );
 }
 
 export default function App() {
