@@ -339,24 +339,37 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
   const [txConn, setTxConn] = useState<{ [k: string]: boolean }>({});
   const [topstepKey, setTopstepKey] = useState('');
   const [showTopstepInput, setShowTopstepInput] = useState(false);
+  const [tradovateUser, setTradovateUser] = useState('');
+  const [tradovatePass, setTradovatePass] = useState('');
+  const [showTradovateInput, setShowTradovateInput] = useState(false);
   const [syncing, setSyncing] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<{ [k: string]: string }>({});
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
 
-  const connectTradovate = (accountId: string) => {
-    const clientId = import.meta.env.VITE_TRADOVATE_CLIENT_ID as string;
-    if (!clientId) {
-      alert(isHe
-        ? 'הגדר VITE_TRADOVATE_CLIENT_ID ב-Vercel Environment Variables'
-        : 'Set VITE_TRADOVATE_CLIENT_ID in Vercel Environment Variables');
-      return;
+  const connectTradovate = async (accountId: string) => {
+    if (!tradovateUser.trim() || !tradovatePass.trim()) return;
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+    try {
+      const res = await fetch(
+        `${supabaseUrl}/functions/v1/tradovate-auth?user_id=${user?.id}&account_id=${accountId}&api_username=${encodeURIComponent(tradovateUser)}&api_password=${encodeURIComponent(tradovatePass)}`,
+        { headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` } },
+      );
+      if (res.ok) {
+        setTxConn((c) => ({ ...c, [accountId]: true }));
+        setShowTradovateInput(false);
+        setTradovateUser('');
+        setTradovatePass('');
+        alert(isHe ? 'Tradovate חובר בהצלחה!' : 'Tradovate connected!');
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(isHe
+          ? `שגיאה בחיבור Tradovate: ${data.error ?? res.status}`
+          : `Tradovate connection failed: ${data.error ?? res.status}`);
+      }
+    } catch {
+      alert(isHe ? 'שגיאה בחיבור Tradovate' : 'Tradovate connection failed');
     }
-    const redirectUri = encodeURIComponent(
-      `${supabaseUrl}/functions/v1/broker-oauth?broker=tradovate&user_id=${user?.id}&account_id=${accountId}`
-    );
-    window.location.href =
-      `https://live.tradovate.com/oauth?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=trading`;
   };
 
   const connectTopstepX = async (accountId: string) => {
@@ -415,7 +428,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div className="list-card-info">
             <div className="list-card-name">Tradovate</div>
-            <div className="list-card-meta">Futures & Options · OAuth 2.0</div>
+            <div className="list-card-meta">Futures & Options · Username / Password</div>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             {lastSync.tradovate && (
@@ -430,19 +443,51 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
         </div>
         <div style={{ borderTop: '1px solid var(--bd)', paddingTop: 10 }}>
           <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 8 }}>
-            {isHe ? 'בחר חשבון TradeLog לקישור:' : 'Select TradeLog account to link:'}
+            {isHe
+              ? 'אימייל + סיסמה של חשבון Tradovate Live'
+              : 'Your Tradovate Live account email & password'}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {allAccounts.map((acc) => (
-              <div key={acc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'var(--s1)', borderRadius: 7, border: '1px solid var(--bd)' }}>
-                <span style={{ fontSize: '.84rem' }}>{acc.name}</span>
-                <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '.76rem' }}
-                  onClick={() => connectTradovate(acc.id)}>
-                  {isHe ? 'התחבר' : 'Connect'} OAuth
-                </button>
+          {!showTradovateInput ? (
+            <button className="btn btn-primary" style={{ fontSize: '.8rem', padding: '6px 14px' }}
+              onClick={() => setShowTradovateInput(true)}>
+              + {isHe ? 'הוסף פרטי כניסה' : 'Add Credentials'}
+            </button>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <input
+                className="form-input"
+                type="email"
+                placeholder={isHe ? 'אימייל Tradovate...' : 'Tradovate email...'}
+                value={tradovateUser}
+                onChange={(e) => setTradovateUser(e.target.value)}
+              />
+              <input
+                className="form-input"
+                type="password"
+                placeholder={isHe ? 'סיסמה...' : 'Password...'}
+                value={tradovatePass}
+                onChange={(e) => setTradovatePass(e.target.value)}
+              />
+              <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 4 }}>
+                {isHe ? 'קשר לחשבון:' : 'Link to account:'}
               </div>
-            ))}
-          </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {allAccounts.map((acc) => (
+                  <div key={acc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'var(--s1)', borderRadius: 7, border: '1px solid var(--bd)' }}>
+                    <span style={{ fontSize: '.84rem' }}>{acc.name}</span>
+                    <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '.76rem' }}
+                      onClick={() => connectTradovate(acc.id)}
+                      disabled={!tradovateUser.trim() || !tradovatePass.trim()}>
+                      {isHe ? 'חבר' : 'Connect'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button className="btn btn-ghost" onClick={() => { setShowTradovateInput(false); setTradovateUser(''); setTradovatePass(''); }}>
+                {T.cancel}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
