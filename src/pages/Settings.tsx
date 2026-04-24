@@ -782,7 +782,7 @@ export default function Settings() {
                 className="btn"
                 onClick={reloadFromCloud}
                 disabled={dataLoading}
-                style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 16px', fontSize: '.84rem', border: '1px solid var(--bd2)', color: 'var(--t2)' }}
+                style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 16px', fontSize: '.82rem', border: '1.5px solid var(--bd2)', color: 'var(--t2)', borderRadius: 'var(--rad-pill)', background: 'var(--s2)' }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <polyline points="1,4 1,10 7,10"/>
@@ -790,7 +790,7 @@ export default function Settings() {
                 </svg>
                 {dataLoading ? '...' : (lang === 'he' ? 'סנכרן' : 'Sync')}
               </button>
-              <button className="btn" onClick={() => setOnboardingDone(false)} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 16px', fontSize: '.84rem' }}>
+              <button className="btn" onClick={() => setOnboardingDone(false)} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 16px', fontSize: '.82rem', border: '1.5px solid var(--bd2)', color: 'var(--t2)', borderRadius: 'var(--rad-pill)', background: 'var(--s2)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <circle cx="12" cy="12" r="10"/>
                   <path d="M12 8v4l3 3"/>
