@@ -56,7 +56,7 @@ interface AppState {
   dailyGoalTarget: number;
   dailyMaxLoss: number;
   onboardingDone: boolean;
-  setOnboardingDone: () => void;
+  setOnboardingDone: (v?: boolean) => void;
 
   setDemo: (v: boolean) => void;
   setUser: (u: AppState['user']) => void;
@@ -132,7 +132,7 @@ export const useStore = create<AppState>()(
       dailyGoalTarget: 0,
       dailyMaxLoss: 0,
       onboardingDone: false,
-      setOnboardingDone: () => set({ onboardingDone: true }),
+      setOnboardingDone: (v = true) => set({ onboardingDone: v }),
 
       setDemo: (v) => set({ isDemo: v }),
       setUser: (u) => set({ user: u }),
