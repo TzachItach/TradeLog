@@ -350,11 +350,17 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'tradelog-storage',
-      version: 3,
+      version: 4,
       migrate: (persisted: unknown) => {
-        // v1/v2 → v3: reset darkMode to true (Spotify dark-first redesign)
         const state = persisted as Record<string, unknown>;
-        return { ...state, darkMode: true };
+        // v1/v2 → v3: reset darkMode to true
+        // v3 → v4: mark existing users as onboarding done (they pre-date the wizard)
+        const hasData = Array.isArray(state.accounts)
+          ? (state.accounts as unknown[]).length > 0
+          : Array.isArray(state.trades)
+            ? (state.trades as unknown[]).length > 0
+            : !!state.user;
+        return { ...state, darkMode: true, onboardingDone: hasData ? true : state.onboardingDone ?? false };
       },
       partialize: (s) => ({
         lang: s.lang, fontSize: s.fontSize, highContrast: s.highContrast,
