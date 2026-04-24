@@ -67,7 +67,7 @@ supabase/
     PropFirm.tsx           — Prop Firm Tracker: כרטיסי חשבון עם מדים
     BusinessManager.tsx    — ניהול עסקי: הוצאות, משיכות, KPIs, גרף, מדד עסקי
     Reports.tsx            — Export PDF + CSV
-    Settings.tsx           — חשבונות + אסטרטגיות + BrokerSection (TopstepX connect/sync) + logout + כפתור סנכרן
+    Settings.tsx           — חשבונות + אסטרטגיות + BrokerSection (TopstepX/Tradovate connect/sync) + logout + כפתורי "סנכרן" ו-"מדריך כניסה" (btn-ghost)
     AppLogo.tsx            — קומפוננטת לוגו responsive עם dark/light switching
     Auth.tsx               — Google OAuth בלבד
     Accessibility.tsx      — הצהרת נגישות עב/en (מתייחסת ל-Negishot)
@@ -128,13 +128,16 @@ RLS: כל טבלה עם `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = u
   - Layout: `grid-template-columns: 1fr 320px` בדסקטופ, עמודה אחת במובייל
 
 ### Landing Page (`/`)
-- דף נחיתה שיווקי בעברית (RTL) עם CSS מבודד `.lp-*`
-- סקציות: Nav, Hero + mockup, Social Proof, Features Bento, Pricing, CTA, Footer
+- דף נחיתה **דו-לשוני** (עברית RTL / אנגלית LTR) עם CSS מבודד `.lp-*`
+- **כפתור שפה** `עב / EN` ב-Nav → `setLang` → `dir` משתנה על `.lp` div
+- סקציות: Nav, Hero + mockup, Social Proof, Features Bento, Pricing, Testimonials (3 כרטיסים), FAQ (5 שאלות `<details>`), CTA, Footer
 - תמחור: USD (לא ₪) — $19/mo | $159/yr | $349 lifetime
-- כפתורים: "התחל עכשיו" → `/auth`, "נסה דמו" → demo data + `/dashboard`
+- כפתורים: "התחל עכשיו" → `/auth`, "Live Demo" → demo data + `/dashboard`
 - Route `*` מפנה ל-`/` (לא ל-`/dashboard`)
 - **לוגואים**: Nav=56px, Footer=52px, Mockup sidebar=36px — כולם `/logo.png` עם `mix-blend-mode:screen` inline
 - **Mockup**: משתמש ב-`/logo.png` (לא `/logo-icon.png` שלא קיים)
+- Social section: `justify-content: center`
+- Pricing + CTA: תמיד `dir="ltr"` (לא מושפעים מהשפה)
 
 ### CalendarView
 - Grid: `32px (ראשון מוקטן + מעומעם) + repeat(6,1fr) + 100px (שבוע)`
@@ -215,7 +218,7 @@ NQ=$20, MNQ=$2, ES=$50, MES=$5, CL=$1000, GC=$100, SI=$5000...
 ### עקרון ראשי
 **Dark-first**: `darkMode: true` כברירת מחדל. `:root` = light, `body.dark` = dark.
 - `body.classList.toggle('dark', darkMode)` ב-AppEffects
-- store `version: 3` + migrate מאפס darkMode ל-`true`
+- store `version: 4` + migrate: darkMode → `true`, `onboardingDone` → `true` למשתמשים קיימים (עם נתונים)
 
 ### CSS Variables (index.css)
 ```css
@@ -241,7 +244,11 @@ NQ=$20, MNQ=$2, ES=$50, MES=$5, CL=$1000, GC=$100, SI=$5000...
 ### Buttons
 ```css
 .btn-primary { background: var(--g); color: #000000; border-radius: var(--rad-pill); }
+.btn-ghost   { background: transparent; border: 1.5px solid var(--bd2); color: var(--t2); padding: 8px 16px; border-radius: var(--rad-pill); }
+.btn-ghost:hover { border-color: var(--t1); color: var(--t1); }  /* hover effect */
+.btn-danger  { background: rgba(233,20,41,.10); color: var(--r); border: 1.5px solid rgba(233,20,41,.28); border-radius: var(--rad-pill); }
 ```
+- כפתורים ניטרליים (סנכרן, מדריך כניסה וכו') → **`btn-ghost`** — לא inline style
 
 ### לוגו (`AppLogo.tsx`)
 - קבצים: `public/logo.png` (לבן על שחור — dark mode), `public/logo-light.png` (שחור על לבן — light mode)
@@ -347,7 +354,12 @@ VITE_SUPABASE_ANON_KEY=...
 ---
 
 ### Tradovate Auto Import (Tradovate REST API)
-- **API Base**: `https://live.tradovate.com/v1` (live) | `https://demo.tradovate.com/v1` (eval/demo)
+- **API Base**: `https://live.tradovateapi.com/v1` (live) | `https://demo.tradovateapi.com/v1` (eval/demo)
+  - ⚠️ Domain ישן `tradovate.com` → **לא עובד** (Supabase IPs חסומות + domain שינה)
+- **Auth מבוצע דרך Vercel Serverless Function** (`api/tradovate-auth.ts`) — לא Supabase Edge Function
+  - הסיבה: Supabase IPs חסומות ע"י Tradovate; Vercel IPs עוברות
+  - פורמט: Node.js `IncomingMessage/ServerResponse` (לא Web API `Request/Response`)
+  - Settings.tsx קורא ל-`/api/tradovate-auth` (לא ל-Supabase function)
 - **Auth endpoint**: `POST /auth/accesstokenrequest` → `{name, password, appId, appVersion, deviceId, cid:0, sec:""}` → `{accessToken}`
 - **Accounts**: `GET /account/list` → `{accounts[].id}`
 - **Trades**: `GET /executionReport/list` → סינון closing fills (grossPL !== 0)
@@ -372,7 +384,16 @@ VITE_SUPABASE_ANON_KEY=...
 - ~~Business Manager~~ — **הושלם** (`/dashboard/business`)
 - השוואה שבוע/חודש ב-StatsBar (חץ ↑↓ ליד כל מספר)
 - Keyboard shortcuts (N=עסקה חדשה, Esc=סגור)
-- Onboarding wizard למשתמש חדש
+- ~~Onboarding wizard למשתמש חדש~~ — **הושלם** (`OnboardingWizard.tsx`, 5 שלבים, דו-לשוני; כפתור "מדריך כניסה" ב-Settings לפתיחה מחדש)
+
+---
+
+### SEO (אפריל 2026)
+- **`index.html`**: title, description, canonical, OG tags (og:title/description/image/type), Twitter Card `summary_large_image`, JSON-LD `SoftwareApplication` schema
+- **`public/robots.txt`**: Allow `/`, Disallow `/dashboard /auth /api/`, Sitemap pointer
+- **`public/sitemap.xml`**: 5 URLs (/, /auth, /terms, /privacy, /accessibility) עם priority + changefreq
+- **`public/og-image.png`**: 1200×630 — נוצר מ-`scripts/og-image.html` דרך Chrome headless
+- **`vercel.json`**: Cache-Control headers לassets/images, rewrite מכסה את כל הנתיבים מחוץ ל-`/api/`
 
 ---
 
