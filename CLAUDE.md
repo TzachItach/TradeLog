@@ -22,11 +22,14 @@ src/
   App.tsx                  — Router, AuthListener, AppEffects, SplashScreen
 supabase/
   functions/
-    broker-oauth/index.ts  — Edge Function: מאמת API key מול ProjectX, שומר credentials ב-broker_connections
-    topstepx-sync/index.ts — Edge Function: מאמת, מושך עסקאות (90 יום אחרונים / מ-last_synced_at), מכניס ל-trades
+    broker-oauth/index.ts    — Edge Function: מאמת API key מול ProjectX, שומר credentials ב-broker_connections
+    topstepx-sync/index.ts   — Edge Function: מאמת, מושך עסקאות (90 יום אחרונים / מ-last_synced_at), מכניס ל-trades
+    tradovate-auth/index.ts  — Edge Function: מאמת username+password מול Tradovate (live/demo), שומר ב-broker_connections
+    tradovate-sync/index.ts  — Edge Function: מושך execution reports, מזהה closing fills, resolves contractId→symbol, מכניס ל-trades
   migrations/
     topstepx_broker_connections.sql — הוספת עמודות + unique constraint + RLS ל-broker_connections
-    business_manager.sql   — יצירת טבלאות prop_expenses + prop_payouts עם RLS
+    business_manager.sql     — יצירת טבלאות prop_expenses + prop_payouts עם RLS
+    tradovate_broker.sql     — הוספת tradovate_account_id + broker_env ל-broker_connections
   store.ts                 — Zustand store + Supabase sync
   i18n.ts                  — עברית/אנגלית (80+ מחרוזות)
   types.ts                 — TypeScript interfaces (כולל PropExpense, PropPayout, ExpenseFeeType)
@@ -94,12 +97,14 @@ supabase/
 ## Database Schema
 טבלאות: `profiles`, `accounts`, `strategies`, `strategy_fields`, `trades`, `trade_media`, `broker_connections`, `sync_log`, `prop_expenses`, `prop_payouts`
 
-**`broker_connections`** — עמודות רלוונטיות לTopstepX:
+**`broker_connections`** — עמודות:
 ```
 id, user_id, account_id, broker,
-api_username (text),          -- TopstepX login email
-api_key (text),               -- TopstepX API key
-projectx_account_id (int),    -- numeric ID מה-ProjectX API
+api_username (text),          -- email (TopstepX + Tradovate)
+api_key (text),               -- API key (TopstepX) / password (Tradovate)
+projectx_account_id (int),    -- numeric ID מה-ProjectX API (TopstepX)
+tradovate_account_id (int),   -- numeric ID מה-Tradovate API
+broker_env (text),            -- 'live' | 'demo' (Tradovate בלבד)
 is_active (bool),
 last_synced_at (timestamptz)  -- נקודת התחלה לסנכרון הבא
 UNIQUE (user_id, account_id, broker)
@@ -337,7 +342,24 @@ VITE_SUPABASE_ANON_KEY=...
   - `pnl = profitAndLoss - fees`
   - `broker_trade_id = topstepx-{id}`
 - **Flow בSettings**: Enter API Key → Connect (קורא `broker-oauth`) → Sync Now (קורא `topstepx-sync`)
-- **Deployed**: שתי Edge Functions פרוסות ב-Supabase project `mxzyfmuktsyazkfxglzb`
+- **Deployed**: פרוס ב-Supabase project `mxzyfmuktsyazkfxglzb`
+
+---
+
+### Tradovate Auto Import (Tradovate REST API)
+- **API Base**: `https://live.tradovate.com/v1` (live) | `https://demo.tradovate.com/v1` (eval/demo)
+- **Auth endpoint**: `POST /auth/accesstokenrequest` → `{name, password, appId, appVersion, deviceId, cid:0, sec:""}` → `{accessToken}`
+- **Accounts**: `GET /account/list` → `{accounts[].id}`
+- **Trades**: `GET /executionReport/list` → סינון closing fills (grossPL !== 0)
+  - `side: "Sell"` (סגר long) → `direction: 'long'` | `side: "Buy"` (סגר short) → `direction: 'short'`
+  - `pnl = grossPL - commission`
+  - contractId נומרי → `GET /contract/item?id={id}` → `name` → normalizeSymbol (parallel)
+  - `broker_trade_id = tradovate-{id}`
+- **Env vars** (Supabase Secrets, אופציונלי — cid:0 עובד ל-read-only):
+  `TRADOVATE_APP_ID`, `TRADOVATE_CID`, `TRADOVATE_SEC`
+- **Flow בSettings**: בחר Live/Demo → הכנס email+password → Connect (קורא `tradovate-auth`) → Sync Now (קורא `tradovate-sync`)
+- **Demo/Eval accounts**: toggle "Demo / תיק מבחן" שולח לדמו URL — שומר `broker_env='demo'` ב-DB
+- **Deployed**: פרוס ב-Supabase project `mxzyfmuktsyazkfxglzb`
 
 ---
 
