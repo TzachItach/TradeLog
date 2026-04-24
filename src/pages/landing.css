@@ -211,7 +211,7 @@
 }
 .lp-social-inner {
   max-width: 1040px; margin: 0 auto;
-  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap;
 }
 .lp-social-label { font-size: .78rem; color: rgba(255,255,255,.40); font-weight: 500; white-space: nowrap; }
 .lp-brokers { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -410,6 +410,70 @@
 .lp-footer-links a:hover { color: rgba(255,255,255,.80); }
 .lp-footer-copy { font-size: .76rem; color: rgba(255,255,255,.30); }
 
+/* ── Testimonials ── */
+.lp-testimonials { padding: 96px 24px; background: #000000; }
+.lp-testimonials-inner { max-width: 1040px; margin: 0 auto; }
+.lp-testimonials h2 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700;
+  letter-spacing: -0.05em; margin-bottom: 48px; text-align: center;
+}
+.lp-testimonials-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+}
+.lp-testimonial-card {
+  background: #181818; border: 1px solid rgba(255,255,255,.07);
+  border-radius: 16px; padding: 28px 24px;
+  display: flex; flex-direction: column; gap: 16px;
+  transition: transform .2s, border-color .2s;
+}
+.lp-testimonial-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,.16); }
+.lp-testimonial-stars { color: #1DB954; font-size: 1rem; letter-spacing: 2px; }
+.lp-testimonial-text {
+  font-size: .9rem; color: rgba(255,255,255,.75);
+  line-height: 1.7; flex: 1;
+  font-style: italic;
+}
+.lp-testimonial-author { display: flex; align-items: center; gap: 12px; margin-top: auto; }
+.lp-testimonial-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, #1DB954, #0a9c3f);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .9rem; font-weight: 700; color: #000; flex-shrink: 0;
+}
+.lp-testimonial-name { font-size: .85rem; font-weight: 700; color: #FFFFFF; }
+.lp-testimonial-role { font-size: .75rem; color: rgba(255,255,255,.40); margin-top: 2px; }
+
+/* ── FAQ ── */
+.lp-faq { padding: 80px 24px; background: #121212; }
+.lp-faq-inner { max-width: 680px; margin: 0 auto; }
+.lp-faq h2 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700;
+  letter-spacing: -0.05em; margin-bottom: 40px; text-align: center;
+}
+.lp-faq-list { display: flex; flex-direction: column; gap: 8px; }
+.lp-faq-item {
+  background: #181818; border: 1px solid rgba(255,255,255,.07);
+  border-radius: 12px; overflow: hidden;
+  transition: border-color .2s;
+}
+.lp-faq-item[open] { border-color: rgba(29,185,84,.25); }
+.lp-faq-q {
+  font-size: .95rem; font-weight: 600; color: #FFFFFF;
+  padding: 18px 20px; cursor: pointer; list-style: none;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px;
+}
+.lp-faq-q::-webkit-details-marker { display: none; }
+.lp-faq-q::after {
+  content: '+'; color: #1DB954; font-size: 1.3rem;
+  font-weight: 300; flex-shrink: 0; transition: transform .2s;
+}
+.lp-faq-item[open] .lp-faq-q::after { content: '−'; }
+.lp-faq-a {
+  font-size: .875rem; color: rgba(255,255,255,.60);
+  line-height: 1.7; padding: 0 20px 18px; margin: 0;
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .lp-nav-links { display: none; }
@@ -419,6 +483,7 @@
   .lp-mockup-app { grid-template-columns: 100px 1fr; }
   .lp-mockup-kpi-row { grid-template-columns: repeat(2, 1fr); }
   .lp-footer-inner { flex-direction: column; align-items: flex-start; }
+  .lp-testimonials-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
   .lp-mockup-charts { grid-template-columns: 1fr; }

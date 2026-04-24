@@ -19,11 +19,11 @@ const T = {
   he: {
     nav: { features: 'פיצ׳רים', pricing: 'מחירים', tools: 'כלים', signin: 'התחבר', start: 'התחל בחינם' },
     badge: '14 ימי ניסיון · ללא כרטיס אשראי',
-    h1a: 'סחר כמו מקצוען,',
-    h1b: 'נתח כמו מכונה',
-    heroSub: 'יומן המסחר המתקדם ביותר לטריידרים בחוזים עתידיים. עקוב אחרי כל עסקה, שלוט בפסיכולוגיה, וחדד את היתרון שלך.',
+    h1a: 'לסחור כמו מקצוען,',
+    h1b: 'לתעד כמו מכונה.',
+    heroSub: 'יומן המסחר האוטומטי המתקדם ביותר לסוחרים בחוזים עתידיים. לעקוב אחרי כל עסקה, לשלוט בפסיכולוגיה, ולחדד את האדג׳ שלך.',
     ctaPrimary: 'התחל ניסיון חינם — 14 יום',
-    ctaDemo: 'דמו חי',
+    ctaDemo: 'Live Demo',
     importsFrom: 'ייבוא מ-',
     featuresTitle: 'כלים שעובדים בשבילך',
     featuresSub: 'כל מה שצריך כדי לנתח, להשתפר ולשלוט בביצועי המסחר שלך.',
@@ -33,8 +33,8 @@ const T = {
     card2Desc: '8 גרפים מתקדמים: Equity Curve, Drawdown, P&L לפי יום וסמל, Heatmap, R:R Scatter ועוד — בזמן אמת.',
     card3Title: 'לוח שנה ויזואלי',
     card3Desc: 'זהה דפוסים בביצועים שלך. ראה באילו ימים אתה מצטיין ואילו סשנים עדיף להימנע מהם.',
-    advTitle: 'כלי פרו',
-    advSub: 'בנוי לטריידרים רציניים שצריכים כלי דיוק לניהול סיכונים והערכות Prop Firm.',
+    advTitle: 'Pro-level tools',
+    advSub: 'בנוי לסוחרים רציניים שצריכים כלי דיוק לניהול סיכונים והערכות Prop Firm.',
     adv1Title: 'ניהול סיכונים מתקדם',
     adv1Desc: 'מחשבון R:R מדויק לכל חוזה עתידי. מעקב בזמן אמת אחרי Max Drawdown, הפסד יומי וחשיפה.',
     adv2Title: 'Prop Firm Tracker',
@@ -68,6 +68,20 @@ const T = {
     planBtnLifetime: 'קבל גישה לכל החיים',
     ctaTitle: 'מוכן לשפר את המסחר שלך?',
     ctaSub: 'ללא כרטיס אשראי. 14 ימים חינם לגמרי. ביטול בכל עת.',
+    testimonialsTitle: 'מה הסוחרים אומרים',
+    testimonials: [
+      { name: 'אלון מ.', role: 'Topstep Funded Trader', text: 'TradeLog שינה לי לגמרי את האופן שבו אני מנהל את החשבונות שלי. ה-Drawdown Tracker מציל אותי כל יום.' },
+      { name: 'יעל כ.', role: 'NQ Day Trader', text: 'הייתי עובד עם Excel. עכשיו אני רואה את כל ה-Analytics שלי בלחיצה אחת. לא מבין איך עבדתי בלי זה.' },
+      { name: 'רועי ש.', role: 'Apex Futures Trader', text: 'הייבוא האוטומטי מ-TopstepX חוסך לי 30 דקות כל יום. המידע מדויק ומסודר בדיוק כמו שצריך.' },
+    ],
+    faqTitle: 'שאלות נפוצות',
+    faqs: [
+      { q: 'האם TradeLog תומך בחשבונות מרובים?', a: 'כן. ניתן להוסיף חשבונות Live, Prop Firm, Sim ולעקוב אחריהם בנפרד — כל אחד עם יתרה, P&L ו-Drawdown משלו.' },
+      { q: 'מאיזה ברוקרים אפשר לייבא עסקאות?', a: 'כרגע תומכים בייבוא אוטומטי מ-Tradovate ו-TopstepX. ניתן גם לייבא CSV ידנית.' },
+      { q: 'האם יש תמיכה ב-Prop Firm Trailing Drawdown?', a: 'כן. TradeLog מחשב Trailing Drawdown (EOD ו-Intraday), Daily Loss Limit ו-Profit Target בדיוק מלא.' },
+      { q: 'האם הנתונים שלי מאובטחים?', a: 'כל הנתונים מאוחסנים בצורה מוצפנת ב-Supabase עם Row-Level Security. רק אתה יכול לראות את הנתונים שלך.' },
+      { q: 'האם ניתן לבטל בכל עת?', a: 'כן. ניתן לבטל מנוי בכל עת ישירות מהחשבון, ללא עמלות ביטול.' },
+    ],
     footerTerms: 'תנאי שימוש',
     footerPrivacy: 'פרטיות',
     footerAccess: 'נגישות',
@@ -125,6 +139,20 @@ const T = {
     planBtnLifetime: 'Get lifetime access',
     ctaTitle: 'Ready to level up your trading?',
     ctaSub: 'No credit card. 14 days completely free. Cancel anytime.',
+    testimonialsTitle: 'What traders are saying',
+    testimonials: [
+      { name: 'Alon M.', role: 'Topstep Funded Trader', text: 'TradeLog completely changed how I manage my accounts. The Drawdown Tracker saves me every single day.' },
+      { name: 'Yael K.', role: 'NQ Day Trader', text: 'I used to work in Excel. Now I see all my analytics in one click. I don\'t understand how I worked without this.' },
+      { name: 'Roee S.', role: 'Apex Futures Trader', text: 'Auto-import from TopstepX saves me 30 minutes every day. The data is accurate and organized exactly as needed.' },
+    ],
+    faqTitle: 'Frequently asked questions',
+    faqs: [
+      { q: 'Does TradeLog support multiple accounts?', a: 'Yes. You can add Live, Prop Firm, and Sim accounts and track them separately — each with its own balance, P&L, and drawdown.' },
+      { q: 'Which brokers can I import trades from?', a: 'We currently support automatic import from Tradovate and TopstepX. You can also import CSV manually.' },
+      { q: 'Does it support Prop Firm Trailing Drawdown?', a: 'Yes. TradeLog calculates Trailing Drawdown (EOD and Intraday), Daily Loss Limit, and Profit Target with full precision.' },
+      { q: 'Is my data secure?', a: 'All data is stored encrypted in Supabase with Row-Level Security. Only you can access your data.' },
+      { q: 'Can I cancel at any time?', a: 'Yes. You can cancel your subscription anytime directly from your account, with no cancellation fees.' },
+    ],
     footerTerms: 'Terms',
     footerPrivacy: 'Privacy',
     footerAccess: 'Accessibility',
@@ -433,6 +461,43 @@ export default function Landing() {
                 </ul>
                 <button className="lp-plan-btn" onClick={goAuth}>{t.planBtnLifetime}</button>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials */}
+        <section className="lp-testimonials">
+          <div className="lp-testimonials-inner">
+            <h2>{t.testimonialsTitle}</h2>
+            <div className="lp-testimonials-grid">
+              {t.testimonials.map((item, i) => (
+                <div key={i} className="lp-testimonial-card">
+                  <div className="lp-testimonial-stars">★★★★★</div>
+                  <p className="lp-testimonial-text">"{item.text}"</p>
+                  <div className="lp-testimonial-author">
+                    <div className="lp-testimonial-avatar">{item.name[0]}</div>
+                    <div>
+                      <div className="lp-testimonial-name">{item.name}</div>
+                      <div className="lp-testimonial-role">{item.role}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="lp-faq">
+          <div className="lp-faq-inner">
+            <h2>{t.faqTitle}</h2>
+            <div className="lp-faq-list">
+              {t.faqs.map((item, i) => (
+                <details key={i} className="lp-faq-item">
+                  <summary className="lp-faq-q">{item.q}</summary>
+                  <p className="lp-faq-a">{item.a}</p>
+                </details>
+              ))}
             </div>
           </div>
         </section>
