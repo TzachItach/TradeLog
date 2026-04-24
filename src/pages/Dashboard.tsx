@@ -29,6 +29,7 @@ export default function Dashboard() {
           <div className="dashboard-chart-card">
             <MiniEquityChart />
           </div>
+          <AIInsightsCard />
         </div>
 
         <div className="dashboard-trades-col">
@@ -46,8 +47,6 @@ export default function Dashboard() {
           <RecentTrades />
         </div>
       </div>
-
-      <AIInsightsCard />
 
       <div className="disclaimer">{T.disclaimer}</div>
     </div>
