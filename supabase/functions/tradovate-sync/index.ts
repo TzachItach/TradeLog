@@ -6,8 +6,9 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const TRADOVATE_BASE =
-  Deno.env.get('TRADOVATE_BASE_URL') ?? 'https://live.tradovate.com/v1';
+const LIVE_BASE  = 'https://live.tradovate.com/v1';
+const DEMO_BASE  = 'https://demo.tradovate.com/v1';
+
 const APP_ID      = Deno.env.get('TRADOVATE_APP_ID')      ?? 'TradeLog';
 const APP_VERSION = Deno.env.get('TRADOVATE_APP_VERSION') ?? '1.0';
 const CID         = parseInt(Deno.env.get('TRADOVATE_CID') ?? '0');
@@ -18,8 +19,8 @@ const DEVICE_ID   = 'tradelog-server-v1';
 // "MNQM5" → "MNQ" | "ESH5" → "ES" | "MNQ M5" → "MNQ"
 function normalizeSymbol(raw: string): string {
   return raw
-    .replace(/\s+[FGHJKMNQUVXZ]\d{1,2}$/, '') // "MNQ M5" → "MNQ"
-    .replace(/[FGHJKMNQUVXZ]\d{1,2}$/, '')     // "MNQM5"  → "MNQ"
+    .replace(/\s+[FGHJKMNQUVXZ]\d{1,2}$/, '')
+    .replace(/[FGHJKMNQUVXZ]\d{1,2}$/, '')
     .toUpperCase()
     .trim();
 }
@@ -29,14 +30,12 @@ interface TradovateExecReport {
   accountId: number;
   contractId: number;
   timestamp: string;
-  tradeTimestamp?: string;
   price: number;
   qty: number;
   side: 'Buy' | 'Sell';
   orderId: number;
   grossPL?: number;
   commission?: number;
-  execType?: string;
 }
 
 interface TradovateContract {
@@ -51,10 +50,13 @@ function json(body: unknown, status = 200) {
   });
 }
 
-// Authenticate and return an access token
-async function getTradovateToken(username: string, password: string): Promise<string | null> {
+function getBaseUrl(env: string | null): string {
+  return env === 'demo' ? DEMO_BASE : LIVE_BASE;
+}
+
+async function getTradovateToken(baseUrl: string, username: string, password: string): Promise<string | null> {
   try {
-    const res = await fetch(`${TRADOVATE_BASE}/auth/accesstokenrequest`, {
+    const res = await fetch(`${baseUrl}/auth/accesstokenrequest`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({
@@ -74,9 +76,8 @@ async function getTradovateToken(username: string, password: string): Promise<st
   }
 }
 
-// Fetch all execution reports for this user's accounts
-async function fetchExecReports(token: string): Promise<TradovateExecReport[]> {
-  const res = await fetch(`${TRADOVATE_BASE}/executionReport/list`, {
+async function fetchExecReports(baseUrl: string, token: string): Promise<TradovateExecReport[]> {
+  const res = await fetch(`${baseUrl}/executionReport/list`, {
     headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
   });
   if (!res.ok) return [];
@@ -84,10 +85,9 @@ async function fetchExecReports(token: string): Promise<TradovateExecReport[]> {
   return Array.isArray(data) ? data : [];
 }
 
-// Fetch contract details by numeric ID
-async function fetchContract(token: string, contractId: number): Promise<TradovateContract | null> {
+async function fetchContract(baseUrl: string, token: string, contractId: number): Promise<TradovateContract | null> {
   try {
-    const res = await fetch(`${TRADOVATE_BASE}/contract/item?id=${contractId}`, {
+    const res = await fetch(`${baseUrl}/contract/item?id=${contractId}`, {
       headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
     });
     if (!res.ok) return null;
@@ -98,18 +98,16 @@ async function fetchContract(token: string, contractId: number): Promise<Tradova
   }
 }
 
-// Fetch Tradovate account list to resolve numeric account ID
-async function fetchTradovateAccountId(token: string): Promise<number | null> {
+async function fetchTradovateAccountId(baseUrl: string, token: string): Promise<number | null> {
   try {
-    const res = await fetch(`${TRADOVATE_BASE}/account/list`, {
+    const res = await fetch(`${baseUrl}/account/list`, {
       headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
     });
     if (!res.ok) return null;
     const accounts = await res.json();
     if (!Array.isArray(accounts) || accounts.length === 0) return null;
-    const live = accounts.find((a: { active: boolean; accountType: string }) =>
-      a.active && a.accountType !== 'Demo');
-    return (live ?? accounts[0]).id ?? null;
+    const active = accounts.filter((a: { active: boolean }) => a.active);
+    return (active[0] ?? accounts[0]).id ?? null;
   } catch {
     return null;
   }
@@ -144,17 +142,20 @@ serve(async (req) => {
   let totalInserted = 0;
 
   for (const conn of connections) {
+    // Use the stored environment (live or demo) so eval accounts work correctly
+    const baseUrl = getBaseUrl(conn.broker_env);
+
     // ── 2. Authenticate ───────────────────────────────────────
-    const token = await getTradovateToken(conn.api_username, conn.api_key);
+    const token = await getTradovateToken(baseUrl, conn.api_username, conn.api_key);
     if (!token) {
-      console.error(`[tradovate-sync] Auth failed for account ${conn.account_id}`);
+      console.error(`[tradovate-sync] Auth failed for account ${conn.account_id} (env: ${conn.broker_env})`);
       continue;
     }
 
     // ── 3. Resolve numeric Tradovate account ID ───────────────
     let tradovateAccountId: number = conn.tradovate_account_id;
     if (!tradovateAccountId) {
-      const resolved = await fetchTradovateAccountId(token);
+      const resolved = await fetchTradovateAccountId(baseUrl, token);
       if (!resolved) {
         console.error('[tradovate-sync] Could not resolve Tradovate account ID');
         continue;
@@ -174,21 +175,19 @@ serve(async (req) => {
     // ── 5. Fetch all execution reports ────────────────────────
     let allReports: TradovateExecReport[] = [];
     try {
-      allReports = await fetchExecReports(token);
+      allReports = await fetchExecReports(baseUrl, token);
     } catch (e) {
       console.error('[tradovate-sync] Execution report fetch failed:', e);
       continue;
     }
 
     // ── 6. Filter: this account, within time window, closing fills only
-    // Closing fills are identified by a non-zero grossPL.
+    // Closing fills realise P&L → grossPL non-zero.
     // side: "Sell" closes a long → direction 'long'
     // side: "Buy"  closes a short → direction 'short'
     const closingFills = allReports.filter((r) => {
       if (r.accountId !== tradovateAccountId) return false;
-      const ts = new Date(r.timestamp);
-      if (ts < startDate) return false;
-      // A closing fill realises P&L (grossPL present and non-zero)
+      if (new Date(r.timestamp) < startDate) return false;
       return r.grossPL !== undefined && r.grossPL !== null && r.grossPL !== 0;
     });
 
@@ -219,13 +218,13 @@ serve(async (req) => {
       continue;
     }
 
-    // ── 8. Resolve contract IDs → symbols (batch, parallel) ───
+    // ── 8. Resolve contract IDs → symbols (parallel) ──────────
     const uniqueContractIds = [...new Set(newFills.map((r) => r.contractId))];
     const contractMap = new Map<number, string>();
 
     await Promise.all(
       uniqueContractIds.map(async (cid) => {
-        const contract = await fetchContract(token, cid);
+        const contract = await fetchContract(baseUrl, token, cid);
         if (contract?.name) {
           contractMap.set(cid, normalizeSymbol(contract.name));
         }
@@ -233,32 +232,31 @@ serve(async (req) => {
     );
 
     // ── 9. Map fills to TradeLog trade rows ───────────────────
-    const rows = newFills
-      .map((r) => {
-        const symbol = contractMap.get(r.contractId) ?? `CONTRACT-${r.contractId}`;
-        const grossPL    = r.grossPL    ?? 0;
-        const commission = r.commission ?? 0;
-        const pnl = Math.round((grossPL - commission) * 100) / 100;
+    const rows = newFills.map((r) => {
+      const symbol     = contractMap.get(r.contractId) ?? `CONTRACT-${r.contractId}`;
+      const grossPL    = r.grossPL    ?? 0;
+      const commission = r.commission ?? 0;
+      const pnl        = Math.round((grossPL - commission) * 100) / 100;
+      const envLabel   = conn.broker_env === 'demo' ? 'Tradovate Demo' : 'Tradovate';
 
-        return {
-          id:              crypto.randomUUID(),
-          user_id:         userId,
-          account_id:      conn.account_id,
-          symbol,
-          // Closing side: Sell=closed a long, Buy=closed a short
-          direction:       r.side === 'Sell' ? 'long' : 'short',
-          trade_date:      r.timestamp.split('T')[0],
-          pnl,
-          size:            r.qty,
-          notes:           commission > 0
-            ? `Fees: $${commission.toFixed(2)} | Tradovate`
-            : 'Tradovate',
-          source:          'auto',
-          broker_trade_id: `tradovate-${r.id}`,
-          confirmations:   {},
-          field_values:    {},
-        };
-      });
+      return {
+        id:              crypto.randomUUID(),
+        user_id:         userId,
+        account_id:      conn.account_id,
+        symbol,
+        direction:       r.side === 'Sell' ? 'long' : 'short',
+        trade_date:      r.timestamp.split('T')[0],
+        pnl,
+        size:            r.qty,
+        notes:           commission > 0
+          ? `Fees: $${commission.toFixed(2)} | ${envLabel}`
+          : envLabel,
+        source:          'auto',
+        broker_trade_id: `tradovate-${r.id}`,
+        confirmations:   {},
+        field_values:    {},
+      };
+    });
 
     const { error: insertErr } = await supabase.from('trades').insert(rows);
     if (insertErr) {

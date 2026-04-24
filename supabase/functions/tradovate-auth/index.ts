@@ -6,8 +6,9 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const TRADOVATE_BASE =
-  Deno.env.get('TRADOVATE_BASE_URL') ?? 'https://live.tradovate.com/v1';
+const LIVE_BASE  = 'https://live.tradovate.com/v1';
+const DEMO_BASE  = 'https://demo.tradovate.com/v1';
+
 const APP_ID      = Deno.env.get('TRADOVATE_APP_ID')      ?? 'TradeLog';
 const APP_VERSION = Deno.env.get('TRADOVATE_APP_VERSION') ?? '1.0';
 const CID         = parseInt(Deno.env.get('TRADOVATE_CID') ?? '0');
@@ -21,6 +22,24 @@ function json(body: unknown, status = 200) {
   });
 }
 
+async function authenticate(baseUrl: string, username: string, password: string) {
+  const res = await fetch(`${baseUrl}/auth/accesstokenrequest`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({
+      name:       username,
+      password,
+      appId:      APP_ID,
+      appVersion: APP_VERSION,
+      deviceId:   DEVICE_ID,
+      cid:        CID,
+      sec:        SEC,
+    }),
+  });
+  const data = await res.json();
+  return data.accessToken ? (data.accessToken as string) : null;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
@@ -29,58 +48,44 @@ serve(async (req) => {
   const accountId = url.searchParams.get('account_id');
   const username  = url.searchParams.get('api_username');
   const password  = url.searchParams.get('api_password');
+  // 'live' (default) or 'demo' for prop-firm eval accounts
+  const env       = url.searchParams.get('env') === 'demo' ? 'demo' : 'live';
+  const baseUrl   = env === 'demo' ? DEMO_BASE : LIVE_BASE;
 
   if (!userId || !accountId || !username || !password) {
     return json({ error: 'Missing required parameters' }, 400);
   }
 
   // ── 1. Authenticate with Tradovate ─────────────────────────
-  let accessToken: string;
+  let accessToken: string | null = null;
   try {
-    const authRes = await fetch(`${TRADOVATE_BASE}/auth/accesstokenrequest`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({
-        name:       username,
-        password,
-        appId:      APP_ID,
-        appVersion: APP_VERSION,
-        deviceId:   DEVICE_ID,
-        cid:        CID,
-        sec:        SEC,
-      }),
-    });
-    const authData = await authRes.json();
-
-    if (!authData.accessToken) {
-      return json(
-        { error: 'Invalid Tradovate credentials', detail: authData.errorText ?? JSON.stringify(authData) },
-        401,
-      );
-    }
-    accessToken = authData.accessToken;
+    accessToken = await authenticate(baseUrl, username, password);
   } catch (e) {
     return json({ error: 'Could not reach Tradovate API', detail: String(e) }, 502);
   }
 
-  // ── 2. Fetch account list to get numeric account ID ────────
+  if (!accessToken) {
+    return json({ error: 'Invalid Tradovate credentials — check email/password and Live/Demo selection' }, 401);
+  }
+
+  // ── 2. Fetch account list ──────────────────────────────────
+  // For demo env, all returned accounts are demo accounts. For live, prefer
+  // non-demo accounts but fall back to any active account (handles edge cases).
   let tradovateAccountId: number | null = null;
   try {
-    const acctRes = await fetch(`${TRADOVATE_BASE}/account/list`, {
+    const acctRes = await fetch(`${baseUrl}/account/list`, {
       headers: { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json' },
     });
     const accounts = await acctRes.json();
     if (Array.isArray(accounts) && accounts.length > 0) {
-      // Prefer the first active/live account
-      const live = accounts.find((a: { active: boolean; accountType: string }) =>
-        a.active && a.accountType !== 'Demo');
-      tradovateAccountId = (live ?? accounts[0]).id;
+      const active = accounts.filter((a: { active: boolean }) => a.active);
+      tradovateAccountId = (active[0] ?? accounts[0]).id ?? null;
     }
   } catch {
-    // Non-fatal — sync will re-fetch if this is null
+    // Non-fatal — sync will re-fetch if null
   }
 
-  // ── 3. Store credentials in Supabase ───────────────────────
+  // ── 3. Store in Supabase ───────────────────────────────────
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
@@ -94,6 +99,7 @@ serve(async (req) => {
       api_username:         username,
       api_key:              password,
       tradovate_account_id: tradovateAccountId,
+      broker_env:           env,
       is_active:            true,
     },
     { onConflict: 'user_id,account_id,broker' },
@@ -101,5 +107,5 @@ serve(async (req) => {
 
   if (error) return json({ error: error.message }, 500);
 
-  return json({ success: true, tradovateAccountId });
+  return json({ success: true, env, tradovateAccountId });
 });

@@ -341,6 +341,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
   const [showTopstepInput, setShowTopstepInput] = useState(false);
   const [tradovateUser, setTradovateUser] = useState('');
   const [tradovatePass, setTradovatePass] = useState('');
+  const [tradovateEnv, setTradovateEnv] = useState<'live' | 'demo'>('live');
   const [showTradovateInput, setShowTradovateInput] = useState(false);
   const [syncing, setSyncing] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<{ [k: string]: string }>({});
@@ -352,7 +353,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
     const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
     try {
       const res = await fetch(
-        `${supabaseUrl}/functions/v1/tradovate-auth?user_id=${user?.id}&account_id=${accountId}&api_username=${encodeURIComponent(tradovateUser)}&api_password=${encodeURIComponent(tradovatePass)}`,
+        `${supabaseUrl}/functions/v1/tradovate-auth?user_id=${user?.id}&account_id=${accountId}&api_username=${encodeURIComponent(tradovateUser)}&api_password=${encodeURIComponent(tradovatePass)}&env=${tradovateEnv}`,
         { headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` } },
       );
       if (res.ok) {
@@ -360,6 +361,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
         setShowTradovateInput(false);
         setTradovateUser('');
         setTradovatePass('');
+        setTradovateEnv('live');
         alert(isHe ? 'Tradovate חובר בהצלחה!' : 'Tradovate connected!');
       } else {
         const data = await res.json().catch(() => ({}));
@@ -468,6 +470,26 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
                 value={tradovatePass}
                 onChange={(e) => setTradovatePass(e.target.value)}
               />
+              {/* Live / Demo toggle */}
+              <div style={{ display: 'flex', gap: 6 }}>
+                {(['live', 'demo'] as const).map((env) => (
+                  <button
+                    key={env}
+                    onClick={() => setTradovateEnv(env)}
+                    style={{
+                      flex: 1, padding: '6px 0', fontSize: '.78rem', fontWeight: 600,
+                      borderRadius: 'var(--rad)', border: '1.5px solid',
+                      cursor: 'pointer', transition: 'all .12s',
+                      borderColor: tradovateEnv === env ? 'var(--g)' : 'var(--bd2)',
+                      background: tradovateEnv === env ? 'rgba(29,185,84,.12)' : 'var(--s2)',
+                      color: tradovateEnv === env ? 'var(--g)' : 'var(--t2)',
+                    }}>
+                    {env === 'live'
+                      ? (isHe ? 'Live (חי)' : 'Live')
+                      : (isHe ? 'Demo / תיק מבחן' : 'Demo / Eval')}
+                  </button>
+                ))}
+              </div>
               <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 4 }}>
                 {isHe ? 'קשר לחשבון:' : 'Link to account:'}
               </div>
