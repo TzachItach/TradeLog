@@ -42,10 +42,21 @@ serve(async (req) => {
 
   if (!userId) return json({ error: 'Missing user_id in request body' }, 400);
 
+  // ── Verify JWT — caller must be the same user ──────────────
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return json({ error: 'Unauthorized' }, 401);
+  }
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   );
+  const { data: { user }, error: authErr } = await supabase.auth.getUser(
+    authHeader.replace('Bearer ', ''),
+  );
+  if (authErr || !user || user.id !== userId) {
+    return json({ error: 'Forbidden' }, 403);
+  }
 
   // ── 1. Load active TopstepX connections ────────────────────
   const { data: connections, error: connErr } = await supabase

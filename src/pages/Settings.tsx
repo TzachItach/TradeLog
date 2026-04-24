@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { useT } from '../i18n';
-import { signOut, DEMO_MODE } from '../lib/supabase';
+import { signOut, DEMO_MODE, supabase } from '../lib/supabase';
 import type { Account, Strategy, StrategyField } from '../types';
 
 const COLORS = ['#4a7dff', '#00c896', '#ff9f43', '#ff3355', '#a855f7', '#06b6d4', '#f59e0b', '#ec4899'];
@@ -350,11 +350,24 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
 
   const connectTradovate = async (accountId: string) => {
     if (!tradovateUser.trim() || !tradovatePass.trim()) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    const jwt = session?.access_token;
+    if (!jwt) return alert(isHe ? 'לא מחובר' : 'Not authenticated');
     const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
     try {
       const res = await fetch(
-        `${supabaseUrl}/functions/v1/tradovate-auth?user_id=${user?.id}&account_id=${accountId}&api_username=${encodeURIComponent(tradovateUser)}&api_password=${encodeURIComponent(tradovatePass)}&env=${tradovateEnv}`,
-        { headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` } },
+        `${supabaseUrl}/functions/v1/tradovate-auth`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
+          body: JSON.stringify({
+            user_id: user?.id,
+            account_id: accountId,
+            api_username: tradovateUser,
+            api_password: tradovatePass,
+            env: tradovateEnv,
+          }),
+        },
       );
       if (res.ok) {
         setTxConn((c) => ({ ...c, [accountId]: true }));
@@ -376,11 +389,24 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
 
   const connectTopstepX = async (accountId: string) => {
     if (!topstepKey.trim()) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    const jwt = session?.access_token;
+    if (!jwt) return alert(isHe ? 'לא מחובר' : 'Not authenticated');
     const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
     try {
       const res = await fetch(
-        `${supabaseUrl}/functions/v1/broker-oauth?broker=topstepx&user_id=${user?.id}&account_id=${accountId}&api_token=${encodeURIComponent(topstepKey)}&api_username=${encodeURIComponent(user?.email ?? '')}`,
-        { headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` } }
+        `${supabaseUrl}/functions/v1/broker-oauth`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
+          body: JSON.stringify({
+            broker: 'topstepx',
+            user_id: user?.id,
+            account_id: accountId,
+            api_token: topstepKey,
+            api_username: user?.email ?? '',
+          }),
+        },
       );
       if (res.ok) {
         setTxConn((c) => ({ ...c, [accountId]: true }));
@@ -400,10 +426,14 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
 
   const triggerSync = async (broker: 'tradovate' | 'topstepx') => {
     setSyncing(broker);
+    const { data: { session } } = await supabase.auth.getSession();
+    const jwt = session?.access_token;
+    if (!jwt) { setSyncing(null); return alert(isHe ? 'לא מחובר' : 'Not authenticated'); }
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
     try {
       const res = await fetch(`${supabaseUrl}/functions/v1/${broker}-sync`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
         body: JSON.stringify({ user_id: user?.id }),
       });
       const data = await res.json();

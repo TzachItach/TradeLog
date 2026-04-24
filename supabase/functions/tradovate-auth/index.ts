@@ -43,20 +43,36 @@ async function authenticate(baseUrl: string, username: string, password: string)
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
-  const url       = new URL(req.url);
-  const userId    = url.searchParams.get('user_id');
-  const accountId = url.searchParams.get('account_id');
-  const username  = url.searchParams.get('api_username');
-  const password  = url.searchParams.get('api_password');
-  // 'live' (default) or 'demo' for prop-firm eval accounts
-  const env       = url.searchParams.get('env') === 'demo' ? 'demo' : 'live';
-  const baseUrl   = env === 'demo' ? DEMO_BASE : LIVE_BASE;
+  // ── 0. Parse body (POST JSON) ──────────────────────────────
+  const body       = await req.json().catch(() => ({}));
+  const userId     = body.user_id    as string | undefined;
+  const accountId  = body.account_id as string | undefined;
+  const username   = body.api_username as string | undefined;
+  const password   = body.api_password as string | undefined;
+  const env        = body.env === 'demo' ? 'demo' : 'live';
+  const baseUrl    = env === 'demo' ? DEMO_BASE : LIVE_BASE;
 
   if (!userId || !accountId || !username || !password) {
     return json({ error: 'Missing required parameters' }, 400);
   }
 
-  // ── 1. Authenticate with Tradovate ─────────────────────────
+  // ── 1. Verify JWT — caller must be the same user ───────────
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return json({ error: 'Unauthorized' }, 401);
+  }
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  );
+  const { data: { user }, error: authErr } = await supabase.auth.getUser(
+    authHeader.replace('Bearer ', ''),
+  );
+  if (authErr || !user || user.id !== userId) {
+    return json({ error: 'Forbidden' }, 403);
+  }
+
+  // ── 2. Authenticate with Tradovate ─────────────────────────
   let accessToken: string | null = null;
   try {
     accessToken = await authenticate(baseUrl, username, password);
@@ -68,9 +84,7 @@ serve(async (req) => {
     return json({ error: 'Invalid Tradovate credentials — check email/password and Live/Demo selection' }, 401);
   }
 
-  // ── 2. Fetch account list ──────────────────────────────────
-  // For demo env, all returned accounts are demo accounts. For live, prefer
-  // non-demo accounts but fall back to any active account (handles edge cases).
+  // ── 3. Fetch account list ──────────────────────────────────
   let tradovateAccountId: number | null = null;
   try {
     const acctRes = await fetch(`${baseUrl}/account/list`, {
@@ -85,12 +99,7 @@ serve(async (req) => {
     // Non-fatal — sync will re-fetch if null
   }
 
-  // ── 3. Store in Supabase ───────────────────────────────────
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-  );
-
+  // ── 4. Store in Supabase ───────────────────────────────────
   const { error } = await supabase.from('broker_connections').upsert(
     {
       user_id:              userId,

@@ -19,18 +19,35 @@ function json(body: unknown, status = 200) {
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
-  const url = new URL(req.url);
-  const broker      = url.searchParams.get('broker');
-  const userId      = url.searchParams.get('user_id');
-  const accountId   = url.searchParams.get('account_id');
-  const apiToken    = url.searchParams.get('api_token');
-  const apiUsername = url.searchParams.get('api_username');
+  // ── 0. Parse body (POST JSON) ──────────────────────────────
+  const body        = await req.json().catch(() => ({}));
+  const broker      = body.broker      as string | undefined;
+  const userId      = body.user_id     as string | undefined;
+  const accountId   = body.account_id  as string | undefined;
+  const apiToken    = body.api_token   as string | undefined;
+  const apiUsername = body.api_username as string | undefined;
 
   if (broker !== 'topstepx' || !userId || !accountId || !apiToken || !apiUsername) {
     return json({ error: 'Missing required parameters' }, 400);
   }
 
-  // ── 1. Validate credentials with ProjectX ──────────────────
+  // ── 1. Verify JWT — caller must be the same user ───────────
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return json({ error: 'Unauthorized' }, 401);
+  }
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  );
+  const { data: { user }, error: authErr } = await supabase.auth.getUser(
+    authHeader.replace('Bearer ', ''),
+  );
+  if (authErr || !user || user.id !== userId) {
+    return json({ error: 'Forbidden' }, 403);
+  }
+
+  // ── 2. Validate credentials with ProjectX ──────────────────
   let sessionToken: string;
   let projectxAccountId: number | null = null;
 
@@ -50,7 +67,7 @@ serve(async (req) => {
     return json({ error: 'Could not reach TopstepX API', detail: String(e) }, 502);
   }
 
-  // ── 2. Fetch ProjectX account ID ───────────────────────────
+  // ── 3. Fetch ProjectX account ID ───────────────────────────
   try {
     const acctRes = await fetch(`${PROJECTX_BASE}/api/Account/search`, {
       method: 'POST',
@@ -68,12 +85,7 @@ serve(async (req) => {
     // Non-fatal — sync will re-fetch accounts if this is null
   }
 
-  // ── 3. Store credentials ───────────────────────────────────
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-  );
-
+  // ── 4. Store credentials ───────────────────────────────────
   const { error } = await supabase.from('broker_connections').upsert(
     {
       user_id:              userId,
