@@ -17,7 +17,7 @@ const equityFill   = equityPoints + ' 400,130 0,130';
 /* ── Translations ─────────────────────────────────────────── */
 const T = {
   he: {
-    nav: { features: 'פיצ׳רים', pricing: 'מחירים', tools: 'כלים', signin: 'התחבר', start: 'התחל בחינם' },
+    nav: { features: 'פיצ׳רים', pricing: 'מחירים', tools: 'כלים', testimonials: 'המלצות', faq: 'שאלות', signin: 'התחבר', start: 'התחל בחינם' },
     badge: '14 ימי ניסיון · ללא כרטיס אשראי',
     h1a: 'לסחור כמו מקצוען,',
     h1b: 'לתעד כמו מכונה.',
@@ -96,7 +96,7 @@ const T = {
     footerCopy: (y: number) => `© ${y} TradeLog. כל הזכויות שמורות.`,
   },
   en: {
-    nav: { features: 'Features', pricing: 'Pricing', tools: 'Tools', signin: 'Sign in', start: 'Start free' },
+    nav: { features: 'Features', pricing: 'Pricing', tools: 'Tools', testimonials: 'Reviews', faq: 'FAQ', signin: 'Sign in', start: 'Start free' },
     badge: '14-day free trial · No credit card required',
     h1a: 'Trade like a pro,',
     h1b: 'analyze like a machine',
@@ -204,6 +204,8 @@ export default function Landing() {
               <li><a href="#features">{t.nav.features}</a></li>
               <li><a href="#pricing">{t.nav.pricing}</a></li>
               <li><a href="#advanced">{t.nav.tools}</a></li>
+              <li><a href="#testimonials">{t.nav.testimonials}</a></li>
+              <li><a href="#faq">{t.nav.faq}</a></li>
             </ul>
           </nav>
           <div className="lp-nav-actions">
@@ -549,7 +551,7 @@ export default function Landing() {
         </section>
 
         {/* Testimonials */}
-        <section className="lp-testimonials">
+        <section className="lp-testimonials" id="testimonials">
           <div className="lp-testimonials-inner">
             <h2>{t.testimonialsTitle}</h2>
             <div className="lp-testimonials-grid">
@@ -571,7 +573,7 @@ export default function Landing() {
         </section>
 
         {/* FAQ */}
-        <section className="lp-faq">
+        <section className="lp-faq" id="faq">
           <div className="lp-faq-inner">
             <h2>{t.faqTitle}</h2>
             <div className="lp-faq-list">
