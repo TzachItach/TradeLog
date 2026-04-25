@@ -25,7 +25,7 @@ export default function Terms() {
             <div className="legal-section">
               <h2>1. פרטי בעל השירות</h2>
               <p>השירות מופעל על ידי: <strong>צח איטח</strong>, ע"מ: <strong>203461470</strong>.</p>
-              <p>כתובת: <strong>יהודה הלוי 21, יבנה</strong>.</p>
+              <p>כתובת: <strong>יהודה הלוי 21</strong>.</p>
               <p>יצירת קשר: <a href="mailto:tradelogisr@gmail.com" style={{color:'var(--b)'}}>tradelogisr@gmail.com</a></p>
             </div>
             <div className="legal-section">
