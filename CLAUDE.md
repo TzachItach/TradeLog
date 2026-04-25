@@ -122,8 +122,9 @@ RLS: כל טבלה עם `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = u
 - **StatsBar**: 6 KPI cards
 - **DailyGoalBar**: סרגל יעד יומי (רווח + הפסד מקסימלי)
 - **CalendarView**: לוח שנה חודשי
-- **Bottom Row** (חדש):
+- **Bottom Row**:
   - **MiniEquityChart**: Canvas equity curve לחודש הנוכחי — P&L מצטבר לפי יום, קו ירוק/אדום + gradient fill + נקודה בקצה + labels תאריכים + ResizeObserver
+  - **AIInsightsCard**: מתחת ל-MiniEquityChart, בתוך עמודת עקומת ההון. תובנות rule-based (ללא AI API): יום חזק/חלש, סמל טוב/גרוע, רצף ניצחונות/הפסדים, מסחר יתר, מגמת WR, R:R, השוואת שבועות. לוגיקה ב-`src/lib/insights.ts`
   - **RecentTrades**: 5 עסקאות אחרונות — symbol icon (ירוק=long, אדום=short), תאריך, P&L; לחיצה → פתיחת modal עריכה; "הכל" → `/trades`
   - Layout: `grid-template-columns: 1fr 320px` בדסקטופ, עמודה אחת במובייל
 
@@ -201,7 +202,12 @@ Tabs: Equity Curve | Drawdown | P&L by Day | P&L by Symbol | Monthly Heatmap | D
 - עמודה קצרה (<18px) → לייבל מחוץ, נועל בתוך גבולות הגרף עם `Math.max/min`
 
 ### BrokerImport
-- **Tradovate Performance CSV**: P&L: `$(110.00)` = שלילי; fills → מאוחד לפי `buyFillId`; נרמול סמל `MNQM6` → `MNQ`
+- **Tradovate Performance CSV**: פורמט עמודות: `symbol, buyFillId, sellFillId, qty, buyPrice, sellPrice, pnl, boughtTimestamp, soldTimestamp, duration`
+  - P&L: `$(110.00)` = שלילי, `$470.00` = חיובי (כולל `"$(1,200.00)"` עם פסיק)
+  - **כיוון per-row**: `boughtTimestamp ≤ soldTimestamp` = long, אחרת short (פורמט `MM/DD/YYYY HH:MM:SS` — string comparison עובד)
+  - **גיווס**: long → לפי `buyFillId` (fill פותח), short → לפי `sellFillId` (fill פותח)
+    - ⚠️ לפני התיקון: גיווס לפי `buyFillId` בלבד — שורטים התפצלו לכמה עסקאות במקום אחת, ולונגים מפסידים סומנו כשורט
+  - נרמול סמל: `MNQM6` → `MNQ`
 - **TopstepX**: API Token
 - מניעת כפילויות לפי `broker_trade_id`
 
@@ -393,7 +399,14 @@ VITE_SUPABASE_ANON_KEY=...
 - **`public/robots.txt`**: Allow `/`, Disallow `/dashboard /auth /api/`, Sitemap pointer
 - **`public/sitemap.xml`**: 5 URLs (/, /auth, /terms, /privacy, /accessibility) עם priority + changefreq
 - **`public/og-image.png`**: 1200×630 — נוצר מ-`scripts/og-image.html` דרך Chrome headless
+- **`public/googlefe5303f75b23b4bb.html`**: קובץ אימות Google Search Console
 - **`vercel.json`**: Cache-Control headers לassets/images, rewrite מכסה את כל הנתיבים מחוץ ל-`/api/`
+- **Sitemap הוגש** ל-Google Search Console לאחר אימות הדומיין
+
+### Google Analytics + Facebook Pixel (ממתין ל-IDs)
+- נדרש: `VITE_GA_MEASUREMENT_ID` (G-XXXXXXXXXX) + `VITE_FB_PIXEL_ID`
+- יש לממש: טעינה **רק אחרי הסכמת cookies**, באנר cookies עם קבל/דחה, שמירה ב-localStorage
+- חובה חוקית (GDPR): cookies אנליטיקס/פרסום דורשים הסכמה מפורשת
 
 ---
 
