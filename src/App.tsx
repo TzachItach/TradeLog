@@ -15,7 +15,6 @@ import Accessibility from './pages/Accessibility';
 import PropFirm from './pages/PropFirm';
 import BusinessManager from './pages/BusinessManager';
 import Landing from './pages/Landing';
-import OnboardingWizard from './components/OnboardingWizard';
 import ProductTour from './components/ProductTour';
 
 /* מסך טעינה קצר — רק לבדיקת session ראשונית */
@@ -117,7 +116,7 @@ function AppEffects() {
 }
 
 function ProtectedRoute({ children, ready, hasUser }: { children: React.ReactNode; ready: boolean; hasUser: boolean }) {
-  const { user, onboardingDone, onboardingVariant, setOnboardingDone } = useStore();
+  const { user, onboardingDone, setOnboardingDone } = useStore();
   const isLoggedIn = hasUser || !!user;
 
   // עדיין בודק session — הצג splash קצר
@@ -130,10 +129,7 @@ function ProtectedRoute({ children, ready, hasUser }: { children: React.ReactNod
   return (
     <>
       {children}
-      {!DEMO_MODE && isLoggedIn && !onboardingDone && onboardingVariant === 'wizard' && (
-        <OnboardingWizard onDone={setOnboardingDone} />
-      )}
-      {!DEMO_MODE && isLoggedIn && !onboardingDone && onboardingVariant === 'tour' && (
+      {!DEMO_MODE && isLoggedIn && !onboardingDone && (
         <ProductTour onDone={setOnboardingDone} />
       )}
     </>
