@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { useT } from '../i18n';
 import { signOut, DEMO_MODE, supabase } from '../lib/supabase';
-import type { Account, Strategy, StrategyField } from '../types';
+import type { Account, Strategy, StrategyField, PropExpense, ExpenseFeeType } from '../types';
 
 const COLORS = ['#4a7dff', '#00c896', '#ff9f43', '#ff3355', '#a855f7', '#06b6d4', '#f59e0b', '#ec4899'];
 
@@ -615,11 +615,15 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
 
 /* ── דף ראשי ── */
 export default function Settings() {
-  const { lang, accounts, strategies, user, dailyGoalTarget, dailyMaxLoss, dataLoading, setDailyGoalTarget, setDailyMaxLoss, addAccount, updateAccount, deleteAccount, addStrategy, updateStrategy, deleteStrategy, setUser, reloadFromCloud, setOnboardingDone } = useStore();
+  const { lang, accounts, strategies, user, dailyGoalTarget, dailyMaxLoss, dataLoading, setDailyGoalTarget, setDailyMaxLoss, addAccount, updateAccount, deleteAccount, addStrategy, updateStrategy, deleteStrategy, setUser, reloadFromCloud, setOnboardingDone, addExpense } = useStore();
   const T = useT(lang);
   const navigate = useNavigate();
+  const isHe = lang === 'he';
   const [accForm, setAccForm] = useState<'new' | string | null>(null);
   const [stratForm, setStratForm] = useState<'new' | string | null>(null);
+  const [expPrompt, setExpPrompt] = useState<Account | null>(null);
+  const [expCost, setExpCost] = useState('');
+  const [expFeeType, setExpFeeType] = useState<ExpenseFeeType>('challenge');
 
   const handleLogout = async () => {
     if (!window.confirm(lang === 'he' ? 'האם אתה בטוח שברצונך להתנתק?' : 'Are you sure you want to log out?')) return;
@@ -674,10 +678,102 @@ export default function Settings() {
 
         {accForm === 'new' && (
           <AccountForm lang={lang}
-            onSave={(a) => { addAccount(a); setAccForm(null); }}
+            onSave={(a) => {
+              addAccount(a);
+              setAccForm(null);
+              if (a.account_type === 'prop_firm') {
+                setExpCost('');
+                setExpFeeType('challenge');
+                setExpPrompt(a);
+              }
+            }}
             onCancel={() => setAccForm(null)} />
         )}
       </div>
+
+      {/* ── Expense Prompt ── */}
+      {expPrompt && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+        }}
+          onClick={() => setExpPrompt(null)}
+        >
+          <div
+            dir={isHe ? 'rtl' : 'ltr'}
+            style={{
+              background: 'var(--s1)', border: '1px solid var(--bd2)', borderRadius: 14,
+              padding: '24px 28px', width: '100%', maxWidth: 380, boxShadow: '0 8px 32px rgba(0,0,0,.4)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* כותרת */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--g)" strokeWidth="2.2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <span style={{ fontWeight: 700, fontSize: '.95rem', color: 'var(--t1)' }}>
+                {isHe ? 'הוסף לניהול עסקי?' : 'Add to Business Manager?'}
+              </span>
+            </div>
+            <p style={{ fontSize: '.82rem', color: 'var(--t3)', marginBottom: 18, lineHeight: 1.5 }}>
+              {isHe
+                ? `שילמת עבור תיק "${expPrompt.name}"? הוסף את העלות לניהול העסקי שלך.`
+                : `Did you pay for "${expPrompt.name}"? Add the cost to your business tracker.`}
+            </p>
+
+            {/* שדות */}
+            <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
+              <div style={{ flex: 1 }}>
+                <label className="form-label">{isHe ? 'עלות ($)' : 'Cost ($)'}</label>
+                <input
+                  type="number" min={0} className="form-input"
+                  placeholder="e.g. 150"
+                  value={expCost}
+                  onChange={(e) => setExpCost(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label className="form-label">{isHe ? 'סוג' : 'Type'}</label>
+                <select className="form-input" value={expFeeType} onChange={(e) => setExpFeeType(e.target.value as ExpenseFeeType)}>
+                  <option value="challenge">{isHe ? 'מבחן' : 'Challenge'}</option>
+                  <option value="reset">{isHe ? 'ריסט' : 'Reset'}</option>
+                  <option value="activation">{isHe ? 'הפעלה' : 'Activation'}</option>
+                  <option value="data_fee">{isHe ? 'דמי נתונים' : 'Data Fee'}</option>
+                  <option value="other">{isHe ? 'אחר' : 'Other'}</option>
+                </select>
+              </div>
+            </div>
+
+            {/* כפתורים */}
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button className="btn btn-ghost" onClick={() => setExpPrompt(null)}>
+                {isHe ? 'לא עכשיו' : 'Not now'}
+              </button>
+              <button
+                className="btn btn-primary"
+                disabled={!expCost || Number(expCost) <= 0}
+                onClick={() => {
+                  const expense: PropExpense = {
+                    id: crypto.randomUUID(),
+                    account_id: expPrompt.id,
+                    prop_firm: expPrompt.name,
+                    account_size: expPrompt.initial_balance,
+                    fee_type: expFeeType,
+                    amount: Number(expCost),
+                    date: new Date().toISOString().slice(0, 10),
+                  };
+                  addExpense(expense);
+                  setExpPrompt(null);
+                }}
+              >
+                {isHe ? 'הוסף הוצאה' : 'Add Expense'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* אסטרטגיות */}
       <div id="tour-strategy-section" className="settings-section">
