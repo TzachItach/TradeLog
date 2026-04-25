@@ -56,6 +56,7 @@ interface AppState {
   dailyGoalTarget: number;
   dailyMaxLoss: number;
   onboardingDone: boolean;
+  onboardingVariant: 'wizard' | 'tour';
   setOnboardingDone: (v?: boolean) => void;
 
   setDemo: (v: boolean) => void;
@@ -132,6 +133,7 @@ export const useStore = create<AppState>()(
       dailyGoalTarget: 0,
       dailyMaxLoss: 0,
       onboardingDone: false,
+      onboardingVariant: (Math.random() < 0.5 ? 'wizard' : 'tour') as 'wizard' | 'tour',
       setOnboardingDone: (v = true) => set({ onboardingDone: v }),
 
       setDemo: (v) => set({ isDemo: v }),
@@ -350,17 +352,20 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'tradelog-storage',
-      version: 4,
+      version: 5,
       migrate: (persisted: unknown) => {
         const state = persisted as Record<string, unknown>;
         // v1/v2 → v3: reset darkMode to true
         // v3 → v4: mark existing users as onboarding done (they pre-date the wizard)
+        // v4 → v5: add onboardingVariant — existing users keep 'wizard', new users get random
         const hasData = Array.isArray(state.accounts)
           ? (state.accounts as unknown[]).length > 0
           : Array.isArray(state.trades)
             ? (state.trades as unknown[]).length > 0
             : !!state.user;
-        return { ...state, darkMode: true, onboardingDone: hasData ? true : state.onboardingDone ?? false };
+        const onboardingVariant = state.onboardingVariant
+          ?? (hasData ? 'wizard' : (Math.random() < 0.5 ? 'wizard' : 'tour'));
+        return { ...state, darkMode: true, onboardingDone: hasData ? true : state.onboardingDone ?? false, onboardingVariant };
       },
       partialize: (s) => ({
         lang: s.lang, fontSize: s.fontSize, highContrast: s.highContrast,
@@ -373,6 +378,7 @@ export const useStore = create<AppState>()(
         selectedAccount: s.selectedAccount, isDemo: s.isDemo,
         lastUserId: s.lastUserId, user: s.user,
         onboardingDone: s.onboardingDone,
+        onboardingVariant: s.onboardingVariant,
       }),
     },
   ),

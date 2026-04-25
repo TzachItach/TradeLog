@@ -643,7 +643,7 @@ export default function BusinessManager() {
       </div>
 
       {/* KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 14, marginBottom: 20 }}>
+      <div id="tour-business-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 14, marginBottom: 20 }}>
         <KpiCard
           label={isHe ? 'סה"כ הכנסות' : 'Total Revenue'}
           value={fmtPos(stats.totalPayouts)}
@@ -697,7 +697,7 @@ export default function BusinessManager() {
       </div>
 
       {/* Two-column: Meter + Insights */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16, marginBottom: 20 }}>
+      <div id="tour-gambling-meter" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16, marginBottom: 20 }}>
         <GamblingMeter score={stats.gamblingMeterScore} isHe={isHe} />
         <div>
           <div style={{ fontWeight: 700, fontSize: '.9rem', color: 'var(--t1)', marginBottom: 10 }}>

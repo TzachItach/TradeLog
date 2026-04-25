@@ -186,7 +186,7 @@ export default function PropFirm() {
   const propAccounts = accounts.filter((a) => a.account_type === 'prop_firm');
 
   return (
-    <div className="page-content">
+    <div id="tour-propfirm" className="page-content">
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 className="page-title">{isHe ? 'Prop Firm Tracker' : 'Prop Firm Tracker'}</h1>
         {propAccounts.length > 0 && (

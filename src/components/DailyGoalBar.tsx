@@ -28,7 +28,7 @@ export default function DailyGoalBar() {
   const pnlColor = todayPnL > 0 ? 'var(--g)' : todayPnL < 0 ? 'var(--r)' : 'var(--t2)';
 
   return (
-    <div className="daily-goal-bar" style={{ direction: isHe ? 'rtl' : 'ltr' }}>
+    <div id="tour-daily-goal" className="daily-goal-bar" style={{ direction: isHe ? 'rtl' : 'ltr' }}>
       {/* Today P&L */}
       <div className="dg-today">
         <span className="dg-label">{T.todayPnL}</span>

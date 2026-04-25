@@ -16,7 +16,7 @@ export default function StatsBar() {
   ];
 
   return (
-    <div className="stats-bar">
+    <div id="tour-statsbar" className="stats-bar">
       {cards.map((c) => (
         <div key={c.label} className="stat-card">
           <div className="stat-label">{c.label}</div>

@@ -607,7 +607,7 @@ export default function Analytics() {
       </div>
 
       {/* Tabs */}
-      <div className="analytics-tabs">
+      <div id="tour-analytics-tabs" className="analytics-tabs">
         {tabs.map((t, i) => (
           <button key={i} onClick={() => setTab(i)}
             style={{

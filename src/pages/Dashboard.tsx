@@ -26,7 +26,7 @@ export default function Dashboard() {
               {lang === 'he' ? 'עקומת הון' : 'Equity Curve'}
             </span>
           </div>
-          <div className="dashboard-chart-card">
+          <div id="tour-equity-chart" className="dashboard-chart-card">
             <MiniEquityChart />
           </div>
           <AIInsightsCard />

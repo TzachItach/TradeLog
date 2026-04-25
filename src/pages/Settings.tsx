@@ -457,7 +457,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
   const allAccounts = accounts.length > 0 ? accounts : [];
 
   return (
-    <div className="settings-section">
+    <div id="tour-broker-section" className="settings-section">
       <div className="section-title">{T.brokerConnections}</div>
 
       {/* Tradovate */}
@@ -680,7 +680,7 @@ export default function Settings() {
       </div>
 
       {/* אסטרטגיות */}
-      <div className="settings-section">
+      <div id="tour-strategy-section" className="settings-section">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} className="section-title">
           <span>{T.strategies}</span>
           <button className="btn btn-primary" onClick={() => setStratForm('new')}>+ {T.addStrategy}</button>
@@ -790,7 +790,7 @@ export default function Settings() {
                 </svg>
                 {dataLoading ? '...' : (lang === 'he' ? 'סנכרן' : 'Sync')}
               </button>
-              <button className="btn btn-ghost" onClick={() => setOnboardingDone(false)} style={{ gap: 7 }}>
+              <button className="btn btn-ghost" onClick={() => { navigate('/dashboard'); setTimeout(() => setOnboardingDone(false), 100); }} style={{ gap: 7 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <circle cx="12" cy="12" r="10"/>
                   <path d="M12 8v4l3 3"/>
