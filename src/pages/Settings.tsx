@@ -615,7 +615,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
 
 /* ── דף ראשי ── */
 export default function Settings() {
-  const { lang, accounts, strategies, user, dailyGoalTarget, dailyMaxLoss, dataLoading, setDailyGoalTarget, setDailyMaxLoss, addAccount, updateAccount, deleteAccount, addStrategy, updateStrategy, deleteStrategy, setUser, reloadFromCloud, setOnboardingDone } = useStore();
+  const { lang, accounts, strategies, user, dailyGoalTarget, dailyMaxLoss, dataLoading, setDailyGoalTarget, setDailyMaxLoss, addAccount, updateAccount, deleteAccount, addStrategy, updateStrategy, deleteStrategy, setUser, reloadFromCloud, setOnboardingDone, setOnboardingVariant } = useStore();
   const T = useT(lang);
   const navigate = useNavigate();
   const [accForm, setAccForm] = useState<'new' | string | null>(null);
@@ -790,7 +790,7 @@ export default function Settings() {
                 </svg>
                 {dataLoading ? '...' : (lang === 'he' ? 'סנכרן' : 'Sync')}
               </button>
-              <button className="btn btn-ghost" onClick={() => { navigate('/dashboard'); setTimeout(() => setOnboardingDone(false), 100); }} style={{ gap: 7 }}>
+              <button className="btn btn-ghost" onClick={() => { setOnboardingVariant('tour'); navigate('/dashboard'); setTimeout(() => setOnboardingDone(false), 100); }} style={{ gap: 7 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <circle cx="12" cy="12" r="10"/>
                   <path d="M12 8v4l3 3"/>

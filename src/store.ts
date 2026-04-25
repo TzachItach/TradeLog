@@ -58,6 +58,7 @@ interface AppState {
   onboardingDone: boolean;
   onboardingVariant: 'wizard' | 'tour';
   setOnboardingDone: (v?: boolean) => void;
+  setOnboardingVariant: (v: 'wizard' | 'tour') => void;
 
   setDemo: (v: boolean) => void;
   setUser: (u: AppState['user']) => void;
@@ -135,6 +136,7 @@ export const useStore = create<AppState>()(
       onboardingDone: false,
       onboardingVariant: (Math.random() < 0.5 ? 'wizard' : 'tour') as 'wizard' | 'tour',
       setOnboardingDone: (v = true) => set({ onboardingDone: v }),
+      setOnboardingVariant: (v) => set({ onboardingVariant: v }),
 
       setDemo: (v) => set({ isDemo: v }),
       setUser: (u) => set({ user: u }),
