@@ -57,6 +57,7 @@ supabase/
     PropFirmCard.tsx       — כרטיסי Prop Firm ב-Dashboard (מד drawdown + profit target)
     SymbolPicker.tsx       — Dropdown 50+ חוזים עם חיפוש וקטגוריות
     BrokerImport.tsx       — ייבוא CSV מ-Tradovate/TopstepX (עם פרסור fills)
+    ProductTour.tsx        — סיור אינטראקטיבי Driver.js: 5 עמודים, spotlight + tooltips, setup modal
     AccessibilityWidget.tsx — קומפוננט ישן (לא בשימוש — הוחלף ב-Negishot)
   pages/
     Landing.tsx            — דף נחיתה שיווקי (route: /)
@@ -192,6 +193,26 @@ RLS: כל טבלה עם `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = u
 - **Store**: `expenses[]`, `payouts[]` + 6 CRUD actions: `addExpense`, `updateExpense`, `deleteExpense`, `addPayout`, `updatePayout`, `deletePayout`
 - **מינוח בעברית**: הוצאה = expense, **משיכה** = payout (לא "תשלום")
 - **כותרת הדף**: `'ניהול עסקי'` (עברית) / `'Business Manager'` (אנגלית)
+
+### Product Tour (`ProductTour.tsx`)
+- **ספרייה**: `driver.js` (MIT) — spotlight + tooltips
+- **טריגר**: משתמש חדש (`!onboardingDone`) + כפתור "מדריך כניסה" ב-Settings
+- **כפתור "מדריך כניסה"**: מנווט ל-`/dashboard` ואז מאפס `onboardingDone: false`
+- **שלבים**:
+  1. **Setup modal** — שם חשבון, סוג, יתרה, יעד יומי + מקסימום הפסד (אופציונלי, ניתן לדלג)
+  2. **Dashboard** — 5 spotlights: `#tour-statsbar`, `#tour-daily-goal`, `#tour-calendar`, `#tour-equity-chart`, `#tour-new-trade`
+  3. **Bridge modal** → navigate ל-Analytics
+  4. **Analytics** — spotlight: `#tour-analytics-tabs`
+  5. **Bridge modal** → navigate ל-Prop Firm
+  6. **PropFirm** — spotlight: `#tour-propfirm`
+  7. **Bridge modal** → navigate ל-Business Manager
+  8. **Business Manager** — 2 spotlights: `#tour-business-kpis`, `#tour-gambling-meter`
+  9. **Bridge modal** → navigate ל-Settings
+  10. **Settings** — 2 spotlights: `#tour-strategy-section` (צור אסטרטגיה), `#tour-broker-section` (חבר ברוקר)
+  11. **Done screen** — 3 אפשרויות: הוסף עסקה / ייבא / dashboard
+- **Skip button**: צף בפינה בכל שלב של Driver.js
+- **IDs שנוספו לקומפוננטות**: `#tour-statsbar` (StatsBar), `#tour-daily-goal` (DailyGoalBar), `#tour-calendar` (CalendarView), `#tour-equity-chart` (Dashboard), `#tour-new-trade` (Header), `#tour-analytics-tabs` (Analytics), `#tour-propfirm` (PropFirm), `#tour-business-kpis` + `#tour-gambling-meter` (BusinessManager), `#tour-strategy-section` + `#tour-broker-section` (Settings)
+- **store**: `onboardingDone: boolean` — ללא `onboardingVariant` (הוסר לאחר A/B testing)
 
 ### Analytics (8 גרפים Canvas — ללא ספריות)
 Tabs: Equity Curve | Drawdown | P&L by Day | P&L by Symbol | Monthly Heatmap | Distribution | Risk/Reward Scatter | Streak Analysis
@@ -390,7 +411,7 @@ VITE_SUPABASE_ANON_KEY=...
 - ~~Business Manager~~ — **הושלם** (`/dashboard/business`)
 - השוואה שבוע/חודש ב-StatsBar (חץ ↑↓ ליד כל מספר)
 - Keyboard shortcuts (N=עסקה חדשה, Esc=סגור)
-- ~~Onboarding wizard למשתמש חדש~~ — **הושלם** (`OnboardingWizard.tsx`, 5 שלבים, דו-לשוני; כפתור "מדריך כניסה" ב-Settings לפתיחה מחדש)
+- ~~Onboarding wizard למשתמש חדש~~ — **הושלם והוחלף** ב-`ProductTour.tsx` (ראה פרטים בסעיף Product Tour)
 
 ---
 
