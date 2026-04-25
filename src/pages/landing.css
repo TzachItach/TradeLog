@@ -305,6 +305,105 @@
 .lp-adv-item h4 { font-size: .95rem; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.02em; }
 .lp-adv-item p { font-size: .82rem; color: rgba(255,255,255,.55); line-height: 1.6; }
 
+/* ── Business Manager section ── */
+.lp-business { padding: 96px 24px; background: #121212; }
+.lp-business-inner {
+  max-width: 1040px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 60px; align-items: center;
+}
+.lp-biz-badge {
+  display: inline-flex; align-items: center;
+  background: rgba(245,155,35,.12); border: 1px solid rgba(245,155,35,.30);
+  color: #F59B23; font-size: .72rem; font-weight: 700;
+  padding: 3px 12px; border-radius: 999px;
+  letter-spacing: .06em; text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.lp-business-text h2 {
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 700;
+  letter-spacing: -0.05em; margin-bottom: 14px; line-height: 1.15;
+}
+.lp-business-text > p {
+  font-size: .95rem; color: rgba(255,255,255,.55); line-height: 1.65; margin-bottom: 28px;
+}
+.lp-biz-features {
+  list-style: none; padding: 0; margin: 0 0 32px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.lp-biz-features li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: .88rem; color: rgba(255,255,255,.75); line-height: 1.5;
+}
+.lp-biz-features li::before {
+  content: '';
+  width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+  background: rgba(29,185,84,.15) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%231DB954' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E") center/10px no-repeat;
+  border: 1px solid rgba(29,185,84,.25);
+}
+.lp-biz-mockup {
+  background: #181818;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 16px; padding: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.4);
+}
+.lp-biz-kpi-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px;
+}
+.lp-biz-kpi {
+  background: #222222; border-radius: 10px; padding: 10px 12px;
+}
+.lp-biz-kpi-label {
+  font-size: .52rem; text-transform: uppercase; letter-spacing: .07em;
+  color: rgba(255,255,255,.38); margin-bottom: 4px;
+}
+.lp-biz-kpi-val {
+  font-size: .80rem; font-weight: 700; font-family: monospace;
+}
+.lp-biz-meter-wrap {
+  background: #222222; border-radius: 10px; padding: 12px 14px; margin-bottom: 12px;
+}
+.lp-biz-meter-title {
+  font-size: .60rem; text-transform: uppercase; letter-spacing: .07em;
+  color: rgba(255,255,255,.38); margin-bottom: 10px;
+}
+.lp-biz-meter-bar {
+  height: 10px; border-radius: 999px;
+  background: linear-gradient(to right, #E91429, #F59B23 45%, #1DB954);
+  position: relative; margin-bottom: 6px;
+}
+.lp-biz-meter-needle {
+  position: absolute; top: 50%; transform: translateX(-50%) translateY(-50%);
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #FFFFFF; border: 2px solid #121212;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.3);
+}
+.lp-biz-meter-labels {
+  display: flex; justify-content: space-between;
+  font-size: .52rem; color: rgba(255,255,255,.30);
+}
+.lp-biz-log {
+  background: #222222; border-radius: 10px; padding: 10px 14px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.lp-biz-log-title {
+  font-size: .55rem; text-transform: uppercase; letter-spacing: .07em;
+  color: rgba(255,255,255,.35); margin-bottom: 4px;
+}
+.lp-biz-log-row {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: .62rem; padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.lp-biz-log-row:last-child { border-bottom: none; }
+.lp-biz-log-firm { color: rgba(255,255,255,.65); font-weight: 500; }
+.lp-biz-log-type { color: rgba(255,255,255,.30); font-size: .54rem; }
+
+@media (max-width: 768px) {
+  .lp-business-inner { grid-template-columns: 1fr; gap: 36px; }
+  .lp-biz-kpi-row { grid-template-columns: repeat(2, 1fr); }
+}
+
 /* ── Pricing ── */
 .lp-pricing { padding: 96px 24px; background: #121212; }
 .lp-pricing-inner { max-width: 780px; margin: 0 auto; text-align: center; }

@@ -43,6 +43,14 @@ const T = {
     adv3Desc: 'NQ, ES, CL, GC, SI ועוד — עם Point Values מדויקים לכל סמל לחישוב R:R אוטומטי.',
     adv4Title: 'ייצוא PDF ו-CSV',
     adv4Desc: 'ייצא דוחות מקצועיים לשיתוף עם מנטור, מוסד מימון, או לארכיון אישי.',
+    bizTitle: 'ניהול עסקי לסוחר Prop',
+    bizSub: 'המסחר הוא העסק שלך. עקוב אחרי כל הוצאה, כל משיכה, ודע בדיוק אם אתה מרוויח — לפני שהמספרים מפתיעים אותך.',
+    bizBadge: 'חדש',
+    biz1: 'מעקב הוצאות: challenges, resets, עמלות נתונים',
+    biz2: 'רישום משיכות ואחוז הצלחה',
+    biz3: 'עלות לחשבון (CPA), רווח נקי אמיתי',
+    biz4: 'מד עסקי: תדע מיד אם אתה בריבית או בהפסד',
+    bizBtn: 'נסה את הניהול העסקי',
     pricingTitle: 'תמחור פשוט ושקוף',
     pricingSub: '14 ימי ניסיון חינם לכל משתמש חדש. ללא כרטיס אשראי.',
     planMonthly: 'חודשי',
@@ -114,6 +122,14 @@ const T = {
     adv3Desc: 'NQ, ES, CL, GC, SI and more — with exact Point Values per symbol for automatic R:R calculations.',
     adv4Title: 'PDF & CSV Export',
     adv4Desc: 'Export professional reports for sharing with a mentor, funding institution, or personal archive.',
+    bizTitle: 'Business Intelligence for Prop Traders',
+    bizSub: 'Trading is a business. Track every expense, every payout, and know exactly if you\'re profitable — before the numbers surprise you.',
+    bizBadge: 'New',
+    biz1: 'Track expenses: challenges, resets, data fees',
+    biz2: 'Log payouts and track your success rate',
+    biz3: 'Cost per account (CPA) and true net profit',
+    biz4: 'Business meter: instantly know if you\'re in the green or red',
+    bizBtn: 'Try Business Manager',
     pricingTitle: 'Simple, transparent pricing',
     pricingSub: '14-day free trial for all new users. No credit card required.',
     planMonthly: 'Monthly',
@@ -421,6 +437,73 @@ export default function Landing() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Business Manager */}
+        <section className="lp-business" id="business">
+          <div className="lp-business-inner">
+            {/* Text — בצד שמאל ב-LTR, ימין ב-RTL */}
+            <div className="lp-business-text">
+              <div className="lp-biz-badge">{t.bizBadge}</div>
+              <h2>{t.bizTitle}</h2>
+              <p>{t.bizSub}</p>
+              <ul className="lp-biz-features">
+                <li>{t.biz1}</li>
+                <li>{t.biz2}</li>
+                <li>{t.biz3}</li>
+                <li>{t.biz4}</li>
+              </ul>
+              <button className="lp-btn-primary" onClick={goAuth}>{t.bizBtn}</button>
+            </div>
+
+            {/* Mockup — Business Manager mini UI */}
+            <div className="lp-biz-mockup" dir="ltr">
+              {/* KPI row */}
+              <div className="lp-biz-kpi-row">
+                {[
+                  { label: 'Revenue',  val: '$2,400', color: '#1DB954' },
+                  { label: 'Expenses', val: '$1,180', color: '#ff4d60' },
+                  { label: 'Net',      val: '$1,220', color: '#1DB954' },
+                  { label: 'CPA',      val: '$295',   color: '#F59B23' },
+                ].map(k => (
+                  <div key={k.label} className="lp-biz-kpi">
+                    <div className="lp-biz-kpi-label">{k.label}</div>
+                    <div className="lp-biz-kpi-val" style={{ color: k.color }}>{k.val}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* GamblingMeter */}
+              <div className="lp-biz-meter-wrap">
+                <div className="lp-biz-meter-title">Business Meter</div>
+                <div className="lp-biz-meter-bar">
+                  <div className="lp-biz-meter-needle" style={{ left: '52%' }} />
+                </div>
+                <div className="lp-biz-meter-labels">
+                  <span>Risky</span>
+                  <span>Break-Even</span>
+                  <span>Safe</span>
+                </div>
+              </div>
+
+              {/* Expense / Payout log */}
+              <div className="lp-biz-log">
+                <div className="lp-biz-log-title">Recent activity</div>
+                {[
+                  { firm: 'TopstepX',  type: 'Challenge',  amt: '-$165', pos: false },
+                  { firm: 'TopstepX',  type: 'Payout',     amt: '+$800', pos: true  },
+                  { firm: 'Apex',      type: 'Reset',       amt: '-$95',  pos: false },
+                  { firm: 'Apex',      type: 'Payout',     amt: '+$620', pos: true  },
+                ].map((row, i) => (
+                  <div key={i} className="lp-biz-log-row">
+                    <span className="lp-biz-log-firm">{row.firm}</span>
+                    <span className="lp-biz-log-type">{row.type}</span>
+                    <span style={{ fontWeight: 700, fontFamily: 'monospace', fontSize: '.70rem', color: row.pos ? '#1DB954' : '#ff4d60' }}>{row.amt}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
