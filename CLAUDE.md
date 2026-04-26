@@ -63,8 +63,8 @@ supabase/
     Landing.tsx            — דף נחיתה שיווקי (route: /)
     Dashboard.tsx          — Stats + Calendar + MiniEquityChart + RecentTrades
     TradesList.tsx         — טבלה עם פילטרים
-    Analytics.tsx          — 8 גרפים Canvas: Equity, Drawdown, ByDay, BySymbol,
-                             Heatmap, Distribution, RR Scatter, Streaks
+    Analytics.tsx          — 9 גרפים Canvas: Equity, Drawdown, ByDay, BySymbol,
+                             Heatmap, Distribution, RR Scatter, Streaks, Strategy Comparison
     PropFirm.tsx           — Prop Firm Tracker: כרטיסי חשבון עם מדים
     BusinessManager.tsx    — ניהול עסקי: הוצאות, משיכות, KPIs, גרף, מדד עסקי
     Reports.tsx            — Export PDF + CSV
@@ -135,7 +135,7 @@ RLS: כל טבלה עם `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = u
 ### Landing Page (`/`)
 - דף נחיתה **דו-לשוני** (עברית RTL / אנגלית LTR) עם CSS מבודד `.lp-*`
 - **כפתור שפה** `עב / EN` ב-Nav → `setLang` → `dir` משתנה על `.lp` div
-- סקציות: Nav, Hero + mockup, Social Proof, Features Bento, Pricing, Testimonials (3 כרטיסים), FAQ (5 שאלות `<details>`), CTA, Footer
+- סקציות: Nav, Hero + mockup, Social Proof, Features Bento, Advanced (5 פריטים), Business Manager, Pricing, Testimonials (3 כרטיסים), FAQ (5 שאלות `<details>`), CTA, Footer
 - תמחור: NIS (שקלים) — ₪69/חודש בלבד (שלב ראשוני, תוכנית אחת)
 - כפתורים: "התחל עכשיו" → `/auth`, "Live Demo" → demo data + `/dashboard`
 - Route `*` מפנה ל-`/` (לא ל-`/dashboard`)
@@ -244,8 +244,16 @@ RLS: כל טבלה עם `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = u
 #### ⚠️ דפים standalone (לא בתוך Layout) — חובה לגלילה
 כל דף שאינו בתוך `.app-shell` (כמו Guides, Terms, Privacy, RiskDisclosure) חייב `overflowY: 'auto'` (או `height: 100vh; overflow-y: auto` ב-CSS) כי `html, body { overflow: hidden }` בשורה 77 ב-index.css חוסם גלילה.
 
-### Analytics (8 גרפים Canvas — ללא ספריות)
-Tabs: Equity Curve | Drawdown | P&L by Day | P&L by Symbol | Monthly Heatmap | Distribution | Risk/Reward Scatter | Streak Analysis
+### Analytics (9 גרפים Canvas — ללא ספריות)
+Tabs: Equity Curve | Drawdown | P&L by Day | P&L by Symbol | Monthly Heatmap | Distribution | Risk/Reward Scatter | Streak Analysis | **Strategy Comparison**
+
+#### Strategy Comparison Tab (טאב 6)
+- **MultiEquityChart**: עקומות הון מרובות על Canvas אחד — ציר X = תאריכים משותפים לכל האסטרטגיות, כל קו בצבע `strategy.color`, נקודה בסוף + legend
+- **StrategyStatsTable**: טבלת HTML — Trades, WR%, Total P&L, Avg P&L, Profit Factor לפי אסטרטגיה, ממוינת לפי P&L כולל
+- עסקאות ללא `strategy_id` → קבוצת "No strategy" (אפור `#737373`)
+- `useStrategyRows(trades, strategies)` — hook מחשב equity points לכל אסטרטגיה על ציר תאריך משותף
+- `STRAT_PALETTE`: 8 צבעים fallback לאסטרטגיות ללא `color`
+- הודעת רמז אם אין אסטרטגיות מוגדרות — מנחה להקצות אסטרטגיות בטופס העסקה
 
 #### ByDayChart — נקודות חשובות
 - `pT = 32` (לא 20) — מרווח עליון מספיק
@@ -456,6 +464,9 @@ VITE_SUPABASE_ANON_KEY=...
 ### Landing Page — שיפורים נוספים
 - Nav: נוספו קישורים להמלצות (`#testimonials`) ושאלות (`#faq`)
 - תנאי שימוש: כתובת "יהודה הלוי 21" (ללא עיר)
+- Advanced section: 5 פריטים (adv1–adv5) — הוסף adv5 "השוואת אסטרטגיות / Strategy Comparison"
+- Features card2 (Analytics): "9 גרפים מתקדמים כולל השוואת אסטרטגיות"
+- Pricing feat6: "9 גרפי אנליטיקס + השוואת אסטרטגיות"
 
 ### Whop Subscription Integration (אפריל 2026)
 - **פלטפורמת תשלום**: Whop (whop.com) — ILS, ₪69/חודש, 14 יום ניסיון
