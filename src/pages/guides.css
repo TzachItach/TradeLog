@@ -1,6 +1,7 @@
 /* ── Guides Page ── */
 .guides-page {
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
   background: #121212;
   color: #ffffff;
   direction: rtl;
