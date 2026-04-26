@@ -103,7 +103,7 @@ const T = {
     ],
     footerUsefulTitle: 'קישורים שימושיים',
     footerUsefulLinks: [
-      { label: 'מרכז עזרה', href: '#' },
+
       { label: 'מדריכים', href: '#' },
       { label: 'שאלות נפוצות', href: '#faq' },
       { label: 'תנאי שימוש', href: '/terms' },
@@ -200,7 +200,7 @@ const T = {
     ],
     footerUsefulTitle: 'Useful Links',
     footerUsefulLinks: [
-      { label: 'Help Center', href: '#' },
+
       { label: 'Guides', href: '#' },
       { label: 'FAQ', href: '#faq' },
       { label: 'Terms of Service', href: '/terms' },
