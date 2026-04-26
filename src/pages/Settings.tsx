@@ -434,18 +434,33 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
     const { data: { session } } = await supabase.auth.getSession();
     const jwt = session?.access_token;
     if (!jwt) { setSyncing(null); return alert(isHe ? 'לא מחובר' : 'Not authenticated'); }
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
     try {
-      const res = await fetch(`${supabaseUrl}/functions/v1/${broker}-sync`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
-        body: JSON.stringify({ user_id: user?.id }),
-      });
+      // Tradovate sync runs on Vercel (Supabase IPs are blocked by Tradovate)
+      // TopstepX sync runs on Supabase Edge Functions
+      let res: Response;
+      if (broker === 'tradovate') {
+        res = await fetch('/api/tradovate-sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+          body: JSON.stringify({ user_id: user?.id }),
+        });
+      } else {
+        const anonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY as string;
+        res = await fetch(`${supabaseUrl}/functions/v1/topstepx-sync`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
+          body: JSON.stringify({ user_id: user?.id }),
+        });
+      }
       const data = await res.json();
       setLastSync((s) => ({ ...s, [broker]: new Date().toLocaleTimeString() }));
-      alert(isHe
-        ? `סנכרון הושלם — ${data.inserted ?? 0} עסקאות חדשות`
-        : `Sync complete — ${data.inserted ?? 0} new trades`);
+      if (!res.ok) {
+        alert(isHe ? `שגיאה בסנכרון: ${data.error ?? res.status}` : `Sync failed: ${data.error ?? res.status}`);
+      } else {
+        alert(isHe
+          ? `סנכרון הושלם — ${data.inserted ?? 0} עסקאות חדשות`
+          : `Sync complete — ${data.inserted ?? 0} new trades`);
+      }
     } catch {
       alert(isHe ? 'שגיאה בסנכרון' : 'Sync failed');
     } finally {
