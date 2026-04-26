@@ -163,8 +163,8 @@ function ProtectedRoute({ children, ready, hasUser }: { children: React.ReactNod
   // אין משתמש — עבור להתחברות
   if (!DEMO_MODE && !isLoggedIn) return <Navigate to="/auth" replace />;
 
-  // מנוי פג — הצג paywall
-  if (!DEMO_MODE && subscriptionStatus === 'expired') {
+  // אין מנוי פעיל — הצג paywall
+  if (!DEMO_MODE && subscriptionStatus !== 'active') {
     return <PaywallScreen email={user?.email} />;
   }
 
