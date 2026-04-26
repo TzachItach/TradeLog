@@ -457,12 +457,32 @@ VITE_SUPABASE_ANON_KEY=...
 - Nav: נוספו קישורים להמלצות (`#testimonials`) ושאלות (`#faq`)
 - תנאי שימוש: כתובת "יהודה הלוי 21" (ללא עיר)
 
+### Whop Subscription Integration (אפריל 2026)
+- **פלטפורמת תשלום**: Whop (whop.com) — ILS, ₪69/חודש, 14 יום ניסיון
+- **Whop IDs**:
+  - Plan ID: `plan_prXodSeim1jYH`
+  - Product ID: `prod_snYEY756GdD92`
+  - Checkout URL: `https://whop.com/checkout/plan_prXodSeim1jYH/`
+- **Webhook**: `POST /api/whop-webhook` (Vercel serverless)
+  - אירועים: `membership_activated` → `status='active'` | `membership_deactivated` → `status='expired'`
+  - Signature: Standard Webhooks spec — `webhook-id`, `webhook-timestamp`, `webhook-signature` headers; signed payload = `id.timestamp.body`; secret: strip `ws_` prefix → hex-decode → HMAC-SHA256 → base64
+  - URL מוגדר ב-Whop: `https://tradelog.co.il/api/whop-webhook`
+- **DB** (`profiles` table): עמודות `subscription_status TEXT` + `whop_membership_id TEXT`
+  - migration: `supabase/migrations/whop_subscription.sql`
+- **Store**: `subscriptionStatus: 'active' | 'expired' | null` — נטען ב-`loadDataInBackground`, `reloadFromCloud`, `initRealUser`
+- **Paywall** (`src/App.tsx` — `PaywallScreen`): מוצג כש-`subscriptionStatus === 'expired'`; כפתור → Whop checkout עם email משתמש pre-filled
+- **Env vars ב-Vercel**: `WHOP_API_KEY`, `WHOP_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`
+- **⚠️ Migration ידני נדרש** ב-Supabase SQL Editor (לא רץ אוטומטית):
+  ```sql
+  ALTER TABLE profiles
+    ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS whop_membership_id  TEXT DEFAULT NULL;
+  ```
+
 ---
 
 ## מה עוד דיברנו לבנות (לא הושלם)
-- **מנויים בתשלום**: ₪69/חודש (תוכנית אחת בשלב ראשוני — ILS)
-  - **פלטפורמת תשלום**: Whop (whop.com) — ממשק נוח, ILS נתמך, webhook לאינטגרציה
-  - נדרש: `profiles` schema (`subscription_status`, `trial_ends_at`, `lemonsqueezy_customer_id`), webhook handler, `useSubscription` hook, Paywall UI
+- ~~**מנויים בתשלום**~~ — **הושלם** (Whop, ₪69/חודש, ראה סעיף Whop Subscription Integration)
 - Push notifications במובייל
 - ~~התראות יעד יומי~~ — DailyGoalBar **הושלם** (bar ב-Dashboard)
 - ~~Business Manager~~ — **הושלם** (`/dashboard/business`)
