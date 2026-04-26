@@ -54,10 +54,7 @@ const T = {
     pricingTitle: 'תמחור פשוט ושקוף',
     pricingSub: '14 ימי ניסיון חינם לכל משתמש חדש. ללא כרטיס אשראי.',
     planMonthly: 'חודשי',
-    planYearly: 'שנתי — חיסכון 16%',
-    planMonthlySub: 'חיוב חודשי',
-    planYearlySub: 'כ-₪58/חודש · 14 ימי ניסיון',
-    planPopular: 'הכי פופולרי',
+    planMonthlySub: 'חיוב חודשי · ביטול בכל עת',
     feat1: 'חשבונות מסחר ללא הגבלה',
     feat2: 'ייבוא עסקאות ללא הגבלה',
     feat3: 'ייבוא אוטומטי (TopstepX & Tradovate)',
@@ -144,10 +141,7 @@ const T = {
     pricingTitle: 'Simple, transparent pricing',
     pricingSub: '14-day free trial for all new users. No credit card required.',
     planMonthly: 'Monthly',
-    planYearly: 'Annual — save 16%',
-    planMonthlySub: 'Billed monthly',
-    planYearlySub: 'About ₪58/month · 14-day free trial',
-    planPopular: 'Most popular',
+    planMonthlySub: 'Billed monthly · cancel anytime',
     feat1: 'Unlimited trading accounts',
     feat2: 'Unlimited trade imports',
     feat3: 'Auto-import (TopstepX & Tradovate)',
@@ -542,18 +536,6 @@ export default function Landing() {
                 <div className="lp-plan-name">{t.planMonthly}</div>
                 <div className="lp-plan-price">₪69<span>{isHe ? '/חודש' : '/mo'}</span></div>
                 <div className="lp-plan-sub">{t.planMonthlySub}</div>
-                <ul className="lp-plan-features">
-                  <li>{t.feat1}</li><li>{t.feat2}</li><li>{t.feat3}</li><li>{t.feat4}</li>
-                  <li>{t.feat5}</li><li>{t.feat6}</li><li>{t.feat7}</li><li>{t.feat8}</li>
-                </ul>
-                <button className="lp-plan-btn" onClick={goAuth}>{t.planBtn}</button>
-              </div>
-
-              <div className="lp-plan popular">
-                <div className="lp-plan-badge">{t.planPopular}</div>
-                <div className="lp-plan-name">{t.planYearly}</div>
-                <div className="lp-plan-price">₪699<span>{isHe ? '/שנה' : '/yr'}</span></div>
-                <div className="lp-plan-sub">{t.planYearlySub}</div>
                 <ul className="lp-plan-features">
                   <li>{t.feat1}</li><li>{t.feat2}</li><li>{t.feat3}</li><li>{t.feat4}</li>
                   <li>{t.feat5}</li><li>{t.feat6}</li><li>{t.feat7}</li><li>{t.feat8}</li>

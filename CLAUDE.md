@@ -136,7 +136,7 @@ RLS: כל טבלה עם `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = u
 - דף נחיתה **דו-לשוני** (עברית RTL / אנגלית LTR) עם CSS מבודד `.lp-*`
 - **כפתור שפה** `עב / EN` ב-Nav → `setLang` → `dir` משתנה על `.lp` div
 - סקציות: Nav, Hero + mockup, Social Proof, Features Bento, Pricing, Testimonials (3 כרטיסים), FAQ (5 שאלות `<details>`), CTA, Footer
-- תמחור: NIS (שקלים) — ₪69/חודש | ₪699/שנה (חיסכון 16%) — אין תוכנית lifetime
+- תמחור: NIS (שקלים) — ₪69/חודש בלבד (שלב ראשוני, תוכנית אחת)
 - כפתורים: "התחל עכשיו" → `/auth`, "Live Demo" → demo data + `/dashboard`
 - Route `*` מפנה ל-`/` (לא ל-`/dashboard`)
 - **לוגואים**: Nav=56px, Footer=52px, Mockup sidebar=36px — כולם `/logo.png` עם `mix-blend-mode:screen` inline
@@ -460,8 +460,8 @@ VITE_SUPABASE_ANON_KEY=...
 ---
 
 ## מה עוד דיברנו לבנות (לא הושלם)
-- **מנויים בתשלום**: ₪69/חודש + ₪699/שנה (ישראל בלבד — שקלים)
-  - **פלטפורמת תשלום**: Cardcom (ישראלי, recurring billing, חשבוניות אוטומטיות) — או Stripe + iCount אם פותחים לבינלאומי
+- **מנויים בתשלום**: ₪69/חודש (תוכנית אחת בשלב ראשוני — ILS)
+  - **פלטפורמת תשלום**: Whop (whop.com) — ממשק נוח, ILS נתמך, webhook לאינטגרציה
   - נדרש: `profiles` schema (`subscription_status`, `trial_ends_at`, `lemonsqueezy_customer_id`), webhook handler, `useSubscription` hook, Paywall UI
 - Push notifications במובייל
 - ~~התראות יעד יומי~~ — DailyGoalBar **הושלם** (bar ב-Dashboard)
