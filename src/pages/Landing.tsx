@@ -54,11 +54,9 @@ const T = {
     pricingTitle: 'תמחור פשוט ושקוף',
     pricingSub: '14 ימי ניסיון חינם לכל משתמש חדש. ללא כרטיס אשראי.',
     planMonthly: 'חודשי',
-    planYearly: 'שנתי — חיסכון 29%',
-    planLifetime: 'לכל החיים',
+    planYearly: 'שנתי — חיסכון 16%',
     planMonthlySub: 'חיוב חודשי',
-    planYearlySub: 'כ-$13/חודש · 14 ימי ניסיון',
-    planLifetimeSub: 'תשלום חד-פעמי, גישה לתמיד',
+    planYearlySub: 'כ-₪58/חודש · 14 ימי ניסיון',
     planPopular: 'הכי פופולרי',
     feat1: 'ייבוא עסקאות ללא הגבלה',
     feat2: 'כל 8 גרפי האנליטיקס',
@@ -68,12 +66,7 @@ const T = {
     featY2: 'Prop Firm Tracker מתקדם',
     featY3: 'גישה מוקדמת לפיצ׳רים חדשים',
     featY4: 'תמיכה מועדפת',
-    featL1: 'הכל כלול',
-    featL2: 'כל העדכונים העתידיים',
-    featL3: 'תמיכה בעדיפות גבוהה ביותר',
-    featL4: 'תג חבר מייסד',
     planBtn: 'התחל ניסיון חינם',
-    planBtnLifetime: 'קבל גישה לכל החיים',
     ctaTitle: 'מוכן לשפר את המסחר שלך?',
     ctaSub: 'ללא כרטיס אשראי. 14 ימים חינם לגמרי. ביטול בכל עת.',
     testimonialsTitle: 'מה הסוחרים אומרים',
@@ -151,11 +144,9 @@ const T = {
     pricingTitle: 'Simple, transparent pricing',
     pricingSub: '14-day free trial for all new users. No credit card required.',
     planMonthly: 'Monthly',
-    planYearly: 'Annual — save 29%',
-    planLifetime: 'Lifetime',
+    planYearly: 'Annual — save 16%',
     planMonthlySub: 'Billed monthly',
-    planYearlySub: 'About $13/month · 14-day free trial',
-    planLifetimeSub: 'One-time payment, forever access',
+    planYearlySub: 'About ₪58/month · 14-day free trial',
     planPopular: 'Most popular',
     feat1: 'Unlimited trade imports',
     feat2: 'All 8 analytics charts',
@@ -165,12 +156,7 @@ const T = {
     featY2: 'Advanced Prop Firm tracker',
     featY3: 'Early access to new features',
     featY4: 'Priority support',
-    featL1: 'Everything included',
-    featL2: 'All future updates',
-    featL3: 'Highest priority support',
-    featL4: 'Founding member badge',
     planBtn: 'Start free trial',
-    planBtnLifetime: 'Get lifetime access',
     ctaTitle: 'Ready to level up your trading?',
     ctaSub: 'No credit card. 14 days completely free. Cancel anytime.',
     testimonialsTitle: 'What traders are saying',
@@ -554,7 +540,7 @@ export default function Landing() {
             <div className="lp-pricing-grid" dir="ltr">
               <div className="lp-plan">
                 <div className="lp-plan-name">{t.planMonthly}</div>
-                <div className="lp-plan-price">$19<span>/mo</span></div>
+                <div className="lp-plan-price">₪69<span>{isHe ? '/חודש' : '/mo'}</span></div>
                 <div className="lp-plan-sub">{t.planMonthlySub}</div>
                 <ul className="lp-plan-features">
                   <li>{t.feat1}</li><li>{t.feat2}</li><li>{t.feat3}</li><li>{t.feat4}</li>
@@ -565,7 +551,7 @@ export default function Landing() {
               <div className="lp-plan popular">
                 <div className="lp-plan-badge">{t.planPopular}</div>
                 <div className="lp-plan-name">{t.planYearly}</div>
-                <div className="lp-plan-price">$159<span>/yr</span></div>
+                <div className="lp-plan-price">₪699<span>{isHe ? '/שנה' : '/yr'}</span></div>
                 <div className="lp-plan-sub">{t.planYearlySub}</div>
                 <ul className="lp-plan-features">
                   <li>{t.featY1}</li><li>{t.featY2}</li><li>{t.featY3}</li><li>{t.featY4}</li>
@@ -573,15 +559,6 @@ export default function Landing() {
                 <button className="lp-plan-btn" onClick={goAuth}>{t.planBtn}</button>
               </div>
 
-              <div className="lp-plan">
-                <div className="lp-plan-name">{t.planLifetime}</div>
-                <div className="lp-plan-price">$349<span> {isHe ? 'חד-פעמי' : 'once'}</span></div>
-                <div className="lp-plan-sub">{t.planLifetimeSub}</div>
-                <ul className="lp-plan-features">
-                  <li>{t.featL1}</li><li>{t.featL2}</li><li>{t.featL3}</li><li>{t.featL4}</li>
-                </ul>
-                <button className="lp-plan-btn" onClick={goAuth}>{t.planBtnLifetime}</button>
-              </div>
             </div>
           </div>
         </section>

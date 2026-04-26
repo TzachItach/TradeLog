@@ -136,7 +136,7 @@ RLS: כל טבלה עם `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = u
 - דף נחיתה **דו-לשוני** (עברית RTL / אנגלית LTR) עם CSS מבודד `.lp-*`
 - **כפתור שפה** `עב / EN` ב-Nav → `setLang` → `dir` משתנה על `.lp` div
 - סקציות: Nav, Hero + mockup, Social Proof, Features Bento, Pricing, Testimonials (3 כרטיסים), FAQ (5 שאלות `<details>`), CTA, Footer
-- תמחור: USD (לא ₪) — $19/mo | $159/yr | $349 lifetime
+- תמחור: NIS (שקלים) — ₪69/חודש | ₪699/שנה (חיסכון 16%) — אין תוכנית lifetime
 - כפתורים: "התחל עכשיו" → `/auth`, "Live Demo" → demo data + `/dashboard`
 - Route `*` מפנה ל-`/` (לא ל-`/dashboard`)
 - **לוגואים**: Nav=56px, Footer=52px, Mockup sidebar=36px — כולם `/logo.png` עם `mix-blend-mode:screen` inline
@@ -389,7 +389,7 @@ VITE_SUPABASE_ANON_KEY=...
 6. **לוגו קליקבילי** בכל מקום → `/dashboard`
 7. **Landing CSS**: namespace `.lp-*` מבודד — אין קונפליקט עם CSS של האפליקציה
 8. **Trade Media**: bucket `trade-media` ב-Supabase Storage (private). טבלת `trade_media`: `id, trade_id, user_id, storage_path, label, created_at`
-9. **Currency**: USD בלבד — `formatPnL()` משתמש ב-`$`. אין ₪ בשום מקום
+9. **Currency**: P&L ועסקאות — USD בלבד (`formatPnL()` = `$`). **מחירי מנויים** — ₪ בלבד (Landing page pricing)
 10. **Design**: Spotify Dark — אין #0071e3, אין Apple Light. Accent = `#1DB954`
 
 ---
@@ -460,8 +460,8 @@ VITE_SUPABASE_ANON_KEY=...
 ---
 
 ## מה עוד דיברנו לבנות (לא הושלם)
-- **מנויים בתשלום**: $19/mo + $159/yr + $349 lifetime
-  - **פלטפורמת תשלום**: Lemon Squeezy — פועל כ-Merchant of Record, מטפל במע"מ וחשבוניות
+- **מנויים בתשלום**: ₪69/חודש + ₪699/שנה (ישראל בלבד — שקלים)
+  - **פלטפורמת תשלום**: Cardcom (ישראלי, recurring billing, חשבוניות אוטומטיות) — או Stripe + iCount אם פותחים לבינלאומי
   - נדרש: `profiles` schema (`subscription_status`, `trial_ends_at`, `lemonsqueezy_customer_id`), webhook handler, `useSubscription` hook, Paywall UI
 - Push notifications במובייל
 - ~~התראות יעד יומי~~ — DailyGoalBar **הושלם** (bar ב-Dashboard)
