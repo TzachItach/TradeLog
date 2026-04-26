@@ -575,9 +575,169 @@ function StreakChart({ trades, lang }: { trades: Trade[]; lang: string }) {
   </>;
 }
 
+// ── 9. Strategy Comparison ───────────────────────────────────
+type Strategy = ReturnType<typeof useStore.getState>['strategies'][0];
+
+const STRAT_PALETTE = ['#5b8fff','#1DB954','#F59B23','#a855f7','#06b6d4','#ec4899','#f97316','#14b8a6'];
+
+interface StratRow {
+  id: string; name: string; color: string;
+  tradeCount: number; winRate: number; totalPnL: number; avgPnL: number; profitFactor: number;
+  pts: number[];
+}
+
+function useStrategyRows(trades: Trade[], strategies: Strategy[]): { rows: StratRow[]; allDates: string[] } {
+  return useMemo(() => {
+    const allDates = [...new Set(trades.map((t) => t.trade_date))].sort();
+    const noKey = '__none__';
+    const map = new Map<string, { id: string; name: string; color: string; dateMap: Record<string, number>; all: Trade[] }>();
+    strategies.forEach((s, i) => {
+      map.set(s.id, { id: s.id, name: s.name, color: s.color || STRAT_PALETTE[i % STRAT_PALETTE.length], dateMap: {}, all: [] });
+    });
+    map.set(noKey, { id: noKey, name: 'No strategy', color: '#737373', dateMap: {}, all: [] });
+    trades.forEach((t) => {
+      const key = (t.strategy_id && map.has(t.strategy_id)) ? t.strategy_id : noKey;
+      const g = map.get(key)!;
+      g.dateMap[t.trade_date] = (g.dateMap[t.trade_date] || 0) + t.pnl;
+      g.all.push(t);
+    });
+    const rows: StratRow[] = Array.from(map.values())
+      .filter((g) => g.all.length > 0)
+      .map((g) => {
+        const wins = g.all.filter((t) => t.pnl > 0);
+        const losses = g.all.filter((t) => t.pnl < 0);
+        const totalPnL = g.all.reduce((s, t) => s + t.pnl, 0);
+        const avgWin = wins.length ? wins.reduce((s, t) => s + t.pnl, 0) / wins.length : 0;
+        const avgLoss = losses.length ? Math.abs(losses.reduce((s, t) => s + t.pnl, 0) / losses.length) : 0;
+        const pf = avgLoss > 0 ? (avgWin * wins.length) / (avgLoss * losses.length) : (wins.length > 0 ? 99 : 0);
+        let cum = 0;
+        const pts = allDates.map((d) => { cum += g.dateMap[d] || 0; return cum; });
+        return {
+          id: g.id, name: g.name, color: g.color,
+          tradeCount: g.all.length,
+          winRate: g.all.length ? (wins.length / g.all.length) * 100 : 0,
+          totalPnL, avgPnL: totalPnL / (g.all.length || 1),
+          profitFactor: Math.min(pf, 99), pts,
+        };
+      })
+      .sort((a, b) => b.totalPnL - a.totalPnL);
+    return { rows, allDates };
+  }, [trades, strategies]);
+}
+
+function MultiEquityChart({ rows, allDates }: { rows: StratRow[]; allDates: string[] }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const c = useColors();
+  useCanvas(ref, (ctx, W, H) => {
+    if (!rows.length || allDates.length < 2) return;
+    const pL = 72, pR = 16, pT = 20, pB = 28;
+    const cW = W - pL - pR, cH = H - pT - pB;
+    const allVals = rows.flatMap((r) => r.pts);
+    const maxV = Math.max(...allVals, 0), minV = Math.min(...allVals, 0);
+    const range = maxV - minV || 1;
+    const xOf = (i: number) => pL + (i / Math.max(allDates.length - 1, 1)) * cW;
+    const yOf = (v: number) => pT + cH - ((v - minV) / range) * cH;
+    [0, 0.25, 0.5, 0.75, 1].forEach((f) => {
+      const v = minV + f * range, y = yOf(v);
+      ctx.beginPath(); ctx.strokeStyle = Math.abs(v) < range * 0.01 ? c.zero : c.grid;
+      ctx.lineWidth = Math.abs(v) < range * 0.01 ? 1.5 : 0.5;
+      ctx.moveTo(pL, y); ctx.lineTo(pL + cW, y); ctx.stroke();
+      ctx.fillStyle = c.text; ctx.font = '10px system-ui'; ctx.textAlign = 'right';
+      ctx.fillText(formatPnL(v), pL - 5, y + 3);
+    });
+    rows.forEach((r) => {
+      if (r.pts.length < 2) return;
+      ctx.beginPath();
+      r.pts.forEach((v, i) => (i === 0 ? ctx.moveTo(xOf(i), yOf(v)) : ctx.lineTo(xOf(i), yOf(v))));
+      ctx.strokeStyle = r.color; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
+      const last = r.pts[r.pts.length - 1];
+      ctx.beginPath();
+      ctx.arc(xOf(r.pts.length - 1), yOf(last), 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = r.color; ctx.fill();
+    });
+  }, [rows, allDates, c.isDark]);
+  return (
+    <div>
+      <div style={{ position: 'relative', width: '100%', height: 200 }}>
+        <canvas ref={ref} style={{ width: '100%', height: '100%', display: 'block' }} />
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 18px', marginTop: 10 }}>
+        {rows.map((r) => (
+          <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: '.72rem', color: 'var(--t2)' }}>
+            <div style={{ width: 18, height: 3, borderRadius: 2, background: r.color, flexShrink: 0 }} />
+            {r.name}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StrategyStatsTable({ rows, isHe }: { rows: StratRow[]; isHe: boolean }) {
+  const col: React.CSSProperties = { padding: '9px 10px', fontSize: '.78rem', textAlign: 'left', whiteSpace: 'nowrap' };
+  const hdr: React.CSSProperties = { ...col, color: 'var(--t3)', fontWeight: 600, fontSize: '.68rem', textTransform: 'uppercase', letterSpacing: '.05em', borderBottom: '1px solid var(--bd2)' };
+  const headers = isHe
+    ? ['אסטרטגיה','עסקאות','WR%','P&L כולל','ממוצע','Profit Factor']
+    : ['Strategy','Trades','WR%','Total P&L','Avg P&L','Profit Factor'];
+  return (
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
+        <thead><tr>{headers.map((h) => <th key={h} style={hdr}>{h}</th>)}</tr></thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.id} style={{ borderBottom: '1px solid var(--bd)' }}>
+              <td style={col}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: r.color, flexShrink: 0 }} />
+                  <span style={{ color: 'var(--t1)', fontWeight: 600 }}>{r.name}</span>
+                </div>
+              </td>
+              <td style={{ ...col, color: 'var(--t2)' }}>{r.tradeCount}</td>
+              <td style={{ ...col, color: r.winRate >= 50 ? G : R, fontWeight: 700 }}>{r.winRate.toFixed(0)}%</td>
+              <td style={{ ...col, color: r.totalPnL >= 0 ? G : R, fontWeight: 700 }}>{formatPnL(r.totalPnL)}</td>
+              <td style={{ ...col, color: r.avgPnL >= 0 ? G : R }}>{formatPnL(r.avgPnL)}</td>
+              <td style={{ ...col, color: r.profitFactor >= 1.5 ? G : r.profitFactor >= 1 ? O : R, fontWeight: 700 }}>
+                {r.profitFactor === 99 ? '∞' : r.profitFactor.toFixed(2)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function StrategyTab({ trades, strategies, isHe }: { trades: Trade[]; strategies: Strategy[]; isHe: boolean }) {
+  const { rows, allDates } = useStrategyRows(trades, strategies);
+  const hasRealStrategies = rows.some((r) => r.id !== '__none__');
+  return (
+    <>
+      {!hasRealStrategies && (
+        <div style={{ background: 'var(--s2)', border: '1px solid var(--bd)', borderRadius: 10, padding: '12px 16px', marginBottom: 14, fontSize: '.82rem', color: 'var(--t3)' }}>
+          {isHe
+            ? 'הקצה אסטרטגיות לעסקאות שלך (בטופס העסקה) כדי להשוות בין הביצועים שלהן.'
+            : 'Assign strategies to your trades (in the trade form) to compare their performance.'}
+        </div>
+      )}
+      <ChartCard
+        title={isHe ? 'עקומות הון לפי אסטרטגיה' : 'Equity Curves by Strategy'}
+        subtitle={isHe ? 'P&L מצטבר לאורך הזמן — כל קו = אסטרטגיה אחת' : 'Cumulative P&L over time — each line = one strategy'}
+      >
+        <MultiEquityChart rows={rows} allDates={allDates} />
+      </ChartCard>
+      <ChartCard
+        title={isHe ? 'השוואת ביצועים' : 'Performance Comparison'}
+        subtitle={isHe ? 'מדדים עיקריים לפי אסטרטגיה' : 'Key metrics by strategy'}
+      >
+        <StrategyStatsTable rows={rows} isHe={isHe} />
+      </ChartCard>
+    </>
+  );
+}
+
 // ── Main Analytics Page ───────────────────────────────────────
 export default function Analytics() {
-  const { lang, getFilteredTrades } = useStore();
+  const { lang, getFilteredTrades, strategies } = useStore();
   const [tab, setTab] = useState(0);
   const isHe = lang === 'he';
   const trades = getFilteredTrades().filter((t) => t.pnl != null);
@@ -588,6 +748,7 @@ export default function Analytics() {
     { label: 'Calendar',    labelHe: 'לוח שנה' },
     { label: 'Stats',       labelHe: 'סטטיסטיקה' },
     { label: 'Risk',        labelHe: 'סיכון' },
+    { label: 'Strategies',  labelHe: 'אסטרטגיות' },
   ];
 
   if (trades.length === 0) return (
@@ -671,6 +832,9 @@ export default function Analytics() {
           <RRScatterChart trades={trades} />
         </ChartCard>
       )}
+
+      {/* Tab 5: Strategies — multi-equity overlay + stats table */}
+      {tab === 5 && <StrategyTab trades={trades} strategies={strategies} isHe={isHe} />}
     </div>
   );
 }
