@@ -200,6 +200,7 @@ export default function Landing() {
   const dir = isHe ? 'rtl' : 'ltr';
 
   const goAuth = () => navigate('/auth');
+  const goWhop = () => window.open('https://whop.com/checkout/plan_VZiIXyiKbr7Pr', '_blank');
 
   const handleDemo = () => {
     loadDemoData();
@@ -237,7 +238,7 @@ export default function Landing() {
               {isHe ? 'EN' : 'עב'}
             </button>
             <button className="lp-btn-ghost" onClick={goAuth}>{t.nav.signin}</button>
-            <button className="lp-btn-primary" onClick={goAuth}>{t.nav.start}</button>
+            <button className="lp-btn-primary" onClick={goWhop}>{t.nav.start}</button>
           </div>
         </div>
       </header>
@@ -256,7 +257,7 @@ export default function Landing() {
             </h1>
             <p>{t.heroSub}</p>
             <div className="lp-hero-ctas" dir="ltr">
-              <button className="lp-btn-hero-primary" onClick={goAuth}>
+              <button className="lp-btn-hero-primary" onClick={goWhop}>
                 {t.ctaPrimary}
               </button>
               <button className="lp-btn-hero-secondary" onClick={handleDemo}>
@@ -473,7 +474,7 @@ export default function Landing() {
                 <li>{t.biz3}</li>
                 <li>{t.biz4}</li>
               </ul>
-              <button className="lp-btn-primary" onClick={goAuth}>{t.bizBtn}</button>
+              <button className="lp-btn-primary" onClick={goWhop}>{t.bizBtn}</button>
             </div>
 
             {/* Mockup — Business Manager mini UI */}
@@ -540,7 +541,7 @@ export default function Landing() {
                   <li>{t.feat1}</li><li>{t.feat2}</li><li>{t.feat3}</li><li>{t.feat4}</li>
                   <li>{t.feat5}</li><li>{t.feat6}</li><li>{t.feat7}</li><li>{t.feat8}</li>
                 </ul>
-                <button className="lp-plan-btn" onClick={goAuth}>{t.planBtn}</button>
+                <button className="lp-plan-btn" onClick={goWhop}>{t.planBtn}</button>
               </div>
 
             </div>
@@ -590,7 +591,7 @@ export default function Landing() {
             <h2>{t.ctaTitle}</h2>
             <p>{t.ctaSub}</p>
             <div className="lp-cta-btns" dir="ltr">
-              <button className="lp-btn-hero-primary" onClick={goAuth}>{t.ctaPrimary}</button>
+              <button className="lp-btn-hero-primary" onClick={goWhop}>{t.ctaPrimary}</button>
               <button className="lp-btn-hero-secondary" onClick={handleDemo}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <circle cx="12" cy="12" r="10"/>

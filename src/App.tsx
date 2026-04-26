@@ -127,12 +127,12 @@ function PaywallScreen({ email }: { email?: string }) {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       flexDirection: 'column', gap: 24, padding: '0 24px', textAlign: 'center',
     }}>
-      <img src="/logo.png?v=2" alt="TraderYo" style={{ width: 160, objectFit: 'contain' }} />
+      <img src="/logo.png?v=2" alt="TraderYo" style={{ width: 80, objectFit: 'contain', borderRadius: 16 }} />
       <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
-        תקופת הניסיון הסתיימה
+        קבל גישה מלאה ל-TraderYo
       </h2>
       <p style={{ color: '#b3b3b3', maxWidth: 360, margin: 0, lineHeight: 1.6 }}>
-        כדי להמשיך לגשת ל-TraderYo, יש לעבור למנוי חודשי. כל הנתונים שלך שמורים ומחכים לך.
+        14 יום ניסיון חינם, ללא התחייבות. כל הנתונים שלך שמורים ומחכים לך.
       </p>
       <a
         href={url}
@@ -144,10 +144,10 @@ function PaywallScreen({ email }: { email?: string }) {
           fontSize: '1rem',
         }}
       >
-        ₪69/חודש — התחל עכשיו
+        התחל ניסיון חינם — 14 יום
       </a>
       <p style={{ color: '#737373', fontSize: '0.78rem', margin: 0 }}>
-        אחרי התשלום, רענן את הדף
+        ₪69/חודש לאחר הניסיון · אחרי ההרשמה, רענן את הדף
       </p>
     </div>
   );
