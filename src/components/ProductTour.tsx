@@ -363,7 +363,7 @@ export default function ProductTour({ onDone }: { onDone: () => void }) {
         {/* Welcome header */}
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <img
-            src="/logo.png"
+            src="/logo.png?v=2"
             alt="TraderYo"
             style={{ width: 64, height: 64, borderRadius: 12, mixBlendMode: 'screen', marginBottom: 12 }}
           />

@@ -15,7 +15,7 @@ export default function AppLogo({ forceLight = false, size = 'md', onClick }: Ap
 
   return (
     <img
-      src={isDark ? '/logo.png' : '/logo-light.png'}
+      src={isDark ? '/logo.png?v=2' : '/logo-light.png?v=2'}
       alt="TraderYo"
       width={px}
       height={px}

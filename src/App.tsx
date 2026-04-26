@@ -27,7 +27,7 @@ function SplashScreen() {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       flexDirection: 'column', gap: 16,
     }}>
-      <img src="/logo.png" alt="TraderYo" style={{ width: 220, height: 'auto', objectFit: 'contain' }} />
+      <img src="/logo.png?v=2" alt="TraderYo" style={{ width: 220, height: 'auto', objectFit: 'contain' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <div style={{ width: 20, height: 20, border: '2px solid rgba(255,255,255,.10)', borderTopColor: '#1DB954', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>
@@ -127,7 +127,7 @@ function PaywallScreen({ email }: { email?: string }) {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       flexDirection: 'column', gap: 24, padding: '0 24px', textAlign: 'center',
     }}>
-      <img src="/logo.png" alt="TraderYo" style={{ width: 160, objectFit: 'contain' }} />
+      <img src="/logo.png?v=2" alt="TraderYo" style={{ width: 160, objectFit: 'contain' }} />
       <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
         תקופת הניסיון הסתיימה
       </h2>

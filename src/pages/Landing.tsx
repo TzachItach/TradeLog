@@ -213,7 +213,7 @@ export default function Landing() {
       <header className="lp-nav" dir="ltr">
         <div className="lp-nav-inner">
           <a className="lp-logo" href="/">
-            <img src="/logo.png" alt="TraderYo" style={{ height: 56, width: 56, objectFit: 'contain', borderRadius: 10, mixBlendMode: 'screen' }} />
+            <img src="/logo.png?v=2" alt="TraderYo" style={{ height: 56, width: 56, objectFit: 'contain', borderRadius: 10, mixBlendMode: 'screen' }} />
           </a>
           <nav>
             <ul className="lp-nav-links">
@@ -280,7 +280,7 @@ export default function Landing() {
               <div className="lp-mockup-app">
                 <div className="lp-mockup-sidebar">
                   <div className="lp-mockup-logo">
-                    <img src="/logo.png" alt="TraderYo" style={{ height: 36, width: 36, objectFit: 'contain', borderRadius: 6, mixBlendMode: 'screen' }} />
+                    <img src="/logo.png?v=2" alt="TraderYo" style={{ height: 36, width: 36, objectFit: 'contain', borderRadius: 6, mixBlendMode: 'screen' }} />
                   </div>
                   {[
                     { label: 'Calendar', active: true },
@@ -639,7 +639,7 @@ export default function Landing() {
         </div>
         <div className="lp-footer-bottom">
           <div className="lp-footer-logo">
-            <img src="/logo.png" alt="TraderYo" style={{ height: 40, width: 40, objectFit: 'contain', borderRadius: 8, mixBlendMode: 'screen' }} />
+            <img src="/logo.png?v=2" alt="TraderYo" style={{ height: 40, width: 40, objectFit: 'contain', borderRadius: 8, mixBlendMode: 'screen' }} />
           </div>
           <div className="lp-footer-copy">{t.footerCopy(new Date().getFullYear())}</div>
           <ul className="lp-footer-links">

@@ -356,7 +356,7 @@ export default function Guides() {
       <div className="guides-header">
         <a href="/" className="btn btn-ghost" style={{ textDecoration: 'none' }}>← דף הבית</a>
         <div className="guides-logo">
-          <img src="/logo.png" alt="TraderYo" style={{ height: 36, width: 36, objectFit: 'contain', borderRadius: 8, mixBlendMode: 'screen' }} />
+          <img src="/logo.png?v=2" alt="TraderYo" style={{ height: 36, width: 36, objectFit: 'contain', borderRadius: 8, mixBlendMode: 'screen' }} />
           <span>TraderYo</span>
         </div>
         <div style={{ width: 80 }} />
