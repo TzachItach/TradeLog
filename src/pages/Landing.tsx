@@ -58,14 +58,14 @@ const T = {
     planMonthlySub: 'חיוב חודשי',
     planYearlySub: 'כ-₪58/חודש · 14 ימי ניסיון',
     planPopular: 'הכי פופולרי',
-    feat1: 'ייבוא עסקאות ללא הגבלה',
-    feat2: 'כל 8 גרפי האנליטיקס',
-    feat3: 'לוח שנה ויזואלי',
-    feat4: 'ייצוא PDF ו-CSV',
-    featY1: 'כל מה שבחודשי',
-    featY2: 'Prop Firm Tracker מתקדם',
-    featY3: 'גישה מוקדמת לפיצ׳רים חדשים',
-    featY4: 'תמיכה מועדפת',
+    feat1: 'חשבונות מסחר ללא הגבלה',
+    feat2: 'ייבוא עסקאות ללא הגבלה',
+    feat3: 'ייבוא אוטומטי (TopstepX & Tradovate)',
+    feat4: 'Prop Firm Tracker מלא',
+    feat5: 'ניהול עסקי',
+    feat6: 'כל 8 גרפי האנליטיקס',
+    feat7: 'לוח שנה ויזואלי',
+    feat8: 'ייצוא PDF ו-CSV',
     planBtn: 'התחל ניסיון חינם',
     ctaTitle: 'מוכן לשפר את המסחר שלך?',
     ctaSub: 'ללא כרטיס אשראי. 14 ימים חינם לגמרי. ביטול בכל עת.',
@@ -148,14 +148,14 @@ const T = {
     planMonthlySub: 'Billed monthly',
     planYearlySub: 'About ₪58/month · 14-day free trial',
     planPopular: 'Most popular',
-    feat1: 'Unlimited trade imports',
-    feat2: 'All 8 analytics charts',
-    feat3: 'Visual trading calendar',
-    feat4: 'PDF & CSV export',
-    featY1: 'Everything in Monthly',
-    featY2: 'Advanced Prop Firm tracker',
-    featY3: 'Early access to new features',
-    featY4: 'Priority support',
+    feat1: 'Unlimited trading accounts',
+    feat2: 'Unlimited trade imports',
+    feat3: 'Auto-import (TopstepX & Tradovate)',
+    feat4: 'Full Prop Firm Tracker',
+    feat5: 'Business Manager',
+    feat6: 'All 8 analytics charts',
+    feat7: 'Visual trading calendar',
+    feat8: 'PDF & CSV export',
     planBtn: 'Start free trial',
     ctaTitle: 'Ready to level up your trading?',
     ctaSub: 'No credit card. 14 days completely free. Cancel anytime.',
@@ -544,6 +544,7 @@ export default function Landing() {
                 <div className="lp-plan-sub">{t.planMonthlySub}</div>
                 <ul className="lp-plan-features">
                   <li>{t.feat1}</li><li>{t.feat2}</li><li>{t.feat3}</li><li>{t.feat4}</li>
+                  <li>{t.feat5}</li><li>{t.feat6}</li><li>{t.feat7}</li><li>{t.feat8}</li>
                 </ul>
                 <button className="lp-plan-btn" onClick={goAuth}>{t.planBtn}</button>
               </div>
@@ -554,7 +555,8 @@ export default function Landing() {
                 <div className="lp-plan-price">₪699<span>{isHe ? '/שנה' : '/yr'}</span></div>
                 <div className="lp-plan-sub">{t.planYearlySub}</div>
                 <ul className="lp-plan-features">
-                  <li>{t.featY1}</li><li>{t.featY2}</li><li>{t.featY3}</li><li>{t.featY4}</li>
+                  <li>{t.feat1}</li><li>{t.feat2}</li><li>{t.feat3}</li><li>{t.feat4}</li>
+                  <li>{t.feat5}</li><li>{t.feat6}</li><li>{t.feat7}</li><li>{t.feat8}</li>
                 </ul>
                 <button className="lp-plan-btn" onClick={goAuth}>{t.planBtn}</button>
               </div>
