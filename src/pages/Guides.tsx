@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import './guides.css';
 
 const SECTIONS = [
@@ -297,16 +297,64 @@ function PropFirmMockup() {
   );
 }
 
+/* ────────────── Prev / Next nav ────────────── */
+
+function GuideNav({ currentId }: { currentId: string }) {
+  const idx = SECTIONS.findIndex(s => s.id === currentId);
+  const prev = idx > 0 ? SECTIONS[idx - 1] : null;
+  const next = idx < SECTIONS.length - 1 ? SECTIONS[idx + 1] : null;
+  return (
+    <div className="guide-nav-row">
+      {next ? (
+        <a href={`#${next.id}`} className="guide-nav-btn guide-nav-next">
+          <span className="guide-nav-emoji">{next.emoji}</span>
+          <span className="guide-nav-label">
+            <span className="guide-nav-hint">המדריך הבא</span>
+            <span className="guide-nav-title">{next.title}</span>
+          </span>
+          <span className="guide-nav-arrow">←</span>
+        </a>
+      ) : <div />}
+      {prev ? (
+        <a href={`#${prev.id}`} className="guide-nav-btn guide-nav-prev">
+          <span className="guide-nav-arrow">→</span>
+          <span className="guide-nav-label">
+            <span className="guide-nav-hint">המדריך הקודם</span>
+            <span className="guide-nav-title">{prev.title}</span>
+          </span>
+          <span className="guide-nav-emoji">{prev.emoji}</span>
+        </a>
+      ) : <div />}
+    </div>
+  );
+}
+
 /* ────────────── Main Component ────────────── */
 
 export default function Guides() {
-  const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState('quickstart');
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) setActiveSection(entry.target.id);
+        });
+      },
+      { rootMargin: '-15% 0px -75% 0px' }
+    );
+    SECTIONS.forEach(s => {
+      const el = document.getElementById(s.id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="guides-page">
       {/* Header */}
       <div className="guides-header">
-        <button className="btn btn-ghost" onClick={() => navigate(-1)}>← חזור</button>
+        <a href="/" className="btn btn-ghost" style={{ textDecoration: 'none' }}>← דף הבית</a>
         <div className="guides-logo">
           <img src="/logo.png" alt="TradeLog" style={{ height: 36, width: 36, objectFit: 'contain', borderRadius: 8, mixBlendMode: 'screen' }} />
           <span>TradeLog</span>
@@ -334,8 +382,11 @@ export default function Guides() {
         ))}
       </div>
 
-      {/* ── Sections ── */}
-      <div className="guides-content">
+      {/* ── Layout: TOC + Content ── */}
+      <div className="guides-with-toc">
+
+        {/* Main content */}
+        <div className="guides-content">
 
         {/* 1. Quick Start */}
         <section id="quickstart" className="guide-section">
@@ -380,6 +431,7 @@ export default function Guides() {
             </div>
             <QuickStartMockup />
           </div>
+          <GuideNav currentId="quickstart" />
         </section>
 
         {/* 2. Add Trade */}
@@ -431,6 +483,7 @@ export default function Guides() {
               </div>
             </div>
           </div>
+          <GuideNav currentId="add-trade" />
         </section>
 
         {/* 3. Import */}
@@ -483,6 +536,7 @@ export default function Guides() {
             </div>
             <ImportMockup />
           </div>
+          <GuideNav currentId="import" />
         </section>
 
         {/* 4. Dashboard */}
@@ -528,6 +582,7 @@ export default function Guides() {
               </div>
             </div>
           </div>
+          <GuideNav currentId="dashboard" />
         </section>
 
         {/* 5. Analytics */}
@@ -586,6 +641,7 @@ export default function Guides() {
             </div>
             <AnalyticsMockup />
           </div>
+          <GuideNav currentId="analytics" />
         </section>
 
         {/* 6. Prop Firm */}
@@ -637,9 +693,32 @@ export default function Guides() {
               </div>
             </div>
           </div>
+          <GuideNav currentId="propfirm" />
         </section>
 
-      </div>
+        </div>{/* end guides-content */}
+
+        {/* Sticky TOC sidebar */}
+        <nav className="guides-toc">
+          <div className="guides-toc-title">תוכן עניינים</div>
+          {SECTIONS.map(s => (
+            <a
+              key={s.id}
+              href={`#${s.id}`}
+              className={`guides-toc-item${activeSection === s.id ? ' active' : ''}`}
+            >
+              <span className="guides-toc-emoji">{s.emoji}</span>
+              <span>{s.title}</span>
+            </a>
+          ))}
+          <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,.07)' }}>
+            <a href="/" style={{ fontSize: '.75rem', color: 'rgba(255,255,255,.3)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+              ← חזור לדף הבית
+            </a>
+          </div>
+        </nav>
+
+      </div>{/* end guides-with-toc */}
 
       {/* Footer */}
       <div style={{ textAlign: 'center', padding: '40px 24px', borderTop: '1px solid rgba(255,255,255,.07)', color: 'rgba(255,255,255,.25)', fontSize: '.78rem' }}>
