@@ -117,7 +117,7 @@ function AppEffects() {
   return null;
 }
 
-const WHOP_CHECKOUT = 'https://whop.com/checkout/plan_prXodSeim1jYH/';
+const WHOP_CHECKOUT = 'https://whop.com/checkout/plan_VZiIXyiKbr7Pr';
 
 function PaywallScreen({ email }: { email?: string }) {
   const url = email ? `${WHOP_CHECKOUT}?email=${encodeURIComponent(email)}` : WHOP_CHECKOUT;
