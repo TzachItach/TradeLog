@@ -73,6 +73,9 @@ supabase/
     Auth.tsx               — Google OAuth בלבד
     Accessibility.tsx      — הצהרת נגישות עב/en (מתייחסת ל-Negishot)
     Terms.tsx / Privacy.tsx — דפים משפטיים עב/en
+    RiskDisclosure.tsx     — גילוי סיכונים עב/en (route: /risk-disclosure)
+    Guides.tsx             — מדריכים לשימוש עב (route: /guides)
+    guides.css             — CSS מבודד לדף המדריכים
     landing.css            — CSS מבודד עם namespace .lp-* לדף הנחיתה
 ```
 
@@ -140,6 +143,14 @@ RLS: כל טבלה עם `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = u
 - **Mockup**: משתמש ב-`/logo.png` (לא `/logo-icon.png` שלא קיים)
 - Social section: `justify-content: center`
 - Pricing + CTA: תמיד `dir="ltr"` (לא מושפעים מהשפה)
+
+#### Footer — מבנה
+- **3 עמודות** (`.lp-footer-cols`): קישורים מהירים | קישורים שימושיים | צור קשר
+  - קישורים מהירים: פיצ'רים, פלטפורמות, מחירים, שאלות ותשובות
+  - קישורים שימושיים: מדריכים (`/guides`), שאלות נפוצות, תנאי שימוש, מדיניות פרטיות, Risk Disclosure (`/risk-disclosure`)
+  - צור קשר: `tradelogisr@gmail.com` (אימייל בלבד — ללא טלפון)
+- **Bottom bar** (`.lp-footer-bottom`): לוגו + copyright + לינקים משפטיים
+- direction: rtl, background: `#0d0d0d`
 
 ### CalendarView
 - Grid: `32px (ראשון מוקטן + מעומעם) + repeat(6,1fr) + 100px (שבוע)`
@@ -213,6 +224,25 @@ RLS: כל טבלה עם `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = u
 - **Skip button**: צף בפינה בכל שלב של Driver.js
 - **IDs שנוספו לקומפוננטות**: `#tour-statsbar` (StatsBar), `#tour-daily-goal` (DailyGoalBar), `#tour-calendar` (CalendarView), `#tour-equity-chart` (Dashboard), `#tour-new-trade` (Header), `#tour-analytics-tabs` (Analytics), `#tour-propfirm` (PropFirm), `#tour-business-kpis` + `#tour-gambling-meter` (BusinessManager), `#tour-strategy-section` + `#tour-broker-section` (Settings)
 - **store**: `onboardingDone: boolean` — ללא `onboardingVariant` (הוסר לאחר A/B testing)
+
+### Risk Disclosure (`/risk-disclosure`)
+- דף משפטי עב/en עם מתג שפה, בסגנון זהה ל-Terms/Privacy
+- 7 סקשנים: אין ייעוץ השקעות | סיכון אובדן הון | ביצועי עבר | אחריות מוגבלת | התאמה אישית | תאימות רגולטורית | דיוק הנתונים
+- **גלילה**: כמו Terms — `overflowY: 'auto'` על ה-div הראשי (body overflow:hidden גלובלי)
+
+### Guides (`/guides`)
+- **מדריכים לשימוש** בעברית — דף standalone (לא בתוך Layout)
+- 6 מדריכים: התחלה מהירה | הוספת עסקה | ייבוא אוטומטי | דשבורד ולוח שנה | אנליטיקס | Prop Firm Tracker
+- כל מדריך: צעדים ממוספרים + tips/warnings + **CSS mockup** (מדמה את ה-UI האמיתי)
+- **TOC צמוד** (desktop): `position: sticky; top: 72px`, מדגיש סקשן נוכחי עם IntersectionObserver (`rootMargin: '-15% 0px -75% 0px'`)
+- **כפתורי הקודם/הבא** בתחתית כל מדריך (`GuideNav` component)
+- **כרטיסי ניווט במובייל**: horizontal scroll chips (`overflow-x: auto; flex-wrap: nowrap`), ללא scrollbar, כל chip 130px (אימוג׳ + כותרת בלבד)
+- **גלילה**: `height: 100vh; overflow-y: auto` על `.guides-page` (פותר חסימת body overflow:hidden)
+- **חזור**: לינק `href="/"` (לא `navigate(-1)` שלא עובד בכניסה ישירה)
+- CSS: `src/pages/guides.css` — מבודד, ללא קונפליקט עם styles של האפליקציה
+
+#### ⚠️ דפים standalone (לא בתוך Layout) — חובה לגלילה
+כל דף שאינו בתוך `.app-shell` (כמו Guides, Terms, Privacy, RiskDisclosure) חייב `overflowY: 'auto'` (או `height: 100vh; overflow-y: auto` ב-CSS) כי `html, body { overflow: hidden }` בשורה 77 ב-index.css חוסם גלילה.
 
 ### Analytics (8 גרפים Canvas — ללא ספריות)
 Tabs: Equity Curve | Drawdown | P&L by Day | P&L by Symbol | Monthly Heatmap | Distribution | Risk/Reward Scatter | Streak Analysis
@@ -399,6 +429,15 @@ VITE_SUPABASE_ANON_KEY=...
 - **Flow בSettings**: בחר Live/Demo → הכנס email+password → Connect (קורא `tradovate-auth`) → Sync Now (קורא `tradovate-sync`)
 - **Demo/Eval accounts**: toggle "Demo / תיק מבחן" שולח לדמו URL — שומר `broker_env='demo'` ב-DB
 - **Deployed**: פרוס ב-Supabase project `mxzyfmuktsyazkfxglzb`
+
+---
+
+## שיפורים שנעשו (אפריל 2026 — גל 2)
+
+### דפים משפטיים ומדריכים
+- **Risk Disclosure** (`/risk-disclosure`): דף גילוי סיכונים מלא עב/en עם 7 סקשנים חוקיים
+- **Guides** (`/guides`): דף מדריכים עם 6 נושאים, TOC צמוד, ניווט הקודם/הבא, מובייל swipeable
+- **Footer Landing**: שדרוג ל-3 עמודות + bottom bar; אימייל: `tradelogisr@gmail.com` בלבד
 
 ---
 
