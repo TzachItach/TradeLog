@@ -11,8 +11,9 @@ export async function loadUserData(userId: string): Promise<{
   accounts: Account[]; strategies: Strategy[]; trades: Trade[];
   expenses: PropExpense[]; payouts: PropPayout[];
   dailyGoalTarget: number; dailyMaxLoss: number;
+  subscriptionStatus: 'active' | 'expired' | null;
 }> {
-  if (DEMO_MODE || !supabase) return { accounts: [], strategies: [], trades: [], expenses: [], payouts: [], dailyGoalTarget: 0, dailyMaxLoss: 0 };
+  if (DEMO_MODE || !supabase) return { accounts: [], strategies: [], trades: [], expenses: [], payouts: [], dailyGoalTarget: 0, dailyMaxLoss: 0, subscriptionStatus: null };
 
   // צור profile אם לא קיים (fallback על המקרה שה-trigger לא רץ)
   const { error: pe } = await supabase
@@ -21,7 +22,7 @@ export async function loadUserData(userId: string): Promise<{
   if (pe) logErr('profiles.upsert', pe);
 
   const [profileRes, accRes, stratRes, tradeRes, expRes, payRes] = await Promise.all([
-    supabase.from('profiles').select('daily_goal_target, daily_max_loss').eq('id', userId).single(),
+    supabase.from('profiles').select('daily_goal_target, daily_max_loss, subscription_status').eq('id', userId).single(),
     supabase.from('accounts').select('*').eq('user_id', userId).order('created_at'),
     supabase.from('strategies').select('*, strategy_fields(*)').eq('user_id', userId).order('created_at'),
     supabase.from('trades').select('*, trade_media(*)').eq('user_id', userId).order('trade_date', { ascending: false }),
@@ -40,8 +41,9 @@ export async function loadUserData(userId: string): Promise<{
   // .catch() keeps the localStorage cache instead of treating it as a new user.
   if (accRes.error) throw new Error(`accounts fetch failed: ${accRes.error.message}`);
 
-  const dailyGoalTarget = profileRes.data?.daily_goal_target ?? 0;
-  const dailyMaxLoss = profileRes.data?.daily_max_loss ?? 0;
+  const dailyGoalTarget    = profileRes.data?.daily_goal_target ?? 0;
+  const dailyMaxLoss       = profileRes.data?.daily_max_loss ?? 0;
+  const subscriptionStatus = (profileRes.data?.subscription_status ?? null) as 'active' | 'expired' | null;
 
   const accounts: Account[] = (accRes.data ?? []).map((r) => ({
     id: r.id, user_id: r.user_id, name: r.name,
@@ -103,7 +105,7 @@ export async function loadUserData(userId: string): Promise<{
   }));
 
   console.log(`[DB] Loaded: ${accounts.length} accounts, ${strategies.length} strategies, ${trades.length} trades, ${expenses.length} expenses, ${payouts.length} payouts`);
-  return { accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss };
+  return { accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, subscriptionStatus };
 }
 
 // ─── PROP EXPENSES ───────────────────────────────────────────────────────────

@@ -117,8 +117,44 @@ function AppEffects() {
   return null;
 }
 
+const WHOP_CHECKOUT = 'https://whop.com/checkout/plan_prXodSeim1jYH/';
+
+function PaywallScreen({ email }: { email?: string }) {
+  const url = email ? `${WHOP_CHECKOUT}?email=${encodeURIComponent(email)}` : WHOP_CHECKOUT;
+  return (
+    <div style={{
+      minHeight: '100vh', background: '#121212',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flexDirection: 'column', gap: 24, padding: '0 24px', textAlign: 'center',
+    }}>
+      <img src="/logo.png" alt="TradeLog" style={{ width: 160, objectFit: 'contain' }} />
+      <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
+        תקופת הניסיון הסתיימה
+      </h2>
+      <p style={{ color: '#b3b3b3', maxWidth: 360, margin: 0, lineHeight: 1.6 }}>
+        כדי להמשיך לגשת ל-TradeLog, יש לעבור למנוי חודשי. כל הנתונים שלך שמורים ומחכים לך.
+      </p>
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          background: '#1DB954', color: '#000', fontWeight: 700,
+          padding: '14px 36px', borderRadius: 999, textDecoration: 'none',
+          fontSize: '1rem',
+        }}
+      >
+        ₪69/חודש — התחל עכשיו
+      </a>
+      <p style={{ color: '#737373', fontSize: '0.78rem', margin: 0 }}>
+        אחרי התשלום, רענן את הדף
+      </p>
+    </div>
+  );
+}
+
 function ProtectedRoute({ children, ready, hasUser }: { children: React.ReactNode; ready: boolean; hasUser: boolean }) {
-  const { user, onboardingDone, setOnboardingDone } = useStore();
+  const { user, subscriptionStatus, onboardingDone, setOnboardingDone } = useStore();
   const isLoggedIn = hasUser || !!user;
 
   // עדיין בודק session — הצג splash קצר
@@ -126,6 +162,11 @@ function ProtectedRoute({ children, ready, hasUser }: { children: React.ReactNod
 
   // אין משתמש — עבור להתחברות
   if (!DEMO_MODE && !isLoggedIn) return <Navigate to="/auth" replace />;
+
+  // מנוי פג — הצג paywall
+  if (!DEMO_MODE && subscriptionStatus === 'expired') {
+    return <PaywallScreen email={user?.email} />;
+  }
 
   // יש משתמש — פתח מיד (נתונים יטענו ברקע)
   return (

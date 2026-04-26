@@ -55,6 +55,7 @@ interface AppState {
   dataLoading: boolean;
   dailyGoalTarget: number;
   dailyMaxLoss: number;
+  subscriptionStatus: 'active' | 'expired' | null;
   onboardingDone: boolean;
   setOnboardingDone: (v?: boolean) => void;
 
@@ -131,6 +132,7 @@ export const useStore = create<AppState>()(
       dataLoading: false,
       dailyGoalTarget: 0,
       dailyMaxLoss: 0,
+      subscriptionStatus: null,
       onboardingDone: false,
       setOnboardingDone: (v = true) => set({ onboardingDone: v }),
 
@@ -260,7 +262,7 @@ export const useStore = create<AppState>()(
         }, 8000);
 
         try {
-          const { accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss } = await loadUserData(userId);
+          const { accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, subscriptionStatus } = await loadUserData(userId);
           clearTimeout(timeout);
           const isNewUser = accounts.length === 0 && strategies.length === 0;
 
@@ -268,9 +270,9 @@ export const useStore = create<AppState>()(
             const defAccount = createDefaultAccount();
             const defStrategies = createDefaultStrategies();
             await dbSeedNewUser(userId, defAccount, defStrategies);
-            set({ accounts: [defAccount], strategies: defStrategies, trades: [], expenses: [], payouts: [], lastUserId: userId, selectedAccount: 'all' });
+            set({ accounts: [defAccount], strategies: defStrategies, trades: [], expenses: [], payouts: [], lastUserId: userId, selectedAccount: 'all', subscriptionStatus });
           } else {
-            set({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, lastUserId: userId, selectedAccount: 'all' });
+            set({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, lastUserId: userId, selectedAccount: 'all', subscriptionStatus });
           }
         } catch (err) {
           clearTimeout(timeout);
@@ -286,9 +288,7 @@ export const useStore = create<AppState>()(
       // טעינת נתונים ברקע — לא חוסם את הממשק
       loadDataInBackground: (userId, name, email) => {
         set({ user: { id: userId, name, email }, isDemo: false });
-        loadUserData(userId).then(({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss }) => {
-          // Guard: never treat empty Supabase response as "new user" if we've seen this
-          // userId before — empty data likely means an RLS / session issue, not a new user.
+        loadUserData(userId).then(({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, subscriptionStatus }) => {
           const isKnownUser = get().lastUserId === userId;
           const isNewUser = !isKnownUser && accounts.length === 0 && strategies.length === 0;
 
@@ -296,18 +296,15 @@ export const useStore = create<AppState>()(
             const defAccount = createDefaultAccount();
             const defStrategies = createDefaultStrategies();
             dbSeedNewUser(userId, defAccount, defStrategies);
-            set({ accounts: [defAccount], strategies: defStrategies, trades: [], expenses: [], payouts: [], lastUserId: userId });
+            set({ accounts: [defAccount], strategies: defStrategies, trades: [], expenses: [], payouts: [], lastUserId: userId, subscriptionStatus });
           } else if (accounts.length > 0) {
-            // Only overwrite state when Supabase actually returned data.
-            // Reset selectedAccount to 'all' so stale account filters never hide trades.
-            set({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, lastUserId: userId, selectedAccount: 'all' });
+            set({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, lastUserId: userId, selectedAccount: 'all', subscriptionStatus });
           } else {
-            // Known user but got 0 accounts — keep localStorage cache
             console.warn('[Store] Known user returned 0 accounts — keeping cache');
+            set({ subscriptionStatus });
           }
         }).catch((err) => {
           console.warn('[Store] Background load failed, using cache:', err);
-          // נשאר עם הנתונים מה-localStorage
         });
       },
 
@@ -316,9 +313,11 @@ export const useStore = create<AppState>()(
         if (!userId) return;
         set({ dataLoading: true });
         try {
-          const { accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss } = await loadUserData(userId);
+          const { accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, subscriptionStatus } = await loadUserData(userId);
           if (accounts.length > 0) {
-            set({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, selectedAccount: 'all' });
+            set({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, selectedAccount: 'all', subscriptionStatus });
+          } else {
+            set({ subscriptionStatus });
           }
         } catch (err) {
           console.error('[Store] reloadFromCloud failed:', err);
