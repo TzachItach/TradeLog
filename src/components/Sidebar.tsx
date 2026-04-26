@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store';
 import { useT } from '../i18n';
@@ -50,6 +51,10 @@ export default function Sidebar() {
     navigate(path);
     if (window.innerWidth < 768) setSidebarCollapsed(true);
   };
+
+  useEffect(() => {
+    if (window.innerWidth < 768) setSidebarCollapsed(true);
+  }, []);
 
   const isOpen = !sidebarCollapsed;
 
