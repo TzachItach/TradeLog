@@ -402,6 +402,24 @@ VITE_SUPABASE_ANON_KEY=...
 
 ---
 
+## שיפורים שנעשו (אפריל 2026)
+
+### Expense Prompt בהוספת חשבון Prop Firm (`Settings.tsx`)
+- כשיוצרים חשבון חדש מסוג `prop_firm` → popup שואל "הוסף לניהול עסקי?"
+- שדות: עלות ($) + סוג (challenge/reset/activation/data_fee/other)
+- אישור → יוצר `PropExpense` עם `account_id` + מוסיף ל-Business Manager
+- דלג / לחיצה מחוץ → סוגר בלי לשמור
+
+### Landing Page — Business Manager section
+- סקשן חדש בין Advanced לPricing עם mockup: KPI cards + GamblingMeter + expense log
+- דו-לשוני, badge כתום "חדש / New"
+
+### Landing Page — שיפורים נוספים
+- Nav: נוספו קישורים להמלצות (`#testimonials`) ושאלות (`#faq`)
+- תנאי שימוש: כתובת "יהודה הלוי 21" (ללא עיר)
+
+---
+
 ## מה עוד דיברנו לבנות (לא הושלם)
 - **מנויים בתשלום**: $19/mo + $159/yr + $349 lifetime
   - **פלטפורמת תשלום**: Lemon Squeezy — פועל כ-Merchant of Record, מטפל במע"מ וחשבוניות
