@@ -13,6 +13,7 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Accessibility from './pages/Accessibility';
 import RiskDisclosure from './pages/RiskDisclosure';
+import Guides from './pages/Guides';
 import PropFirm from './pages/PropFirm';
 import BusinessManager from './pages/BusinessManager';
 import Landing from './pages/Landing';
@@ -152,6 +153,7 @@ export default function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/accessibility" element={<Accessibility />} />
         <Route path="/risk-disclosure" element={<RiskDisclosure />} />
+        <Route path="/guides" element={<Guides />} />
         <Route path="/dashboard/*" element={
           <ProtectedRoute ready={ready} hasUser={hasUser}>
             <Layout />
