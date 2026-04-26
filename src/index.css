@@ -899,6 +899,7 @@ body:not(.dark) .daily-goal-bar { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
   height: 48px;
   width: 48px;
   aspect-ratio: 1;
+  border-radius: 14px;
 }
 /* Blend-mode erases the solid background: screen=erase black, multiply=erase white */
 body.dark .app-logo        { mix-blend-mode: screen; }
