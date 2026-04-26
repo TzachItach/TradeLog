@@ -30,11 +30,11 @@ export default function Terms() {
             </div>
             <div className="legal-section">
               <h2>2. קבלת התנאים</h2>
-              <p>בשימוש בשירות TradeLog ("השירות"), הנך מסכים לתנאי שימוש אלה. אם אינך מסכים לתנאים, אנא הפסק את השימוש בשירות.</p>
+              <p>בשימוש בשירות TraderYo ("השירות"), הנך מסכים לתנאי שימוש אלה. אם אינך מסכים לתנאים, אנא הפסק את השימוש בשירות.</p>
             </div>
             <div className="legal-section">
               <h2>3. תיאור השירות</h2>
-              <p>TradeLog הינו יומן מסחר דיגיטלי המיועד לתיעוד ואנליזה של עסקאות מסחר בשוק ההון. השירות מיועד למטרות תיעוד בלבד ואינו מהווה כלי לניהול השקעות.</p>
+              <p>TraderYo הינו יומן מסחר דיגיטלי המיועד לתיעוד ואנליזה של עסקאות מסחר בשוק ההון. השירות מיועד למטרות תיעוד בלבד ואינו מהווה כלי לניהול השקעות.</p>
             </div>
             <div className="legal-section">
               <h2>4. שימוש מותר ואסור</h2>
@@ -81,11 +81,11 @@ export default function Terms() {
             </div>
             <div className="legal-section">
               <h2>2. Acceptance of Terms</h2>
-              <p>By using the TradeLog service ("Service"), you agree to these Terms of Use. If you do not agree, please discontinue use of the Service.</p>
+              <p>By using the TraderYo service ("Service"), you agree to these Terms of Use. If you do not agree, please discontinue use of the Service.</p>
             </div>
             <div className="legal-section">
               <h2>3. Description of Service</h2>
-              <p>TradeLog is a digital trading journal designed for recording and analyzing trading activity in financial markets. The Service is intended for documentation purposes only and does not constitute an investment management tool.</p>
+              <p>TraderYo is a digital trading journal designed for recording and analyzing trading activity in financial markets. The Service is intended for documentation purposes only and does not constitute an investment management tool.</p>
             </div>
             <div className="legal-section">
               <h2>4. Permitted and Prohibited Use</h2>

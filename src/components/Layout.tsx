@@ -27,7 +27,7 @@ function AppFooter({ lang }: { lang: 'he' | 'en' }) {
       <Link to="/accessibility" style={{ color: 'var(--t3)', textDecoration: 'none' }}>
         {lang === 'he' ? 'הצהרת נגישות' : 'Accessibility'}
       </Link>
-      <span>© {new Date().getFullYear()} TradeLog</span>
+      <span>© {new Date().getFullYear()} TraderYo</span>
     </footer>
   );
 }

@@ -25,7 +25,7 @@ export default function Accessibility() {
 
             <div className="legal-section">
               <h2>1. מחויבות לנגישות</h2>
-              <p>TradeLog מחויב להנגשת השירות לכלל המשתמשים, לרבות אנשים עם מוגבלויות, בהתאם לחוק שוויון זכויות לאנשים עם מוגבלות, תשנ"ח-1998, ותקנות הנגישות.</p>
+              <p>TraderYo מחויב להנגשת השירות לכלל המשתמשים, לרבות אנשים עם מוגבלויות, בהתאם לחוק שוויון זכויות לאנשים עם מוגבלות, תשנ"ח-1998, ותקנות הנגישות.</p>
             </div>
 
             <div className="legal-section">
@@ -70,7 +70,7 @@ export default function Accessibility() {
 
             <div className="legal-section">
               <h2>1. Our Commitment</h2>
-              <p>TradeLog is committed to making its Service accessible to all users, including people with disabilities, in accordance with the Israeli Equal Rights for Persons with Disabilities Law, 5758-1998, and the Accessibility Regulations.</p>
+              <p>TraderYo is committed to making its Service accessible to all users, including people with disabilities, in accordance with the Israeli Equal Rights for Persons with Disabilities Law, 5758-1998, and the Accessibility Regulations.</p>
             </div>
 
             <div className="legal-section">

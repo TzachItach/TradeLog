@@ -29,7 +29,7 @@ export default function RiskDisclosure() {
 
             <div className="legal-section">
               <h2>1. אין ייעוץ השקעות</h2>
-              <p>TradeLog הינו כלי תיעוד ואנליזה בלבד. <strong>אין בתוכן המוצג, בנתונים, בגרפים, בסטטיסטיקות, בחישובים, או בכל חלק אחר של השירות משום ייעוץ השקעות, ייעוץ מס, ייעוץ פיננסי, או המלצה לרכישה, מכירה, או החזקה של כל נכס פיננסי שהוא.</strong></p>
+              <p>TraderYo הינו כלי תיעוד ואנליזה בלבד. <strong>אין בתוכן המוצג, בנתונים, בגרפים, בסטטיסטיקות, בחישובים, או בכל חלק אחר של השירות משום ייעוץ השקעות, ייעוץ מס, ייעוץ פיננסי, או המלצה לרכישה, מכירה, או החזקה של כל נכס פיננסי שהוא.</strong></p>
               <p>המידע המוצג נועד לצרכי ניהול יומן מסחר אישי בלבד, ואין לפרשו כהמלצה לפעולה כלשהי. כל החלטת מסחר היא באחריות הבלעדית של המשתמש.</p>
             </div>
 
@@ -51,7 +51,7 @@ export default function RiskDisclosure() {
 
             <div className="legal-section">
               <h2>4. אחריות מוגבלת</h2>
-              <p>TradeLog ובעליו אינם אחראים לכל הפסד כספי, ישיר, עקיף, מקרי, או תוצאתי, הנובע מ:</p>
+              <p>TraderYo ובעליו אינם אחראים לכל הפסד כספי, ישיר, עקיף, מקרי, או תוצאתי, הנובע מ:</p>
               <ul>
                 <li>שימוש בשירות או בנתונים המוצגים בו</li>
                 <li>הסתמכות על מידע, סטטיסטיקות, או חישובים בשירות</li>
@@ -67,16 +67,16 @@ export default function RiskDisclosure() {
 
             <div className="legal-section">
               <h2>6. תאימות רגולטורית</h2>
-              <p>TradeLog אינו גוף מפוקח על ידי הרשות לניירות ערך בישראל (רשות ני"ע), ה-CFTC, ה-SEC, ה-NFA, או כל רגולטור פיננסי אחר. השירות אינו מורשה לספק ייעוץ השקעות, לנהל תיקי השקעות, או לבצע כל פעולה המחייבת רישיון פיננסי.</p>
+              <p>TraderYo אינו גוף מפוקח על ידי הרשות לניירות ערך בישראל (רשות ני"ע), ה-CFTC, ה-SEC, ה-NFA, או כל רגולטור פיננסי אחר. השירות אינו מורשה לספק ייעוץ השקעות, לנהל תיקי השקעות, או לבצע כל פעולה המחייבת רישיון פיננסי.</p>
             </div>
 
             <div className="legal-section">
               <h2>7. דיוק הנתונים</h2>
-              <p>TradeLog מסתמך על נתונים המוזנים על ידי המשתמש, ייבוא ממערכות ברוקרים חיצוניים, ו-API של צד שלישי. אנו שואפים לדיוק מרבי, אך איננו מתחייבים על נכונות, שלמות, או עדכניות הנתונים. <strong>יש לאמת תמיד את נתוני המסחר מול דוחות הברוקר הרשמיים.</strong></p>
+              <p>TraderYo מסתמך על נתונים המוזנים על ידי המשתמש, ייבוא ממערכות ברוקרים חיצוניים, ו-API של צד שלישי. אנו שואפים לדיוק מרבי, אך איננו מתחייבים על נכונות, שלמות, או עדכניות הנתונים. <strong>יש לאמת תמיד את נתוני המסחר מול דוחות הברוקר הרשמיים.</strong></p>
             </div>
 
             <div className="disclaimer">
-              ⚠ בשימוש בשירות, המשתמש מאשר כי קרא, הבין, וקיבל את גילוי הסיכונים המלא לעיל. TradeLog אינו ייעוץ השקעות. מסחר בניירות ערך כרוך בסיכון גבוה. יש להתייעץ עם יועץ מוסמך.
+              ⚠ בשימוש בשירות, המשתמש מאשר כי קרא, הבין, וקיבל את גילוי הסיכונים המלא לעיל. TraderYo אינו ייעוץ השקעות. מסחר בניירות ערך כרוך בסיכון גבוה. יש להתייעץ עם יועץ מוסמך.
             </div>
           </>
         ) : (
@@ -90,7 +90,7 @@ export default function RiskDisclosure() {
 
             <div className="legal-section">
               <h2>1. Not Investment Advice</h2>
-              <p>TradeLog is a trade journaling and analytics tool only. <strong>Nothing in this Service — including any content, data, charts, statistics, calculations, or other features — constitutes investment advice, tax advice, financial advice, or a recommendation to buy, sell, or hold any financial instrument.</strong></p>
+              <p>TraderYo is a trade journaling and analytics tool only. <strong>Nothing in this Service — including any content, data, charts, statistics, calculations, or other features — constitutes investment advice, tax advice, financial advice, or a recommendation to buy, sell, or hold any financial instrument.</strong></p>
               <p>All information is provided solely for personal trade journaling purposes and should not be interpreted as a recommendation for any action. All trading decisions are the sole responsibility of the user.</p>
             </div>
 
@@ -112,7 +112,7 @@ export default function RiskDisclosure() {
 
             <div className="legal-section">
               <h2>4. Limitation of Liability</h2>
-              <p>TradeLog and its owners are not liable for any financial loss — direct, indirect, incidental, or consequential — arising from:</p>
+              <p>TraderYo and its owners are not liable for any financial loss — direct, indirect, incidental, or consequential — arising from:</p>
               <ul>
                 <li>Use of the Service or any data displayed therein</li>
                 <li>Reliance on information, statistics, or calculations in the Service</li>
@@ -128,16 +128,16 @@ export default function RiskDisclosure() {
 
             <div className="legal-section">
               <h2>6. Regulatory Compliance</h2>
-              <p>TradeLog is not regulated by the Israel Securities Authority (ISA), the CFTC, the SEC, the NFA, or any other financial regulator. The Service is not licensed to provide investment advice, manage investment portfolios, or perform any activity requiring a financial license.</p>
+              <p>TraderYo is not regulated by the Israel Securities Authority (ISA), the CFTC, the SEC, the NFA, or any other financial regulator. The Service is not licensed to provide investment advice, manage investment portfolios, or perform any activity requiring a financial license.</p>
             </div>
 
             <div className="legal-section">
               <h2>7. Data Accuracy</h2>
-              <p>TradeLog relies on data entered by the user, imports from third-party broker systems, and external APIs. While we strive for maximum accuracy, we make no warranty as to the correctness, completeness, or timeliness of data. <strong>Always verify trade data against official broker statements.</strong></p>
+              <p>TraderYo relies on data entered by the user, imports from third-party broker systems, and external APIs. While we strive for maximum accuracy, we make no warranty as to the correctness, completeness, or timeliness of data. <strong>Always verify trade data against official broker statements.</strong></p>
             </div>
 
             <div className="disclaimer">
-              ⚠ By using the Service, the user confirms they have read, understood, and accepted this Risk Disclosure in full. TradeLog does not constitute investment advice. Trading securities involves significant risk. Consult a qualified advisor.
+              ⚠ By using the Service, the user confirms they have read, understood, and accepted this Risk Disclosure in full. TraderYo does not constitute investment advice. Trading securities involves significant risk. Consult a qualified advisor.
             </div>
           </>
         )}

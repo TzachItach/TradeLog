@@ -136,7 +136,7 @@ function exportPDF(
   ].map((k) => `<div class="stat"><div class="stat-l">${k.l}</div><div class="stat-v" style="color:${k.c}">${k.v}</div></div>`).join('');
 
   win.document.write(`<!DOCTYPE html><html dir="${dir}"><head>
-    <meta charset="UTF-8"><title>TradeLog Report</title>
+    <meta charset="UTF-8"><title>TraderYo Report</title>
     <style>
       body{font-family:system-ui,sans-serif;background:#fff;color:#111;padding:40px;margin:0}
       h1{font-size:1.8rem;margin-bottom:2px}
@@ -157,7 +157,7 @@ function exportPDF(
       <div style="width:34px;height:34px;background:#1DB954;border-radius:50%;display:flex;align-items:center;justify-content:center">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.8" stroke-linecap="round"><polyline points="3,17 9,11 13,15 21,6"/></svg>
       </div>
-      <h1>TradeLog</h1>
+      <h1>TraderYo</h1>
     </div>
     <div class="sub">${isHe ? 'דוח מסחר' : 'Trading Report'} — ${dateLabel}</div>
 

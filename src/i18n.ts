@@ -2,7 +2,7 @@ import type { Language } from './types';
 
 const translations = {
   he: {
-    appName: 'TradeLog',
+    appName: 'TraderYo',
     calendar: 'לוח שנה',
     trades: 'עסקאות',
     reports: 'דוחות',
@@ -135,7 +135,7 @@ const translations = {
     count: 'כמות',
   },
   en: {
-    appName: 'TradeLog',
+    appName: 'TraderYo',
     calendar: 'Calendar',
     trades: 'Trades',
     reports: 'Reports',

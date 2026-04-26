@@ -364,11 +364,11 @@ export default function ProductTour({ onDone }: { onDone: () => void }) {
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <img
             src="/logo.png"
-            alt="TradeLog"
+            alt="TraderYo"
             style={{ width: 64, height: 64, borderRadius: 12, mixBlendMode: 'screen', marginBottom: 12 }}
           />
           <h2 style={{ fontSize: 24, fontWeight: 800, margin: '0 0 8px', letterSpacing: -.5 }}>
-            {isHe ? '👋 ברוך הבא ל-TradeLog!' : '👋 Welcome to TradeLog!'}
+            {isHe ? '👋 ברוך הבא ל-TraderYo!' : '👋 Welcome to TraderYo!'}
           </h2>
           <p style={{ color: T2, fontSize: 14, margin: 0, lineHeight: 1.6 }}>
             {isHe
@@ -529,8 +529,8 @@ export default function ProductTour({ onDone }: { onDone: () => void }) {
             </h3>
             <p style={{ color: T2, fontSize: 14, margin: 0, lineHeight: 1.6 }}>
               {isHe
-                ? 'TradeLog מוכן לעבוד בשבילך. איך תרצה להתחיל?'
-                : 'TradeLog is ready to work for you. How do you want to start?'}
+                ? 'TraderYo מוכן לעבוד בשבילך. איך תרצה להתחיל?'
+                : 'TraderYo is ready to work for you. How do you want to start?'}
             </p>
           </div>
 

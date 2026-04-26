@@ -356,15 +356,15 @@ export default function Guides() {
       <div className="guides-header">
         <a href="/" className="btn btn-ghost" style={{ textDecoration: 'none' }}>← דף הבית</a>
         <div className="guides-logo">
-          <img src="/logo.png" alt="TradeLog" style={{ height: 36, width: 36, objectFit: 'contain', borderRadius: 8, mixBlendMode: 'screen' }} />
-          <span>TradeLog</span>
+          <img src="/logo.png" alt="TraderYo" style={{ height: 36, width: 36, objectFit: 'contain', borderRadius: 8, mixBlendMode: 'screen' }} />
+          <span>TraderYo</span>
         </div>
         <div style={{ width: 80 }} />
       </div>
 
       {/* Hero */}
       <div className="guides-hero">
-        <h1>מדריכים לשימוש ב-TradeLog</h1>
+        <h1>מדריכים לשימוש ב-TraderYo</h1>
         <p>כל מה שצריך לדעת כדי לנהל יומן מסחר מקצועי — מהגדרה ועד אנליזה מתקדמת</p>
       </div>
 
@@ -424,7 +424,7 @@ export default function Guides() {
               <div className="guide-callout">
                 <h4>📱 גישה ממובייל</h4>
                 <ul>
-                  <li>TradeLog עובד מלא על מובייל — ניווט תחתון, לחצנים גדולים, RTL מלא</li>
+                  <li>TraderYo עובד מלא על מובייל — ניווט תחתון, לחצנים גדולים, RTL מלא</li>
                   <li>ניתן להוסיף לדף הבית של הנייד כ-PWA לחוויית אפליקציה</li>
                 </ul>
               </div>
@@ -455,7 +455,7 @@ export default function Guides() {
                 <div className="guide-step-num">2</div>
                 <div className="guide-step-body">
                   <h3>כיוון: Long או Short</h3>
-                  <p>בחר <strong>LONG</strong> אם פתחת פוזיציית קנייה, <strong>SHORT</strong> אם פתחת פוזיציית מכירה. TradeLog יתאים את חישוב ה-P&L בהתאם.</p>
+                  <p>בחר <strong>LONG</strong> אם פתחת פוזיציית קנייה, <strong>SHORT</strong> אם פתחת פוזיציית מכירה. TraderYo יתאים את חישוב ה-P&L בהתאם.</p>
                 </div>
               </div>
               <div className="guide-step">
@@ -506,8 +506,8 @@ export default function Guides() {
                 <div className="guide-step-num">2</div>
                 <div className="guide-step-body">
                   <h3>TopstepX — API Key</h3>
-                  <p>ב-TopstepX, הכנס לחשבון שלך ← <strong>Account Settings ← Integrations</strong> — שם תמצא את ה-API Key. הדבק אותו בשדה ה-API Key ב-TradeLog ולחץ "חבר".</p>
-                  <div className="guide-tip"><strong>💡 מה קורה:</strong> TradeLog מתחבר ל-ProjectX API, מאמת את הפרטים ומושך את ה-Account ID שלך אוטומטית.</div>
+                  <p>ב-TopstepX, הכנס לחשבון שלך ← <strong>Account Settings ← Integrations</strong> — שם תמצא את ה-API Key. הדבק אותו בשדה ה-API Key ב-TraderYo ולחץ "חבר".</p>
+                  <div className="guide-tip"><strong>💡 מה קורה:</strong> TraderYo מתחבר ל-ProjectX API, מאמת את הפרטים ומושך את ה-Account ID שלך אוטומטית.</div>
                 </div>
               </div>
               <div className="guide-step">
@@ -522,15 +522,15 @@ export default function Guides() {
                 <div className="guide-step-num">4</div>
                 <div className="guide-step-body">
                   <h3>Tradovate — ייבוא CSV</h3>
-                  <p>ב-Tradovate, עבור ל-<strong>Account ← Reports ← Performance</strong> וייצא CSV. גרור את הקובץ לאזור הייבוא ב-TradeLog — המערכת תנתח את הנתונים ותוסיף את העסקאות אוטומטית.</p>
-                  <div className="guide-tip"><strong>💡 טיפ:</strong> TradeLog מנרמל סמלים אוטומטית: MNQM6 → MNQ, ESHU25 → ES וכדומה.</div>
+                  <p>ב-Tradovate, עבור ל-<strong>Account ← Reports ← Performance</strong> וייצא CSV. גרור את הקובץ לאזור הייבוא ב-TraderYo — המערכת תנתח את הנתונים ותוסיף את העסקאות אוטומטית.</p>
+                  <div className="guide-tip"><strong>💡 טיפ:</strong> TraderYo מנרמל סמלים אוטומטית: MNQM6 → MNQ, ESHU25 → ES וכדומה.</div>
                 </div>
               </div>
               <div className="guide-step">
                 <div className="guide-step-num">5</div>
                 <div className="guide-step-body">
                   <h3>מניעת כפילויות</h3>
-                  <p>בכל סנכרון, TradeLog בודק לפי <strong>broker_trade_id</strong> ייחודי — כך שאם תסנכרן שוב, לא ייווצרו עסקאות כפולות.</p>
+                  <p>בכל סנכרון, TraderYo בודק לפי <strong>broker_trade_id</strong> ייחודי — כך שאם תסנכרן שוב, לא ייווצרו עסקאות כפולות.</p>
                 </div>
               </div>
             </div>
@@ -666,7 +666,7 @@ export default function Guides() {
                 <div className="guide-step-body">
                   <h3>Trailing Drawdown — EOD ו-Intraday</h3>
                   <p>בחר בין <strong>EOD</strong> (Trailing עוקב אחרי שיא סוף יום) ו-<strong>Intraday</strong> (עוקב אחרי שיא בזמן אמת). Apex ו-Topstep משתמשים ב-Trailing EOD — בדוק את כלל ה-Prop Firm שלך.</p>
-                  <div className="guide-warn"><strong>⚠ חשוב:</strong> TradeLog מחשב את ה-Trailing Floor בדיוק מלא לפי השיא ההיסטורי מכל עסקה.</div>
+                  <div className="guide-warn"><strong>⚠ חשוב:</strong> TraderYo מחשב את ה-Trailing Floor בדיוק מלא לפי השיא ההיסטורי מכל עסקה.</div>
                 </div>
               </div>
               <div className="guide-step">
@@ -680,7 +680,7 @@ export default function Guides() {
                 <div className="guide-step-num">4</div>
                 <div className="guide-step-body">
                   <h3>Daily Loss Limit</h3>
-                  <p>המד מתאפס בחצות כל יום. אם P&L היום עוקב אחרי <strong>Daily Loss Limit</strong> — TradeLog מציג התראה אדומה. הפסקת מסחר ביום זה היא קריטית.</p>
+                  <p>המד מתאפס בחצות כל יום. אם P&L היום עוקב אחרי <strong>Daily Loss Limit</strong> — TraderYo מציג התראה אדומה. הפסקת מסחר ביום זה היא קריטית.</p>
                   <div className="guide-tip"><strong>💡 טיפ:</strong> הגדר Daily Limit ל-80% מהמותר כ"קו אדום אישי" — זה משאיר מרווח בטחון.</div>
                 </div>
               </div>
