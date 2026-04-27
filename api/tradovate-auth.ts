@@ -88,7 +88,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const username  = body.api_username as string | undefined;
     const password  = body.api_password as string | undefined;
     const env       = body.env === 'demo' ? 'demo' : 'live';
-    const baseUrl   = env === 'demo' ? DEMO_BASE : LIVE_BASE;
+    const primaryUrl   = env === 'demo' ? DEMO_BASE : LIVE_BASE;
+    const fallbackUrl  = env === 'demo' ? LIVE_BASE : DEMO_BASE;
 
     if (!userId || !username || !password) return sendJson(res, { error: 'Missing required parameters' }, 400);
 
@@ -105,17 +106,29 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
     if (authErr || !user || user.id !== userId) return sendJson(res, { error: 'Forbidden' }, 403);
 
-    // Authenticate with Tradovate
+    // Authenticate with Tradovate — try primary env first, then fallback
     let accessToken: string | undefined;
+    let baseUrl = primaryUrl;
+    let resolvedEnv = env;
     try {
-      const result = await authenticate(baseUrl, username, password);
-      accessToken = result.token;
-      if (!accessToken) {
-        return sendJson(res, {
-          error: 'Invalid Tradovate credentials — check username/password and Live/Demo selection',
-          tradovateStatus: result.httpStatus,
-          tradovateResponse: result.rawBody,
-        }, 401);
+      const primary = await authenticate(primaryUrl, username, password);
+      if (primary.token) {
+        accessToken = primary.token;
+      } else {
+        // Try the other environment automatically
+        const fallback = await authenticate(fallbackUrl, username, password);
+        if (fallback.token) {
+          accessToken = fallback.token;
+          baseUrl = fallbackUrl;
+          resolvedEnv = env === 'demo' ? 'live' : 'demo';
+        } else {
+          return sendJson(res, {
+            error: 'Invalid Tradovate credentials — check username/password',
+            hint: 'Tried both Live and Demo endpoints. Verify credentials at trader.tradovate.com',
+            tradovateStatus: primary.httpStatus,
+            tradovateResponse: primary.rawBody,
+          }, 401);
+        }
       }
     } catch (e) {
       const detail = e instanceof Error ? e.message : String(e);
@@ -131,7 +144,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     if (action === 'list') {
       try {
         const accounts = await fetchAccounts(baseUrl, accessToken);
-        return sendJson(res, { accounts });
+        return sendJson(res, { accounts, resolvedEnv });
       } catch {
         return sendJson(res, { error: 'Could not fetch Tradovate account list' }, 502);
       }
@@ -167,7 +180,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         api_username:         username,
         api_key:              password,
         tradovate_account_id: resolvedTdvId,
-        broker_env:           env,
+        broker_env:           resolvedEnv,
         is_active:            true,
       },
       { onConflict: 'user_id,account_id,broker' },

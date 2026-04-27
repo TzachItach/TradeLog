@@ -338,6 +338,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
   const T = useT(lang as 'he' | 'en');
   const [txConn, setTxConn] = useState<{ [k: string]: boolean }>({});
   const [topstepKey, setTopstepKey] = useState('');
+  const [topstepEmail, setTopstepEmail] = useState('');
   const [showTopstepInput, setShowTopstepInput] = useState(false);
   const [tradovateUser, setTradovateUser] = useState('');
   const [tradovatePass, setTradovatePass] = useState('');
@@ -379,11 +380,16 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setTradovateAccounts(data.accounts ?? []);
+        if (data.resolvedEnv && data.resolvedEnv !== tradovateEnv) {
+          setTradovateEnv(data.resolvedEnv);
+        }
         setTradovateStep('mapping');
       } else {
-        const errMsg = data.tradovateStatus
-          ? `${data.error} (HTTP ${data.tradovateStatus})\n\nTradovate said: ${data.tradovateResponse ?? '(no body)'}`
-          : (data.detail ? `${data.error}\n${data.detail}` : (data.error ?? res.status));
+        const errMsg = data.hint
+          ? `${data.error}\n\n${data.hint}`
+          : (data.tradovateStatus
+            ? `${data.error} (HTTP ${data.tradovateStatus})\n\nTradovate said: ${data.tradovateResponse ?? '(no body)'}`
+            : (data.detail ? `${data.error}\n${data.detail}` : (data.error ?? res.status)));
         alert(isHe ? `שגיאה: ${errMsg}` : `Error: ${errMsg}`);
       }
     } catch {
@@ -444,7 +450,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
             user_id: user?.id,
             account_id: accountId,
             api_token: topstepKey,
-            api_username: user?.email ?? '',
+            api_username: topstepEmail.trim(),
           }),
         },
       );
@@ -452,6 +458,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
         setTxConn((c) => ({ ...c, [accountId]: true }));
         setShowTopstepInput(false);
         setTopstepKey('');
+        setTopstepEmail('');
         alert(isHe ? 'TopstepX חובר בהצלחה!' : 'TopstepX connected!');
       } else {
         const data = await res.json().catch(() => ({}));
@@ -539,7 +546,12 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
             /* ── שלב 1: הכנסת פרטים ── */
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ fontSize: '.74rem', color: 'var(--t3)' }}>
-                {isHe ? 'שם משתמש או אימייל + סיסמה של חשבון Tradovate' : 'Tradovate username or email & password'}
+                {isHe ? 'שם משתמש + סיסמה של חשבון Tradovate' : 'Tradovate username & password'}
+              </div>
+              <div style={{ fontSize: '.72rem', padding: '7px 10px', background: 'rgba(245,155,35,.1)', border: '1px solid rgba(245,155,35,.3)', borderRadius: 7, color: 'var(--o)' }}>
+                {isHe
+                  ? '⚡ חשבונות Prop Firm (MFFU, Lucid וכו׳) — בחר "Demo / תיק מבחן". חשבון Live אישי — בחר "Live".'
+                  : '⚡ Prop Firm accounts (MFFU, Lucid, etc.) — select "Demo / Eval". Personal live account — select "Live".'}
               </div>
               <input
                 className="form-input"
@@ -645,8 +657,8 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
         <div style={{ borderTop: '1px solid var(--bd)', paddingTop: 10 }}>
           <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 8 }}>
             {isHe
-              ? 'TopstepX → Settings → API Key → העתק את ה-Token'
-              : 'TopstepX → Settings → API Key → Copy your Token'}
+              ? 'הכנס את האימייל של TopstepX + API Token מ: TopstepX → Settings → API Key'
+              : 'Enter your TopstepX email + API Token from: TopstepX → Settings → API Key'}
           </div>
           {!showTopstepInput ? (
             <button className="btn btn-primary" style={{ fontSize: '.8rem', padding: '6px 14px' }}
@@ -655,6 +667,13 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
             </button>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <input
+                className="form-input"
+                type="email"
+                placeholder={isHe ? 'אימייל TopstepX שלך...' : 'Your TopstepX email...'}
+                value={topstepEmail}
+                onChange={(e) => setTopstepEmail(e.target.value)}
+              />
               <input
                 className="form-input"
                 type="password"
@@ -671,13 +690,13 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
                     <span style={{ fontSize: '.84rem' }}>{acc.name}</span>
                     <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '.76rem' }}
                       onClick={() => connectTopstepX(acc.id)}
-                      disabled={!topstepKey.trim()}>
+                      disabled={!topstepKey.trim() || !topstepEmail.trim()}>
                       {isHe ? 'חבר' : 'Connect'}
                     </button>
                   </div>
                 ))}
               </div>
-              <button className="btn btn-ghost" onClick={() => { setShowTopstepInput(false); setTopstepKey(''); }}>
+              <button className="btn btn-ghost" onClick={() => { setShowTopstepInput(false); setTopstepKey(''); setTopstepEmail(''); }}>
                 {T.cancel}
               </button>
             </div>
