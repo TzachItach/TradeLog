@@ -92,24 +92,45 @@ export default function Header() {
         <AppLogo size="md" onClick={() => navigate('/dashboard')} />
       </div>
 
-      {/* Account tabs */}
-      <div className="account-tabs">
-        <div
-          className={"account-tab" + (selectedAccount === 'all' ? ' active' : '')}
-          onClick={() => setSelectedAccount('all')}
-        >
-          {T.allAccounts}
-        </div>
-        {accounts.filter((a) => a.is_active).map((acc) => (
-          <div
-            key={acc.id}
-            className={"account-tab" + (selectedAccount === acc.id ? ' active' : '')}
-            onClick={() => setSelectedAccount(acc.id)}
-          >
-            {acc.name}
+      {/* Account tabs / dropdown */}
+      {(() => {
+        const activeAccounts = accounts.filter((a) => a.is_active);
+        if (activeAccounts.length > 3) {
+          return (
+            <div className="account-tabs">
+              <select
+                className="account-select"
+                value={selectedAccount}
+                onChange={(e) => setSelectedAccount(e.target.value)}
+              >
+                <option value="all">{T.allAccounts}</option>
+                {activeAccounts.map((acc) => (
+                  <option key={acc.id} value={acc.id}>{acc.name}</option>
+                ))}
+              </select>
+            </div>
+          );
+        }
+        return (
+          <div className="account-tabs">
+            <div
+              className={"account-tab" + (selectedAccount === 'all' ? ' active' : '')}
+              onClick={() => setSelectedAccount('all')}
+            >
+              {T.allAccounts}
+            </div>
+            {activeAccounts.map((acc) => (
+              <div
+                key={acc.id}
+                className={"account-tab" + (selectedAccount === acc.id ? ' active' : '')}
+                onClick={() => setSelectedAccount(acc.id)}
+              >
+                {acc.name}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        );
+      })()}
 
       <div className="header-right">
         <ThemeToggle darkMode={darkMode} onClick={() => setDarkMode(!darkMode)} />
