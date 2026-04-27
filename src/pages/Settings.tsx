@@ -379,7 +379,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
         const errMsg = data.detail
           ? `${data.error}\n${data.detail}`
           : data.tradovateStatus
-            ? `${data.error} (HTTP ${data.tradovateStatus})`
+            ? `${data.error} (HTTP ${data.tradovateStatus})\n\nTradovate said: ${data.tradovateResponse ?? '(no body)'}`
             : (data.error ?? res.status);
         alert(isHe
           ? `שגיאה בחיבור Tradovate: ${errMsg}`

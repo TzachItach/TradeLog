@@ -53,7 +53,7 @@ async function authenticate(baseUrl: string, username: string, password: string)
       throw new Error(`Tradovate returned HTTP ${res.status} with non-JSON response: ${text.slice(0, 200)}`);
     }
     const data = JSON.parse(text) as { accessToken?: string };
-    return { token: data.accessToken, httpStatus: res.status };
+    return { token: data.accessToken, httpStatus: res.status, rawBody: text };
   } finally {
     clearTimeout(timeout);
   }
@@ -117,6 +117,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         return sendJson(res, {
           error: 'Invalid Tradovate credentials — check email/password and Live/Demo selection',
           tradovateStatus: result.httpStatus,
+          tradovateResponse: result.rawBody,
         }, 401);
       }
     } catch (e) {
