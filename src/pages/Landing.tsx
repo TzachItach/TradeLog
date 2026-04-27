@@ -18,7 +18,7 @@ const equityFill   = equityPoints + ' 400,130 0,130';
 const T = {
   he: {
     nav: { features: 'פיצ׳רים', pricing: 'מחירים', tools: 'כלים', testimonials: 'המלצות', faq: 'שאלות', signin: 'התחבר', start: 'התחל בחינם' },
-    badge: '14 ימי ניסיון · ללא כרטיס אשראי',
+    badge: '14 ימי ניסיון חינם',
     h1a: 'לסחור כמו מקצוען,',
     h1b: 'לתעד כמו מכונה.',
     heroSub: 'יומן המסחר האוטומטי המתקדם ביותר לסוחרים בחוזים עתידיים. לעקוב אחרי כל עסקה, לשלוט בפסיכולוגיה, ולחדד את האדג׳ שלך.',
@@ -54,7 +54,7 @@ const T = {
     biz4: 'מד עסקי: תדע מיד אם אתה ברווח או בהפסד',
     bizBtn: 'נסה את הניהול העסקי',
     pricingTitle: 'תמחור פשוט ושקוף',
-    pricingSub: '14 ימי ניסיון חינם לכל משתמש חדש. ללא כרטיס אשראי.',
+    pricingSub: '14 ימי ניסיון חינם לכל משתמש חדש.',
     planMonthly: 'חודשי',
     planMonthlySub: 'חיוב חודשי · ביטול בכל עת',
     feat1: 'חשבונות מסחר ללא הגבלה',
@@ -67,7 +67,7 @@ const T = {
     feat8: 'ייצוא PDF ו-CSV',
     planBtn: 'התחל ניסיון חינם',
     ctaTitle: 'מוכן לשפר את המסחר שלך?',
-    ctaSub: 'ללא כרטיס אשראי. 14 ימים חינם לגמרי. ביטול בכל עת.',
+    ctaSub: '14 ימים חינם לגמרי. ביטול בכל עת.',
     testimonialsTitle: 'מה הסוחרים אומרים',
     testimonials: [
       { name: 'אלון מ.', role: 'Topstep Funded Trader', text: 'TraderYo שינה לי לגמרי את האופן שבו אני מנהל את החשבונות שלי. ה-Drawdown Tracker מציל אותי כל יום.' },
@@ -107,7 +107,7 @@ const T = {
   },
   en: {
     nav: { features: 'Features', pricing: 'Pricing', tools: 'Tools', testimonials: 'Reviews', faq: 'FAQ', signin: 'Sign in', start: 'Start free' },
-    badge: '14-day free trial · No credit card required',
+    badge: '14-day free trial',
     h1a: 'Trade like a pro,',
     h1b: 'analyze like a machine',
     heroSub: 'The most advanced trading journal for futures traders. Track every trade, master your psychology, and sharpen your edge.',
@@ -143,7 +143,7 @@ const T = {
     biz4: 'Business meter: instantly know if you\'re in the green or red',
     bizBtn: 'Try Business Manager',
     pricingTitle: 'Simple, transparent pricing',
-    pricingSub: '14-day free trial for all new users. No credit card required.',
+    pricingSub: '14-day free trial for all new users.',
     planMonthly: 'Monthly',
     planMonthlySub: 'Billed monthly · cancel anytime',
     feat1: 'Unlimited trading accounts',
@@ -156,7 +156,7 @@ const T = {
     feat8: 'PDF & CSV export',
     planBtn: 'Start free trial',
     ctaTitle: 'Ready to level up your trading?',
-    ctaSub: 'No credit card. 14 days completely free. Cancel anytime.',
+    ctaSub: '14 days completely free. Cancel anytime.',
     testimonialsTitle: 'What traders are saying',
     testimonials: [
       { name: 'Alon M.', role: 'Topstep Funded Trader', text: 'TraderYo completely changed how I manage my accounts. The Drawdown Tracker saves me every single day.' },
@@ -540,7 +540,7 @@ export default function Landing() {
             <div className="lp-pricing-grid" dir="ltr">
               <div className="lp-plan">
                 <div className="lp-plan-name">{t.planMonthly}</div>
-                <div className="lp-plan-price">₪69<span>{isHe ? '/חודש' : '/mo'}</span></div>
+                <div className="lp-plan-price">$24.99<span>/mo</span></div>
                 <div className="lp-plan-sub">{t.planMonthlySub}</div>
                 <ul className="lp-plan-features">
                   <li>{t.feat1}</li><li>{t.feat2}</li><li>{t.feat3}</li><li>{t.feat4}</li>

@@ -117,7 +117,7 @@ export const useStore = create<AppState>()(
       strategies: [],
       expenses: [],
       payouts: [],
-      lang: 'he',
+      lang: 'en',
       selectedAccount: 'all',
       currentYear: now.getFullYear(),
       currentMonth: now.getMonth(),
