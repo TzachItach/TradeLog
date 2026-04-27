@@ -155,6 +155,68 @@ function PaywallScreen({ email }: { email?: string }) {
   );
 }
 
+/* רץ פעם אחת בכניסה — מסנכרן ברוקרים ברקע, בשקט */
+function BackgroundSync() {
+  const { user, reloadFromCloud } = useStore();
+  const syncedFor = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!user || user.id === 'demo' || !supabase || syncedFor.current === user.id) return;
+    syncedFor.current = user.id;
+
+    const run = async () => {
+      const { data: { session } } = await supabase!.auth.getSession();
+      const jwt = session?.access_token;
+      if (!jwt) return;
+
+      const { data: connections } = await supabase!
+        .from('broker_connections')
+        .select('broker')
+        .eq('user_id', user.id)
+        .eq('is_active', true);
+
+      if (!connections?.length) return;
+
+      const brokers = new Set(connections.map((c: { broker: string }) => c.broker));
+      const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL as string;
+      const anonKey    = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY as string;
+
+      const syncs: Promise<void>[] = [];
+
+      if (brokers.has('tradovate')) {
+        syncs.push(
+          fetch('/api/tradovate-sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+            body: JSON.stringify({ user_id: user.id }),
+          }).then(() => {}).catch(() => {})
+        );
+      }
+
+      if (brokers.has('topstepx')) {
+        syncs.push(
+          fetch(`${supabaseUrl}/functions/v1/topstepx-sync`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
+            body: JSON.stringify({ user_id: user.id }),
+          }).then(() => {}).catch(() => {})
+        );
+      }
+
+      if (syncs.length) {
+        await Promise.all(syncs);
+        reloadFromCloud();
+      }
+    };
+
+    // מחכה שהטעינה הראשונית תסתיים לפני הסנכרון
+    const timer = setTimeout(run, 3000);
+    return () => clearTimeout(timer);
+  }, [user?.id]);
+
+  return null;
+}
+
 function ProtectedRoute({ children, ready, hasUser }: { children: React.ReactNode; ready: boolean; hasUser: boolean }) {
   const { user, subscriptionStatus, onboardingDone, setOnboardingDone } = useStore();
   const isLoggedIn = hasUser || !!user;
@@ -189,6 +251,7 @@ export default function App() {
     <BrowserRouter>
       <AppEffects />
       <AuthListener onReady={(u) => { setReady(true); setHasUser(u); }} />
+      <BackgroundSync />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<Auth />} />
