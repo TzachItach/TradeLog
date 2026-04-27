@@ -45,8 +45,6 @@ async function authenticate(baseUrl: string, username: string, password: string)
         deviceId: DEVICE_ID,
         cid: CID,
         sec: SEC,
-        enc: true,
-        chl: String(Math.floor(Math.random() * 1e12)),
       }),
     });
     const text = await res.text();

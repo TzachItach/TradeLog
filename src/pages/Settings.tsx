@@ -373,7 +373,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
   > => {
     const LIVE = 'https://live.tradovateapi.com/v1';
     const DEMO = 'https://demo.tradovateapi.com/v1';
-    const authBody = JSON.stringify({ name: username, password, appId: 'tradovate_trader(web)', appVersion: '1.0', deviceId: 'tradelog-client-v1', cid: 1, sec: '', enc: true, chl: String(Math.floor(Math.random() * 1e12)) });
+    const authBody = JSON.stringify({ name: username, password, appId: 'tradovate_trader(web)', appVersion: '1.0', deviceId: 'tradelog-client-v1', cid: 1, sec: '' });
 
     for (const [base, env] of [[LIVE, 'live'], [DEMO, 'demo']] as const) {
       let authRes: Response;
@@ -549,7 +549,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
           const r = await fetch(`${b}/auth/accesstokenrequest`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: conn.api_username, password: conn.api_key, appId: 'tradovate_trader(web)', appVersion: '1.0', deviceId: 'tradelog-client-v1', cid: 1, sec: '', enc: true, chl: String(Math.floor(Math.random() * 1e12)) }),
+            body: JSON.stringify({ name: conn.api_username, password: conn.api_key, appId: 'tradovate_trader(web)', appVersion: '1.0', deviceId: 'tradelog-client-v1', cid: 1, sec: '' }),
           });
           const d = await r.json().catch(() => ({}));
           if (d.accessToken) { token = d.accessToken; activeBase = b; break; }
