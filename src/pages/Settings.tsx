@@ -343,50 +343,86 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
   const [tradovatePass, setTradovatePass] = useState('');
   const [tradovateEnv, setTradovateEnv] = useState<'live' | 'demo'>('live');
   const [showTradovateInput, setShowTradovateInput] = useState(false);
+  const [tradovateStep, setTradovateStep] = useState<'credentials' | 'mapping'>('credentials');
+  const [tradovateAccounts, setTradovateAccounts] = useState<{ id: number; name: string; active: boolean }[]>([]);
+  const [tradovateMapping, setTradovateMapping] = useState<{ [tdvId: number]: string }>({});
+  const [loadingAccounts, setLoadingAccounts] = useState(false);
+  const [connectingTdv, setConnectingTdv] = useState<number | null>(null);
   const [syncing, setSyncing] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<{ [k: string]: string }>({});
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL as string ?? '';
 
-  const connectTradovate = async (accountId: string) => {
-    if (!tradovateUser.trim() || !tradovatePass.trim()) return;
-    if (!supabase) return;
+  const resetTradovate = () => {
+    setShowTradovateInput(false);
+    setTradovateStep('credentials');
+    setTradovateUser('');
+    setTradovatePass('');
+    setTradovateEnv('live');
+    setTradovateAccounts([]);
+    setTradovateMapping({});
+  };
+
+  const fetchTradovateAccounts = async () => {
+    if (!tradovateUser.trim() || !tradovatePass.trim() || !supabase) return;
     const { data: { session } } = await supabase.auth.getSession();
     const jwt = session?.access_token;
     if (!jwt) return alert(isHe ? 'לא מחובר' : 'Not authenticated');
+    setLoadingAccounts(true);
+    try {
+      const res = await fetch('/api/tradovate-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+        body: JSON.stringify({ action: 'list', user_id: user?.id, api_username: tradovateUser, api_password: tradovatePass, env: tradovateEnv }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setTradovateAccounts(data.accounts ?? []);
+        setTradovateStep('mapping');
+      } else {
+        const errMsg = data.tradovateStatus
+          ? `${data.error} (HTTP ${data.tradovateStatus})\n\nTradovate said: ${data.tradovateResponse ?? '(no body)'}`
+          : (data.detail ? `${data.error}\n${data.detail}` : (data.error ?? res.status));
+        alert(isHe ? `שגיאה: ${errMsg}` : `Error: ${errMsg}`);
+      }
+    } catch {
+      alert(isHe ? 'שגיאה בחיבור לטריידובייט' : 'Could not reach Tradovate');
+    } finally {
+      setLoadingAccounts(false);
+    }
+  };
+
+  const connectTradovateAccount = async (tdvId: number, tradelogAccountId: string) => {
+    if (!supabase) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    const jwt = session?.access_token;
+    if (!jwt) return;
+    setConnectingTdv(tdvId);
     try {
       const res = await fetch('/api/tradovate-auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
         body: JSON.stringify({
           user_id: user?.id,
-          account_id: accountId,
+          account_id: tradelogAccountId,
           api_username: tradovateUser,
           api_password: tradovatePass,
           env: tradovateEnv,
+          tradovate_account_id: tdvId,
         }),
       });
       if (res.ok) {
-        setTxConn((c) => ({ ...c, [accountId]: true }));
-        setShowTradovateInput(false);
-        setTradovateUser('');
-        setTradovatePass('');
-        setTradovateEnv('live');
-        alert(isHe ? 'Tradovate חובר בהצלחה!' : 'Tradovate connected!');
+        setTxConn((c) => ({ ...c, [tradelogAccountId]: true }));
+        alert(isHe ? 'חובר בהצלחה!' : 'Connected!');
       } else {
         const data = await res.json().catch(() => ({}));
-        const errMsg = data.detail
-          ? `${data.error}\n${data.detail}`
-          : data.tradovateStatus
-            ? `${data.error} (HTTP ${data.tradovateStatus})\n\nTradovate said: ${data.tradovateResponse ?? '(no body)'}`
-            : (data.error ?? res.status);
-        alert(isHe
-          ? `שגיאה בחיבור Tradovate: ${errMsg}`
-          : `Tradovate connection failed: ${errMsg}`);
+        alert(isHe ? `שגיאה: ${data.error ?? res.status}` : `Error: ${data.error ?? res.status}`);
       }
     } catch {
-      alert(isHe ? 'שגיאה בחיבור Tradovate' : 'Tradovate connection failed');
+      alert(isHe ? 'שגיאה בחיבור' : 'Connection failed');
+    } finally {
+      setConnectingTdv(null);
     }
   };
 
@@ -494,22 +530,21 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
           </div>
         </div>
         <div style={{ borderTop: '1px solid var(--bd)', paddingTop: 10 }}>
-          <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 8 }}>
-            {isHe
-              ? 'אימייל + סיסמה של חשבון Tradovate Live'
-              : 'Your Tradovate Live account email & password'}
-          </div>
           {!showTradovateInput ? (
             <button className="btn btn-primary" style={{ fontSize: '.8rem', padding: '6px 14px' }}
               onClick={() => setShowTradovateInput(true)}>
               + {isHe ? 'הוסף פרטי כניסה' : 'Add Credentials'}
             </button>
-          ) : (
+          ) : tradovateStep === 'credentials' ? (
+            /* ── שלב 1: הכנסת פרטים ── */
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ fontSize: '.74rem', color: 'var(--t3)' }}>
+                {isHe ? 'שם משתמש או אימייל + סיסמה של חשבון Tradovate' : 'Tradovate username or email & password'}
+              </div>
               <input
                 className="form-input"
-                type="email"
-                placeholder={isHe ? 'אימייל Tradovate...' : 'Tradovate email...'}
+                type="text"
+                placeholder={isHe ? 'שם משתמש / אימייל...' : 'Username or email...'}
                 value={tradovateUser}
                 onChange={(e) => setTradovateUser(e.target.value)}
               />
@@ -520,44 +555,70 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
                 value={tradovatePass}
                 onChange={(e) => setTradovatePass(e.target.value)}
               />
-              {/* Live / Demo toggle */}
               <div style={{ display: 'flex', gap: 6 }}>
                 {(['live', 'demo'] as const).map((env) => (
-                  <button
-                    key={env}
-                    onClick={() => setTradovateEnv(env)}
-                    style={{
-                      flex: 1, padding: '6px 0', fontSize: '.78rem', fontWeight: 600,
-                      borderRadius: 'var(--rad)', border: '1.5px solid',
-                      cursor: 'pointer', transition: 'all .12s',
-                      borderColor: tradovateEnv === env ? 'var(--g)' : 'var(--bd2)',
-                      background: tradovateEnv === env ? 'rgba(29,185,84,.12)' : 'var(--s2)',
-                      color: tradovateEnv === env ? 'var(--g)' : 'var(--t2)',
-                    }}>
-                    {env === 'live'
-                      ? (isHe ? 'Live (חי)' : 'Live')
-                      : (isHe ? 'Demo / תיק מבחן' : 'Demo / Eval')}
+                  <button key={env} onClick={() => setTradovateEnv(env)} style={{
+                    flex: 1, padding: '6px 0', fontSize: '.78rem', fontWeight: 600,
+                    borderRadius: 'var(--rad)', border: '1.5px solid', cursor: 'pointer', transition: 'all .12s',
+                    borderColor: tradovateEnv === env ? 'var(--g)' : 'var(--bd2)',
+                    background: tradovateEnv === env ? 'rgba(29,185,84,.12)' : 'var(--s2)',
+                    color: tradovateEnv === env ? 'var(--g)' : 'var(--t2)',
+                  }}>
+                    {env === 'live' ? (isHe ? 'Live (חי)' : 'Live') : (isHe ? 'Demo / תיק מבחן' : 'Demo / Eval')}
                   </button>
                 ))}
               </div>
-              <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 4 }}>
-                {isHe ? 'קשר לחשבון:' : 'Link to account:'}
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="btn btn-primary" style={{ fontSize: '.8rem', padding: '6px 16px' }}
+                  onClick={fetchTradovateAccounts}
+                  disabled={!tradovateUser.trim() || !tradovatePass.trim() || loadingAccounts}>
+                  {loadingAccounts ? '...' : (isHe ? 'מצא חשבונות' : 'Find Accounts')}
+                </button>
+                <button className="btn btn-ghost" onClick={resetTradovate}>{T.cancel}</button>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {allAccounts.map((acc) => (
-                  <div key={acc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'var(--s1)', borderRadius: 7, border: '1px solid var(--bd)' }}>
-                    <span style={{ fontSize: '.84rem' }}>{acc.name}</span>
-                    <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '.76rem' }}
-                      onClick={() => connectTradovate(acc.id)}
-                      disabled={!tradovateUser.trim() || !tradovatePass.trim()}>
-                      {isHe ? 'חבר' : 'Connect'}
+            </div>
+          ) : (
+            /* ── שלב 2: מיפוי חשבונות ── */
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ fontSize: '.74rem', color: 'var(--t3)' }}>
+                {isHe
+                  ? `נמצאו ${tradovateAccounts.length} חשבונות בטריידובייט — בחר לאיזה חשבון לקשר כל אחד:`
+                  : `Found ${tradovateAccounts.length} Tradovate account(s) — select which TraderYo account to link each:`}
+              </div>
+              {tradovateAccounts.map((tdv) => (
+                <div key={tdv.id} style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '10px', background: 'var(--s1)', borderRadius: 8, border: '1px solid var(--bd)' }}>
+                  <div style={{ fontSize: '.84rem', fontWeight: 600 }}>
+                    {tdv.name || `Account #${tdv.id}`}
+                    {!tdv.active && <span style={{ fontSize: '.72rem', color: 'var(--t3)', marginInlineStart: 6 }}>({isHe ? 'לא פעיל' : 'inactive'})</span>}
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <select
+                      className="form-input"
+                      style={{ flex: 1, fontSize: '.8rem' }}
+                      value={tradovateMapping[tdv.id] ?? ''}
+                      onChange={(e) => setTradovateMapping((m) => ({ ...m, [tdv.id]: e.target.value }))}>
+                      <option value="">{isHe ? '— בחר חשבון TraderYo —' : '— Select TraderYo account —'}</option>
+                      {allAccounts.map((acc) => (
+                        <option key={acc.id} value={acc.id}>{acc.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      className="btn btn-primary"
+                      style={{ padding: '5px 14px', fontSize: '.78rem', whiteSpace: 'nowrap' }}
+                      disabled={!tradovateMapping[tdv.id] || connectingTdv === tdv.id}
+                      onClick={() => connectTradovateAccount(tdv.id, tradovateMapping[tdv.id])}>
+                      {connectingTdv === tdv.id ? '...' : (isHe ? 'חבר' : 'Connect')}
                     </button>
                   </div>
-                ))}
+                </div>
+              ))}
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="btn btn-ghost" style={{ fontSize: '.78rem' }}
+                  onClick={() => setTradovateStep('credentials')}>
+                  {isHe ? '← חזור' : '← Back'}
+                </button>
+                <button className="btn btn-ghost" onClick={resetTradovate}>{T.cancel}</button>
               </div>
-              <button className="btn btn-ghost" onClick={() => { setShowTradovateInput(false); setTradovateUser(''); setTradovatePass(''); }}>
-                {T.cancel}
-              </button>
             </div>
           )}
         </div>

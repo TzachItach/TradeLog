@@ -59,8 +59,17 @@ async function authenticate(baseUrl: string, username: string, password: string)
   }
 }
 
+async function fetchAccounts(baseUrl: string, accessToken: string) {
+  const res = await fetch(`${baseUrl}/account/list`, {
+    headers: { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json' },
+  });
+  const raw = await res.json() as Array<{ id: number; name: string; active: boolean; archived?: boolean }>;
+  return (Array.isArray(raw) ? raw : [])
+    .filter((a) => !a.archived)
+    .map((a) => ({ id: a.id, name: a.name, active: a.active }));
+}
+
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
-  // CORS preflight
   if (req.method === 'OPTIONS') {
     res.writeHead(200, {
       'Access-Control-Allow-Origin': '*',
@@ -70,43 +79,31 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     return;
   }
 
-  if (req.method !== 'POST') {
-    return sendJson(res, { error: 'Method not allowed' }, 405);
-  }
+  if (req.method !== 'POST') return sendJson(res, { error: 'Method not allowed' }, 405);
 
   try {
-    const body = await readBody(req);
+    const body      = await readBody(req);
+    const action    = (body.action as string | undefined) ?? 'connect';
     const userId    = body.user_id      as string | undefined;
-    const accountId = body.account_id   as string | undefined;
     const username  = body.api_username as string | undefined;
     const password  = body.api_password as string | undefined;
     const env       = body.env === 'demo' ? 'demo' : 'live';
     const baseUrl   = env === 'demo' ? DEMO_BASE : LIVE_BASE;
 
-    if (!userId || !accountId || !username || !password) {
-      return sendJson(res, { error: 'Missing required parameters' }, 400);
-    }
+    if (!userId || !username || !password) return sendJson(res, { error: 'Missing required parameters' }, 400);
 
     // Verify JWT
     const authHeader = (req.headers['authorization'] ?? '') as string;
-    if (!authHeader.startsWith('Bearer ')) {
-      return sendJson(res, { error: 'Unauthorized' }, 401);
-    }
+    if (!authHeader.startsWith('Bearer ')) return sendJson(res, { error: 'Unauthorized' }, 401);
     const token = authHeader.replace('Bearer ', '');
 
     const supabaseUrl = process.env.VITE_SUPABASE_URL ?? '';
     const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY ?? '';
-    const serviceKey  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? supabaseKey;
-
-    if (!supabaseUrl || !supabaseKey) {
-      return sendJson(res, { error: 'Server misconfiguration: missing Supabase env vars' }, 500);
-    }
+    if (!supabaseUrl || !supabaseKey) return sendJson(res, { error: 'Server misconfiguration' }, 500);
 
     const supabase = createClient(supabaseUrl, supabaseKey);
     const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
-    if (authErr || !user || user.id !== userId) {
-      return sendJson(res, { error: 'Forbidden' }, 403);
-    }
+    if (authErr || !user || user.id !== userId) return sendJson(res, { error: 'Forbidden' }, 403);
 
     // Authenticate with Tradovate
     let accessToken: string | undefined;
@@ -115,7 +112,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       accessToken = result.token;
       if (!accessToken) {
         return sendJson(res, {
-          error: 'Invalid Tradovate credentials — check email/password and Live/Demo selection',
+          error: 'Invalid Tradovate credentials — check username/password and Live/Demo selection',
           tradovateStatus: result.httpStatus,
           tradovateResponse: result.rawBody,
         }, 401);
@@ -130,26 +127,38 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       }, 502);
     }
 
-    // Fetch account list
-    let tradovateAccountId: number | null = null;
-    try {
-      const acctRes = await fetch(`${baseUrl}/account/list`, {
-        headers: { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json' },
-      });
-      const accounts = await acctRes.json() as Array<{ id: number; active: boolean }>;
-      if (Array.isArray(accounts) && accounts.length > 0) {
-        const active = accounts.filter((a) => a.active);
-        tradovateAccountId = (active[0] ?? accounts[0]).id ?? null;
+    // ── LIST MODE: return accounts, don't save ──
+    if (action === 'list') {
+      try {
+        const accounts = await fetchAccounts(baseUrl, accessToken);
+        return sendJson(res, { accounts });
+      } catch {
+        return sendJson(res, { error: 'Could not fetch Tradovate account list' }, 502);
       }
-    } catch {
-      // Non-fatal
     }
 
-    // Store in Supabase — pass user JWT so RLS works even if serviceKey falls back to anon key
+    // ── CONNECT MODE: save specific connection ──
+    const accountId           = body.account_id          as string | undefined;
+    const tradovateAccountId  = body.tradovate_account_id as number | undefined;
+
+    if (!accountId) return sendJson(res, { error: 'Missing account_id' }, 400);
+
+    // If no specific tradovate_account_id provided, use first active account (legacy fallback)
+    let resolvedTdvId: number | null = tradovateAccountId ?? null;
+    if (!resolvedTdvId) {
+      try {
+        const accounts = await fetchAccounts(baseUrl, accessToken);
+        const active = accounts.filter((a) => a.active);
+        resolvedTdvId = (active[0] ?? accounts[0])?.id ?? null;
+      } catch { /* non-fatal */ }
+    }
+
+    const serviceKey  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? supabaseKey;
     const adminClient = createClient(supabaseUrl, serviceKey, {
       auth: { persistSession: false },
       global: { headers: { Authorization: `Bearer ${token}` } },
     });
+
     const { error: dbError } = await adminClient.from('broker_connections').upsert(
       {
         user_id:              userId,
@@ -157,7 +166,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         broker:               'tradovate',
         api_username:         username,
         api_key:              password,
-        tradovate_account_id: tradovateAccountId,
+        tradovate_account_id: resolvedTdvId,
         broker_env:           env,
         is_active:            true,
       },
@@ -165,8 +174,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     );
 
     if (dbError) return sendJson(res, { error: dbError.message }, 500);
-
-    return sendJson(res, { success: true, env, tradovateAccountId });
+    return sendJson(res, { success: true, env, tradovateAccountId: resolvedTdvId });
 
   } catch (e) {
     const detail = e instanceof Error ? e.message : String(e);
