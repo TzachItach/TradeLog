@@ -1022,6 +1022,7 @@ body:not(.dark) .app-logo  { mix-blend-mode: multiply; }
 @media (max-width: 480px) {
   .stats-bar { grid-template-columns: repeat(2, 1fr); }
   .account-tabs { display: none; }
+  .account-tabs:has(.account-select) { display: flex; }
   .cb-grid { grid-template-columns: 1fr; }
   .day-cell { min-height: 60px; padding: 4px 3px; }
   .cell-daynum { font-size: .72rem; }
