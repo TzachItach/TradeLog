@@ -252,6 +252,9 @@ RLS: כל טבלה עם `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = u
 ### Analytics (9 גרפים Canvas — ללא ספריות)
 Tabs: Equity Curve | Drawdown | P&L by Day | P&L by Symbol | Monthly Heatmap | Distribution | Risk/Reward Scatter | Streak Analysis | **Strategy Comparison**
 
+#### Monthly Heatmap (טאב 2)
+- לייבלי החודשים (ינ/פב/...) — `color: var(--t1)` (לבן/שחור לפי theme) — **לא** `var(--t3)` שכמעט בלתי נראה על רקע כהה
+
 #### Strategy Comparison Tab (טאב 6)
 - **MultiEquityChart**: עקומות הון מרובות על Canvas אחד — ציר X = תאריכים משותפים לכל האסטרטגיות, כל קו בצבע `strategy.color`, נקודה בסוף + legend
 - **StrategyStatsTable**: טבלת HTML — Trades, WR%, Total P&L, Avg P&L, Profit Factor לפי אסטרטגיה, ממוינת לפי P&L כולל
@@ -497,6 +500,7 @@ RESEND_API_KEY=re_G5aKAVqD_NSg8f2DJHZNNweYDZJpoGMij
   - migration: `supabase/migrations/whop_subscription.sql`
 - **Store**: `subscriptionStatus: 'active' | 'expired' | null` — נטען ב-`loadDataInBackground`, `reloadFromCloud`, `initRealUser`
 - **Paywall** (`src/App.tsx` — `PaywallScreen`): מוצג כש-`subscriptionStatus === 'expired'`; כפתור → Whop checkout עם email משתמש pre-filled
+  - **⚠️ חשוב**: התנאי הוא `=== 'expired'` ולא `!== 'active'` — כך `null` (טעינה ראשונית) לא חוסם את המשתמש ולא גורם להבזק של מסך ה-Paywall
 - **Env vars ב-Vercel**: `WHOP_API_KEY`, `WHOP_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`
 - **⚠️ Migration ידני נדרש** ב-Supabase SQL Editor (לא רץ אוטומטית):
   ```sql
