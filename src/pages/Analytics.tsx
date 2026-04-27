@@ -1,5 +1,11 @@
 import { useMemo, useRef, useEffect, useState } from 'react';
 import { useStore, formatPnL } from '../store';
+import {
+  calcEquityPoints, calcDrawdownPoints, calcMaxDrawdown,
+  calcByDay, calcBySymbol, calcHeatmapData, calcDistribution,
+  calcStreaks, calcStrategyRows,
+} from '../lib/analytics';
+import type { StratRow } from '../lib/analytics';
 
 type Trade = ReturnType<typeof useStore.getState>['trades'][0];
 
@@ -68,13 +74,7 @@ function EquityChart({ trades }: { trades: Trade[] }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const c = useColors();
 
-  const points = useMemo(() => {
-    const sorted = [...trades].sort((a, b) => a.trade_date.localeCompare(b.trade_date));
-    let cum = 0;
-    const pts = [{ date: '', val: 0 }];
-    sorted.forEach((t) => { cum += t.pnl; pts.push({ date: t.trade_date, val: cum }); });
-    return pts;
-  }, [trades]);
+  const points = useMemo(() => calcEquityPoints(trades), [trades]);
 
   useCanvas(ref, (ctx, W, H) => {
     const pL = 72, pR = 16, pT = 20, pB = 36;
@@ -130,19 +130,8 @@ function DrawdownChart({ trades }: { trades: Trade[] }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const c = useColors();
 
-  const points = useMemo(() => {
-    const sorted = [...trades].sort((a, b) => a.trade_date.localeCompare(b.trade_date));
-    let cum = 0, peak = 0;
-    const pts: number[] = [0];
-    sorted.forEach((t) => {
-      cum += t.pnl;
-      if (cum > peak) peak = cum;
-      pts.push(peak > 0 ? ((cum - peak) / peak) * 100 : 0);
-    });
-    return pts;
-  }, [trades]);
-
-  const maxDD = useMemo(() => Math.min(...points), [points]);
+  const points = useMemo(() => calcDrawdownPoints(trades), [trades]);
+  const maxDD  = useMemo(() => calcMaxDrawdown(trades), [trades]);
 
   useCanvas(ref, (ctx, W, H) => {
     const pL = 52, pR = 16, pT = 20, pB = 28;
@@ -194,14 +183,10 @@ function ByDayChart({ trades, lang }: { trades: Trade[]; lang: string }) {
   const isHe = lang === 'he';
   const dayLabels = isHe ? ["א'","ב'","ג'","ד'","ה'","ו'","ש'"] : ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-  const byDay = useMemo(() => {
-    const sums = Array(7).fill(0), counts = Array(7).fill(0);
-    trades.forEach((t) => {
-      const d = new Date(t.trade_date + 'T12:00:00').getDay();
-      sums[d] += t.pnl; counts[d]++;
-    });
-    return dayLabels.map((label, i) => ({ label, pnl: sums[i], count: counts[i] }));
-  }, [trades, lang]);
+  const byDay = useMemo(
+    () => calcByDay(trades).map((b, i) => ({ label: dayLabels[i], pnl: b.pnl, count: b.count })),
+    [trades, lang],
+  );
 
   useCanvas(ref, (ctx, W, H) => {
     // pB = 10(gap) + 1(sep) + 18(pnl) + 17(count) + 17(dayname) + 5(bottom) = 68
@@ -278,11 +263,7 @@ function BySymbolChart({ trades }: { trades: Trade[] }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const c = useColors();
 
-  const bySymbol = useMemo(() => {
-    const map: Record<string, number> = {};
-    trades.forEach((t) => { map[t.symbol] = (map[t.symbol] || 0) + t.pnl; });
-    return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 10);
-  }, [trades]);
+  const bySymbol = useMemo(() => calcBySymbol(trades), [trades]);
 
   const h = Math.max(bySymbol.length * 44 + 20, 100);
 
@@ -324,15 +305,7 @@ function MonthlyHeatmap({ trades, lang }: { trades: Trade[]; lang: string }) {
     ? ['ינ','פב','מר','אפ','מי','יו','יל','אג','ספ','אק','נו','דצ']
     : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  const data = useMemo(() => {
-    const map: Record<string, number> = {};
-    trades.forEach((t) => {
-      const [y, m] = t.trade_date.split('-');
-      const key = `${y}-${m}`;
-      map[key] = (map[key] || 0) + t.pnl;
-    });
-    return map;
-  }, [trades]);
+  const data = useMemo(() => calcHeatmapData(trades), [trades]);
 
   const years = useMemo(() => {
     const ys = new Set<string>();
@@ -386,25 +359,7 @@ function DistributionChart({ trades }: { trades: Trade[] }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const c = useColors();
 
-  const { buckets, labels } = useMemo(() => {
-    if (!trades.length) return { buckets: [], labels: [] };
-    const pnls = trades.map((t) => t.pnl);
-    const min = Math.min(...pnls), max = Math.max(...pnls);
-    const step = Math.ceil((max - min) / 10 / 100) * 100 || 100;
-    const start = Math.floor(min / step) * step;
-    const bkts: number[] = [];
-    const lbls: string[] = [];
-    const fmtLbl = (v: number) => Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v);
-    for (let v = start; v <= max + step; v += step) {
-      bkts.push(0);
-      lbls.push(v >= 0 ? `+${fmtLbl(v)}` : fmtLbl(v));
-    }
-    pnls.forEach((p) => {
-      const idx = Math.min(Math.floor((p - start) / step), bkts.length - 1);
-      if (idx >= 0) bkts[idx]++;
-    });
-    return { buckets: bkts, labels: lbls };
-  }, [trades]);
+  const { buckets, labels } = useMemo(() => calcDistribution(trades), [trades]);
 
   useCanvas(ref, (ctx, W, H) => {
     if (!buckets.length) return;
@@ -500,17 +455,7 @@ function StreakChart({ trades, lang }: { trades: Trade[]; lang: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const c = useColors();
 
-  const { winStreaks, lossStreaks, longestWin, longestLoss } = useMemo(() => {
-    const sorted = [...trades].sort((a, b) => a.trade_date.localeCompare(b.trade_date));
-    const ws: Record<number, number> = {}, ls: Record<number, number> = {};
-    let curW = 0, curL = 0, maxW = 0, maxL = 0;
-    sorted.forEach((t) => {
-      if (t.pnl > 0) { curW++; curL = 0; ws[curW] = (ws[curW] || 0) + 1; if (curW > maxW) maxW = curW; }
-      else if (t.pnl < 0) { curL++; curW = 0; ls[curL] = (ls[curL] || 0) + 1; if (curL > maxL) maxL = curL; }
-      else { curW = 0; curL = 0; }
-    });
-    return { winStreaks: ws, lossStreaks: ls, longestWin: maxW, longestLoss: maxL };
-  }, [trades]);
+  const { winStreaks, lossStreaks, longestWin, longestLoss } = useMemo(() => calcStreaks(trades), [trades]);
 
   const maxLen = Math.max(...Object.keys(winStreaks).map(Number), ...Object.keys(lossStreaks).map(Number), 1);
   const labels = Array.from({ length: maxLen }, (_, i) => String(i + 1));
@@ -578,51 +523,9 @@ function StreakChart({ trades, lang }: { trades: Trade[]; lang: string }) {
 // ── 9. Strategy Comparison ───────────────────────────────────
 type Strategy = ReturnType<typeof useStore.getState>['strategies'][0];
 
-const STRAT_PALETTE = ['#5b8fff','#1DB954','#F59B23','#a855f7','#06b6d4','#ec4899','#f97316','#14b8a6'];
 
-interface StratRow {
-  id: string; name: string; color: string;
-  tradeCount: number; winRate: number; totalPnL: number; avgPnL: number; profitFactor: number;
-  pts: number[];
-}
-
-function useStrategyRows(trades: Trade[], strategies: Strategy[]): { rows: StratRow[]; allDates: string[] } {
-  return useMemo(() => {
-    const allDates = [...new Set(trades.map((t) => t.trade_date))].sort();
-    const noKey = '__none__';
-    const map = new Map<string, { id: string; name: string; color: string; dateMap: Record<string, number>; all: Trade[] }>();
-    strategies.forEach((s, i) => {
-      map.set(s.id, { id: s.id, name: s.name, color: s.color || STRAT_PALETTE[i % STRAT_PALETTE.length], dateMap: {}, all: [] });
-    });
-    map.set(noKey, { id: noKey, name: 'No strategy', color: '#737373', dateMap: {}, all: [] });
-    trades.forEach((t) => {
-      const key = (t.strategy_id && map.has(t.strategy_id)) ? t.strategy_id : noKey;
-      const g = map.get(key)!;
-      g.dateMap[t.trade_date] = (g.dateMap[t.trade_date] || 0) + t.pnl;
-      g.all.push(t);
-    });
-    const rows: StratRow[] = Array.from(map.values())
-      .filter((g) => g.all.length > 0)
-      .map((g) => {
-        const wins = g.all.filter((t) => t.pnl > 0);
-        const losses = g.all.filter((t) => t.pnl < 0);
-        const totalPnL = g.all.reduce((s, t) => s + t.pnl, 0);
-        const avgWin = wins.length ? wins.reduce((s, t) => s + t.pnl, 0) / wins.length : 0;
-        const avgLoss = losses.length ? Math.abs(losses.reduce((s, t) => s + t.pnl, 0) / losses.length) : 0;
-        const pf = avgLoss > 0 ? (avgWin * wins.length) / (avgLoss * losses.length) : (wins.length > 0 ? 99 : 0);
-        let cum = 0;
-        const pts = allDates.map((d) => { cum += g.dateMap[d] || 0; return cum; });
-        return {
-          id: g.id, name: g.name, color: g.color,
-          tradeCount: g.all.length,
-          winRate: g.all.length ? (wins.length / g.all.length) * 100 : 0,
-          totalPnL, avgPnL: totalPnL / (g.all.length || 1),
-          profitFactor: Math.min(pf, 99), pts,
-        };
-      })
-      .sort((a, b) => b.totalPnL - a.totalPnL);
-    return { rows, allDates };
-  }, [trades, strategies]);
+function useStrategyRows(trades: Trade[], strategies: Strategy[]) {
+  return useMemo(() => calcStrategyRows(trades, strategies), [trades, strategies]);
 }
 
 function MultiEquityChart({ rows, allDates }: { rows: StratRow[]; allDates: string[] }) {
