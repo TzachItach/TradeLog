@@ -29,7 +29,7 @@ const icons: Record<string, JSX.Element> = {
 };
 
 export default function Sidebar() {
-  const { lang, sidebarCollapsed, setSidebarCollapsed } = useStore();
+  const { lang, sidebarCollapsed, setSidebarCollapsed, accounts, selectedAccount, setSelectedAccount } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
   const T = useT(lang);
@@ -81,6 +81,26 @@ export default function Sidebar() {
             </svg>
           </button>
         </div>
+
+        {(() => {
+          const activeAccounts = accounts.filter((a) => a.is_active);
+          if (activeAccounts.length <= 3) return null;
+          return (
+            <div className="sidebar-account-wrap">
+              <label>{lang === 'he' ? 'חשבון' : 'Account'}</label>
+              <select
+                className="account-select"
+                value={selectedAccount}
+                onChange={(e) => { setSelectedAccount(e.target.value); setSidebarCollapsed(true); }}
+              >
+                <option value="all">{lang === 'he' ? 'כל החשבונות' : 'All accounts'}</option>
+                {activeAccounts.map((acc) => (
+                  <option key={acc.id} value={acc.id}>{acc.name}</option>
+                ))}
+              </select>
+            </div>
+          );
+        })()}
 
         <nav className="sidebar-nav">
           {navItems.map((item) => (

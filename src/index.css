@@ -187,6 +187,27 @@ body:not(.dark) .sidebar {
   border-top: 1px solid rgba(255,255,255,.06);
   display: flex; flex-direction: column; gap: 4px;
 }
+.sidebar-account-wrap {
+  display: none; /* desktop: hidden, header handles it */
+  padding: 8px 12px 4px;
+}
+.sidebar-account-wrap label {
+  display: block;
+  font-size: .68rem; font-weight: 600;
+  color: rgba(255,255,255,.4);
+  text-transform: uppercase; letter-spacing: .04em;
+  margin-bottom: 6px;
+}
+.sidebar-account-wrap .account-select {
+  width: 100%;
+  max-width: 100%;
+  background: rgba(255,255,255,.07);
+  border-color: rgba(255,255,255,.18);
+  color: #fff;
+}
+@media (max-width: 768px) {
+  .sidebar-account-wrap { display: block; }
+}
 
 /* ── Theme toggle — split half-dark/half-light circle ── */
 .theme-toggle-btn {
@@ -1022,7 +1043,6 @@ body:not(.dark) .app-logo  { mix-blend-mode: multiply; }
 @media (max-width: 480px) {
   .stats-bar { grid-template-columns: repeat(2, 1fr); }
   .account-tabs { display: none; }
-  .account-tabs:has(.account-select) { display: flex; }
   .cb-grid { grid-template-columns: 1fr; }
   .day-cell { min-height: 60px; padding: 4px 3px; }
   .cell-daynum { font-size: .72rem; }
