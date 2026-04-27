@@ -144,8 +144,11 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       // Non-fatal
     }
 
-    // Store in Supabase
-    const adminClient = createClient(supabaseUrl, serviceKey);
+    // Store in Supabase — pass user JWT so RLS works even if serviceKey falls back to anon key
+    const adminClient = createClient(supabaseUrl, serviceKey, {
+      auth: { persistSession: false },
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
     const { error: dbError } = await adminClient.from('broker_connections').upsert(
       {
         user_id:              userId,

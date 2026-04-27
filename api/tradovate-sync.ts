@@ -122,7 +122,11 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
   if (!supabaseUrl || !supabaseKey) return sendJson(res, { error: 'Server misconfiguration' }, 500);
 
-  const supabase = createClient(supabaseUrl, serviceKey);
+  // Pass user JWT so RLS works even if serviceKey falls back to anon key
+  const supabase = createClient(supabaseUrl, serviceKey, {
+    auth: { persistSession: false },
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
   const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
   if (authErr || !user || user.id !== userId) return sendJson(res, { error: 'Forbidden' }, 403);
 
