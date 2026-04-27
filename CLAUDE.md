@@ -13,6 +13,7 @@
 - **Repo**: github.com/TzachItach/TradeLog
 - **Supabase project**: `mxzyfmuktsyazkfxglzb`
 - **Live URL**: `https://trade-log-osxu.vercel.app`
+- **דומיין**: `traderyo.com` (החדש — מיילים נשלחים מ-`hello@traderyo.com`)
 
 ---
 
@@ -26,10 +27,13 @@ supabase/
     topstepx-sync/index.ts   — Edge Function: מאמת, מושך עסקאות (90 יום אחרונים / מ-last_synced_at), מכניס ל-trades
     tradovate-auth/index.ts  — Edge Function: מאמת username+password מול Tradovate (live/demo), שומר ב-broker_connections
     tradovate-sync/index.ts  — Edge Function: מושך execution reports, מזהה closing fills, resolves contractId→symbol, מכניס ל-trades
+    send-welcome-email/index.ts — Edge Function: שולח מייל ברוכים הבאים דרך Resend בעת INSERT ל-profiles
   migrations/
     topstepx_broker_connections.sql — הוספת עמודות + unique constraint + RLS ל-broker_connections
     business_manager.sql     — יצירת טבלאות prop_expenses + prop_payouts עם RLS
     tradovate_broker.sql     — הוספת tradovate_account_id + broker_env ל-broker_connections
+    whop_subscription.sql    — הוספת subscription_status + whop_membership_id ל-profiles
+    email_unsubscribe.sql    — הוספת email_unsubscribed BOOLEAN ל-profiles
   store.ts                 — Zustand store + Supabase sync
   i18n.ts                  — עברית/אנגלית (80+ מחרוזות)
   types.ts                 — TypeScript interfaces (כולל PropExpense, PropPayout, ExpenseFeeType)
@@ -380,6 +384,15 @@ const G = '#1DB954';  const R = '#E91429';  const B = '#1DB954';  const O = '#F5
 ```
 VITE_SUPABASE_URL=https://mxzyfmuktsyazkfxglzb.supabase.co
 VITE_SUPABASE_ANON_KEY=...
+WHOP_API_KEY=...
+WHOP_WEBHOOK_SECRET=...
+SUPABASE_SERVICE_ROLE_KEY=...
+RESEND_API_KEY=re_G5aKAVqD_NSg8f2DJHZNNweYDZJpoGMij
+```
+
+## Supabase Secrets (Edge Functions)
+```
+RESEND_API_KEY=re_G5aKAVqD_NSg8f2DJHZNNweYDZJpoGMij
 ```
 
 ## Supabase Auth Settings
@@ -476,19 +489,49 @@ VITE_SUPABASE_ANON_KEY=...
   - Product ID: `prod_snYEY756GdD92`
   - Checkout URL: `https://whop.com/checkout/plan_prXodSeim1jYH/`
 - **Webhook**: `POST /api/whop-webhook` (Vercel serverless)
-  - אירועים: `membership_activated` → `status='active'` | `membership_deactivated` → `status='expired'`
+  - אירועים: `membership_activated` → `status='active'` + שולח מייל "המנוי הופעל"
+  - אירועים: `membership_deactivated` → `status='expired'` + שולח מייל "המנוי הסתיים"
   - Signature: Standard Webhooks spec — `webhook-id`, `webhook-timestamp`, `webhook-signature` headers; signed payload = `id.timestamp.body`; secret: strip `ws_` prefix → hex-decode → HMAC-SHA256 → base64
   - URL מוגדר ב-Whop: `https://tradelog.co.il/api/whop-webhook`
 - **DB** (`profiles` table): עמודות `subscription_status TEXT` + `whop_membership_id TEXT`
   - migration: `supabase/migrations/whop_subscription.sql`
 - **Store**: `subscriptionStatus: 'active' | 'expired' | null` — נטען ב-`loadDataInBackground`, `reloadFromCloud`, `initRealUser`
 - **Paywall** (`src/App.tsx` — `PaywallScreen`): מוצג כש-`subscriptionStatus === 'expired'`; כפתור → Whop checkout עם email משתמש pre-filled
-- **Env vars ב-Vercel**: `WHOP_API_KEY`, `WHOP_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`
+- **Env vars ב-Vercel**: `WHOP_API_KEY`, `WHOP_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`
 - **⚠️ Migration ידני נדרש** ב-Supabase SQL Editor (לא רץ אוטומטית):
   ```sql
   ALTER TABLE profiles
     ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT NULL,
     ADD COLUMN IF NOT EXISTS whop_membership_id  TEXT DEFAULT NULL;
+  ```
+
+---
+
+### Email System — Resend (אפריל 2026)
+- **שירות שליחה**: Resend (`resend.com`) — API key מוגדר ב-Vercel + Supabase Secrets
+- **דומיין שולח**: `hello@traderyo.com` — מאומת ב-Resend עם DKIM + SPF
+- **3 מיילים אוטומטיים**:
+
+| אירוע | קובץ | נושא |
+|-------|------|-------|
+| משתמש חדש נרשם | `supabase/functions/send-welcome-email/index.ts` | "ברוכים הבאים ל-TraderYo" |
+| מנוי הופעל (Whop) | `api/whop-webhook.ts` | "המנוי שלך הופעל 🎉" |
+| מנוי פג (Whop) | `api/whop-webhook.ts` | "המנוי שלך הסתיים" |
+
+- **Trigger מייל ברוכים הבאים**: Database Webhook ב-Supabase על INSERT ל-`profiles` → קורא ל-Edge Function
+  - הפונקציה מושכת email מ-`/auth/v1/admin/users/{id}` (Admin REST API — **לא** `supabase.auth.admin.getUser` שלא עובד ב-Deno)
+- **Unsubscribe flow**:
+  - כפתור "הסר מרשימת הדיוור" בפוטר של מייל ברוכים הבאים
+  - לינק: `https://traderyo.com/api/unsubscribe?uid={userId}&tok={HMAC}`
+  - Token: `HMAC-SHA256(userId, RESEND_API_KEY).slice(0,32)` — מאומת ב-`api/unsubscribe.ts`
+  - מעדכן `email_unsubscribed=true` ב-`profiles` → מחזיר דף אישור HTML
+  - הפונקציה בודקת את הדגל לפני שליחה — לא שולחת למי שהסיר את עצמו
+  - מיילי מנוי (הופעל/פג) נשלחים תמיד — טרנזקציונליים, לא שיווקיים
+- **DB**: עמודה `email_unsubscribed BOOLEAN DEFAULT FALSE` ב-`profiles`
+  - migration: `supabase/migrations/email_unsubscribe.sql`
+- **⚠️ Migration ידני נדרש**:
+  ```sql
+  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS email_unsubscribed BOOLEAN DEFAULT FALSE;
   ```
 
 ---
