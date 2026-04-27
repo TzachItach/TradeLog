@@ -943,13 +943,13 @@ export default function Settings() {
       {/* פרופיל + התנתקות */}
       <div className="settings-section">
         <div className="section-title">{lang === 'he' ? 'פרופיל וחשבון' : 'Profile & Account'}</div>
-        <div className="list-card">
+        <div className="list-card settings-profile-card">
           <div className="list-card-info">
             <div className="list-card-name">{user?.name ?? 'User'}</div>
             <div className="list-card-meta">{user?.email ?? ''}</div>
           </div>
           {!DEMO_MODE && (
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div className="settings-profile-actions">
               <button
                 className="btn btn-ghost"
                 onClick={reloadFromCloud}
