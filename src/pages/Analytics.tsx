@@ -338,7 +338,7 @@ function MonthlyHeatmap({ trades, lang }: { trades: Trade[]; lang: string }) {
                   background: bg, borderRadius: 6, padding: '8px 4px',
                   textAlign: 'center', border: '1px solid var(--bd)',
                 }}>
-                  <div style={{ fontSize: '.65rem', color: 'var(--t3)', marginBottom: 3 }}>{months[mi]}</div>
+                  <div style={{ fontSize: '.65rem', color: 'var(--t1)', marginBottom: 3 }}>{months[mi]}</div>
                   {pnl != null && (
                     <div style={{ fontSize: '.68rem', fontWeight: 700, color: 'var(--t1)', lineHeight: 1 }}>
                       {formatPnL(pnl)}
