@@ -17,6 +17,8 @@ import Guides from './pages/Guides';
 import PropFirm from './pages/PropFirm';
 import BusinessManager from './pages/BusinessManager';
 import Landing from './pages/Landing';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
 import ProductTour from './components/ProductTour';
 
 /* מסך טעינה קצר — רק לבדיקת session ראשונית */
@@ -195,6 +197,8 @@ export default function App() {
         <Route path="/accessibility" element={<Accessibility />} />
         <Route path="/risk-disclosure" element={<RiskDisclosure />} />
         <Route path="/guides" element={<Guides />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/dashboard/*" element={
           <ProtectedRoute ready={ready} hasUser={hasUser}>
             <Layout />

@@ -17,7 +17,7 @@ const equityFill   = equityPoints + ' 400,130 0,130';
 /* ── Translations ─────────────────────────────────────────── */
 const T = {
   he: {
-    nav: { features: 'פיצ׳רים', pricing: 'מחירים', tools: 'כלים', testimonials: 'המלצות', faq: 'שאלות', signin: 'התחבר', start: 'התחל בחינם' },
+    nav: { features: 'פיצ׳רים', pricing: 'מחירים', tools: 'כלים', testimonials: 'המלצות', faq: 'שאלות', blog: 'בלוג', signin: 'התחבר', start: 'התחל בחינם' },
     badge: '14 ימי ניסיון חינם',
     h1a: 'לסחור כמו מקצוען,',
     h1b: 'לתעד כמו מכונה.',
@@ -95,7 +95,7 @@ const T = {
     ],
     footerUsefulTitle: 'קישורים שימושיים',
     footerUsefulLinks: [
-
+      { label: 'בלוג', href: '/blog' },
       { label: 'מדריכים', href: '/guides' },
       { label: 'שאלות נפוצות', href: '#faq' },
       { label: 'תנאי שימוש', href: '/terms' },
@@ -106,7 +106,7 @@ const T = {
     footerEmail: 'tradelogisr@gmail.com',
   },
   en: {
-    nav: { features: 'Features', pricing: 'Pricing', tools: 'Tools', testimonials: 'Reviews', faq: 'FAQ', signin: 'Sign in', start: 'Start free' },
+    nav: { features: 'Features', pricing: 'Pricing', tools: 'Tools', testimonials: 'Reviews', faq: 'FAQ', blog: 'Blog', signin: 'Sign in', start: 'Start free' },
     badge: '14-day free trial',
     h1a: 'Trade like a pro,',
     h1b: 'analyze like a machine',
@@ -184,7 +184,7 @@ const T = {
     ],
     footerUsefulTitle: 'Useful Links',
     footerUsefulLinks: [
-
+      { label: 'Blog', href: '/blog' },
       { label: 'Guides', href: '/guides' },
       { label: 'FAQ', href: '#faq' },
       { label: 'Terms of Service', href: '/terms' },
@@ -227,6 +227,7 @@ export default function Landing() {
               <li><a href="#advanced">{t.nav.tools}</a></li>
               <li><a href="#testimonials">{t.nav.testimonials}</a></li>
               <li><a href="#faq">{t.nav.faq}</a></li>
+              <li><a href="/blog">{t.nav.blog}</a></li>
             </ul>
           </nav>
           <div className="lp-nav-actions">
