@@ -49,7 +49,12 @@ async function getTradovateToken(baseUrl: string, username: string, password: st
   try {
     const res = await fetch(`${baseUrl}/auth/accesstokenrequest`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Origin': 'https://trader.tradovate.com',
+        'Referer': 'https://trader.tradovate.com/',
+      },
       signal: controller.signal,
       body: JSON.stringify({ name: username, password: encryptPassword(username, password), enc: true, chl: String(Math.floor(Math.random() * 1e12)), appId: APP_ID, appVersion: APP_VERSION, deviceId: DEVICE_ID, cid: CID, sec: SEC }),
     });

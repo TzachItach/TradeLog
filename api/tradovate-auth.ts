@@ -41,7 +41,12 @@ async function authenticate(baseUrl: string, username: string, password: string)
   try {
     const res = await fetch(`${baseUrl}/auth/accesstokenrequest`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Origin': 'https://trader.tradovate.com',
+        'Referer': 'https://trader.tradovate.com/',
+      },
       signal: controller.signal,
       body: JSON.stringify({
         name: username,
