@@ -37,6 +37,12 @@ function normalizeSymbol(raw: string): string {
     .trim();
 }
 
+function encryptPassword(name: string, password: string): string {
+  const o = name.length % password.length;
+  const rotated = password.slice(o) + password.slice(0, o);
+  return btoa(rotated);
+}
+
 async function getTradovateToken(baseUrl: string, username: string, password: string): Promise<string | null> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
@@ -45,7 +51,7 @@ async function getTradovateToken(baseUrl: string, username: string, password: st
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       signal: controller.signal,
-      body: JSON.stringify({ name: username, password, appId: APP_ID, appVersion: APP_VERSION, deviceId: DEVICE_ID, cid: CID, sec: SEC }),
+      body: JSON.stringify({ name: username, password: encryptPassword(username, password), enc: true, chl: String(Math.floor(Math.random() * 1e12)), appId: APP_ID, appVersion: APP_VERSION, deviceId: DEVICE_ID, cid: CID, sec: SEC }),
     });
     const data = await res.json() as { accessToken?: string };
     return data.accessToken ?? null;

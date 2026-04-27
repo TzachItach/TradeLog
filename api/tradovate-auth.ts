@@ -29,6 +29,12 @@ async function readBody(req: IncomingMessage): Promise<Record<string, unknown>> 
   });
 }
 
+function encryptPassword(name: string, password: string): string {
+  const o = name.length % password.length;
+  const rotated = password.slice(o) + password.slice(0, o);
+  return btoa(rotated);
+}
+
 async function authenticate(baseUrl: string, username: string, password: string) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
@@ -39,7 +45,9 @@ async function authenticate(baseUrl: string, username: string, password: string)
       signal: controller.signal,
       body: JSON.stringify({
         name: username,
-        password,
+        password: encryptPassword(username, password),
+        enc: true,
+        chl: String(Math.floor(Math.random() * 1e12)),
         appId: APP_ID,
         appVersion: APP_VERSION,
         deviceId: DEVICE_ID,

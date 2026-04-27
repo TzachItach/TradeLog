@@ -367,13 +367,19 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
   };
 
   // Try authenticating directly from the browser (user's IP — not blocked by Tradovate)
+  const encryptTradovatePassword = (name: string, password: string): string => {
+    const o = name.length % password.length;
+    const rotated = password.slice(o) + password.slice(0, o);
+    return btoa(rotated);
+  };
+
   const tryTradovateClientSide = async (username: string, password: string): Promise<
     { ok: true; token: string; accounts: { id: number; name: string; active: boolean }[]; resolvedEnv: 'live' | 'demo' } |
     { ok: false; reason: 'cors' | 'credentials' }
   > => {
     const LIVE = 'https://live.tradovateapi.com/v1';
     const DEMO = 'https://demo.tradovateapi.com/v1';
-    const authBody = JSON.stringify({ name: username, password, appId: 'tradovate_trader(web)', appVersion: '1.0', deviceId: 'tradelog-client-v1', cid: 1, sec: '' });
+    const authBody = JSON.stringify({ name: username, password: encryptTradovatePassword(username, password), enc: true, chl: String(Math.floor(Math.random() * 1e12)), appId: 'tradovate_trader(web)', appVersion: '1.0', deviceId: 'tradelog-client-v1', cid: 1, sec: '' });
 
     for (const [base, env] of [[LIVE, 'live'], [DEMO, 'demo']] as const) {
       let authRes: Response;
@@ -549,7 +555,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
           const r = await fetch(`${b}/auth/accesstokenrequest`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: conn.api_username, password: conn.api_key, appId: 'tradovate_trader(web)', appVersion: '1.0', deviceId: 'tradelog-client-v1', cid: 1, sec: '' }),
+            body: JSON.stringify({ name: conn.api_username, password: encryptTradovatePassword(conn.api_username, conn.api_key), enc: true, chl: String(Math.floor(Math.random() * 1e12)), appId: 'tradovate_trader(web)', appVersion: '1.0', deviceId: 'tradelog-client-v1', cid: 1, sec: '' }),
           });
           const d = await r.json().catch(() => ({}));
           if (d.accessToken) { token = d.accessToken; activeBase = b; break; }
