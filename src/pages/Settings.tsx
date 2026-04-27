@@ -349,6 +349,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
   const [tradovateMapping, setTradovateMapping] = useState<{ [tdvId: number]: string }>({});
   const [loadingAccounts, setLoadingAccounts] = useState(false);
   const [connectingTdv, setConnectingTdv] = useState<number | null>(null);
+  const [tradovateClientToken, setTradovateClientToken] = useState<string | null>(null);
   const [syncing, setSyncing] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<{ [k: string]: string }>({});
 
@@ -365,13 +366,67 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
     setTradovateMapping({});
   };
 
+  // Try authenticating directly from the browser (user's IP — not blocked by Tradovate)
+  const tryTradovateClientSide = async (username: string, password: string): Promise<
+    { ok: true; token: string; accounts: { id: number; name: string; active: boolean }[]; resolvedEnv: 'live' | 'demo' } |
+    { ok: false; reason: 'cors' | 'credentials' }
+  > => {
+    const LIVE = 'https://live.tradovateapi.com/v1';
+    const DEMO = 'https://demo.tradovateapi.com/v1';
+    const authBody = JSON.stringify({ name: username, password, appId: 'TradeLog', appVersion: '1.0', deviceId: 'tradelog-client-v1', cid: 0, sec: '' });
+
+    for (const [base, env] of [[LIVE, 'live'], [DEMO, 'demo']] as const) {
+      let authRes: Response;
+      try {
+        authRes = await fetch(`${base}/auth/accesstokenrequest`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: authBody,
+        });
+      } catch {
+        return { ok: false, reason: 'cors' }; // CORS blocked — fall back to server
+      }
+      const authData = await authRes.json().catch(() => ({}));
+      if (!authData.accessToken) continue;
+      try {
+        const acctRes = await fetch(`${base}/account/list`, {
+          headers: { Authorization: `Bearer ${authData.accessToken}`, Accept: 'application/json' },
+        });
+        const raw = await acctRes.json().catch(() => []);
+        const accounts = (Array.isArray(raw) ? raw : [])
+          .filter((a: { archived?: boolean }) => !a.archived)
+          .map((a: { id: number; name: string; active: boolean }) => ({ id: a.id, name: a.name, active: a.active }));
+        return { ok: true, token: authData.accessToken, accounts, resolvedEnv: env };
+      } catch {
+        return { ok: false, reason: 'cors' };
+      }
+    }
+    return { ok: false, reason: 'credentials' };
+  };
+
   const fetchTradovateAccounts = async () => {
     if (!tradovateUser.trim() || !tradovatePass.trim() || !supabase) return;
-    const { data: { session } } = await supabase.auth.getSession();
-    const jwt = session?.access_token;
-    if (!jwt) return alert(isHe ? 'לא מחובר' : 'Not authenticated');
     setLoadingAccounts(true);
     try {
+      // 1. Try client-side first (user's IP — not blocked)
+      const clientResult = await tryTradovateClientSide(tradovateUser, tradovatePass);
+      if (clientResult.ok) {
+        setTradovateAccounts(clientResult.accounts);
+        setTradovateClientToken(clientResult.token);
+        if (clientResult.resolvedEnv !== tradovateEnv) setTradovateEnv(clientResult.resolvedEnv);
+        setTradovateStep('mapping');
+        return;
+      }
+      if (clientResult.reason === 'credentials') {
+        alert(isHe
+          ? 'שגיאה: שם משתמש או סיסמה שגויים — נסה להתחבר ב-trader.tradovate.com לאימות'
+          : 'Error: Invalid username or password — verify at trader.tradovate.com');
+        return;
+      }
+
+      // 2. CORS blocked — fall back to server-side
+      const { data: { session } } = await supabase.auth.getSession();
+      const jwt = session?.access_token;
+      if (!jwt) return alert(isHe ? 'לא מחובר' : 'Not authenticated');
       const res = await fetch('/api/tradovate-auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
@@ -380,9 +435,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setTradovateAccounts(data.accounts ?? []);
-        if (data.resolvedEnv && data.resolvedEnv !== tradovateEnv) {
-          setTradovateEnv(data.resolvedEnv);
-        }
+        if (data.resolvedEnv && data.resolvedEnv !== tradovateEnv) setTradovateEnv(data.resolvedEnv);
         setTradovateStep('mapping');
       } else {
         const errMsg = data.hint
@@ -416,6 +469,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
           api_password: tradovatePass,
           env: tradovateEnv,
           tradovate_account_id: tdvId,
+          pre_auth_token: tradovateClientToken ?? undefined,
         }),
       });
       if (res.ok) {
@@ -471,6 +525,97 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
     }
   };
 
+  // Client-side Tradovate sync — fetches directly from user's browser (bypasses server IP blocks)
+  const syncTradovateClientSide = async (jwt: string): Promise<boolean> => {
+    const LIVE = 'https://live.tradovateapi.com/v1';
+    const DEMO = 'https://demo.tradovateapi.com/v1';
+
+    // Load connections from our DB
+    const { data: connections } = await supabase!.from('broker_connections')
+      .select('*').eq('user_id', user?.id).eq('broker', 'tradovate').eq('is_active', true);
+    if (!connections?.length) return false;
+
+    let totalInserted = 0;
+
+    for (const conn of connections) {
+      const base = conn.broker_env === 'demo' ? DEMO : LIVE;
+      const fallback = conn.broker_env === 'demo' ? LIVE : DEMO;
+
+      // Auth — try stored env, then fallback
+      let token: string | null = null;
+      let activeBase = base;
+      for (const b of [base, fallback]) {
+        try {
+          const r = await fetch(`${b}/auth/accesstokenrequest`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: conn.api_username, password: conn.api_key, appId: 'TradeLog', appVersion: '1.0', deviceId: 'tradelog-client-v1', cid: 0, sec: '' }),
+          });
+          const d = await r.json().catch(() => ({}));
+          if (d.accessToken) { token = d.accessToken; activeBase = b; break; }
+        } catch { return false; } // CORS blocked — fall back to server
+      }
+      if (!token) continue;
+
+      // Fetch execution reports
+      let allReports: { id: number; accountId: number; contractId: number; timestamp: string; qty: number; side: string; grossPL?: number; commission?: number }[] = [];
+      try {
+        const r = await fetch(`${activeBase}/executionReport/list`, { headers: { Authorization: `Bearer ${token}` } });
+        const d = await r.json().catch(() => []);
+        allReports = Array.isArray(d) ? d : [];
+      } catch { return false; }
+
+      const tdvAccountId: number = conn.tradovate_account_id;
+      const startDate = conn.last_synced_at ? new Date(conn.last_synced_at) : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+      const endTimestamp = new Date().toISOString();
+
+      const closingFills = allReports.filter((r) =>
+        r.accountId === tdvAccountId &&
+        new Date(r.timestamp) >= startDate &&
+        r.grossPL !== undefined && r.grossPL !== null && r.grossPL !== 0,
+      );
+      if (!closingFills.length) {
+        await fetch('/api/tradovate-sync', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+          body: JSON.stringify({ user_id: user?.id, pre_fetched_trades: [], connection_id: conn.id, end_timestamp: endTimestamp }) });
+        continue;
+      }
+
+      // Resolve symbols
+      const uniqueIds = [...new Set(closingFills.map((r) => r.contractId))];
+      const symbolMap = new Map<number, string>();
+      await Promise.all(uniqueIds.map(async (cid) => {
+        try {
+          const r = await fetch(`${activeBase}/contract/item?id=${cid}`, { headers: { Authorization: `Bearer ${token!}` } });
+          const d = await r.json().catch(() => ({}));
+          if (d.name) symbolMap.set(cid, d.name.replace(/[FGHJKMNQUVXZ]\d{1,2}$/, '').replace(/\s+[FGHJKMNQUVXZ]\d{1,2}$/, '').toUpperCase().trim());
+        } catch { /* skip */ }
+      }));
+
+      const envLabel = conn.broker_env === 'demo' ? 'Tradovate Demo' : 'Tradovate';
+      const rows = closingFills.map((r) => {
+        const pnl = Math.round(((r.grossPL ?? 0) - (r.commission ?? 0)) * 100) / 100;
+        return {
+          id: crypto.randomUUID(), user_id: user?.id, account_id: conn.account_id,
+          symbol: symbolMap.get(r.contractId) ?? `CONTRACT-${r.contractId}`,
+          direction: r.side === 'Sell' ? 'long' : 'short',
+          trade_date: r.timestamp.split('T')[0], pnl, size: r.qty,
+          notes: (r.commission ?? 0) > 0 ? `Fees: $${(r.commission ?? 0).toFixed(2)} | ${envLabel}` : envLabel,
+          source: 'auto', broker_trade_id: `tradovate-${r.id}`, confirmations: {}, field_values: {},
+        };
+      });
+
+      const saveRes = await fetch('/api/tradovate-sync', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+        body: JSON.stringify({ user_id: user?.id, pre_fetched_trades: rows, connection_id: conn.id, end_timestamp: endTimestamp }),
+      });
+      const saveData = await saveRes.json().catch(() => ({}));
+      totalInserted += saveData.inserted ?? 0;
+    }
+
+    alert(isHe ? `סנכרון הושלם — ${totalInserted} עסקאות חדשות` : `Sync complete — ${totalInserted} new trades`);
+    return true;
+  };
+
   const triggerSync = async (broker: 'tradovate' | 'topstepx') => {
     setSyncing(broker);
     if (!supabase) { setSyncing(null); return; }
@@ -478,32 +623,38 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
     const jwt = session?.access_token;
     if (!jwt) { setSyncing(null); return alert(isHe ? 'לא מחובר' : 'Not authenticated'); }
     try {
-      // Tradovate sync runs on Vercel (Supabase IPs are blocked by Tradovate)
-      // TopstepX sync runs on Supabase Edge Functions
-      let res: Response;
       if (broker === 'tradovate') {
-        res = await fetch('/api/tradovate-sync', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
-          body: JSON.stringify({ user_id: user?.id }),
-        });
+        // Try client-side first (user's IP — bypasses server IP blocks)
+        const clientOk = await syncTradovateClientSide(jwt);
+        if (!clientOk) {
+          // CORS blocked — fall back to server-side
+          const res = await fetch('/api/tradovate-sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+            body: JSON.stringify({ user_id: user?.id }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            alert(isHe ? `שגיאה בסנכרון: ${data.error ?? res.status}` : `Sync failed: ${data.error ?? res.status}`);
+          } else {
+            alert(isHe ? `סנכרון הושלם — ${data.inserted ?? 0} עסקאות חדשות` : `Sync complete — ${data.inserted ?? 0} new trades`);
+          }
+        }
       } else {
         const anonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY as string;
-        res = await fetch(`${supabaseUrl}/functions/v1/topstepx-sync`, {
+        const res = await fetch(`${supabaseUrl}/functions/v1/topstepx-sync`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
           body: JSON.stringify({ user_id: user?.id }),
         });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(isHe ? `שגיאה בסנכרון: ${data.error ?? res.status}` : `Sync failed: ${data.error ?? res.status}`);
+        } else {
+          alert(isHe ? `סנכרון הושלם — ${data.inserted ?? 0} עסקאות חדשות` : `Sync complete — ${data.inserted ?? 0} new trades`);
+        }
       }
-      const data = await res.json();
       setLastSync((s) => ({ ...s, [broker]: new Date().toLocaleTimeString() }));
-      if (!res.ok) {
-        alert(isHe ? `שגיאה בסנכרון: ${data.error ?? res.status}` : `Sync failed: ${data.error ?? res.status}`);
-      } else {
-        alert(isHe
-          ? `סנכרון הושלם — ${data.inserted ?? 0} עסקאות חדשות`
-          : `Sync complete — ${data.inserted ?? 0} new trades`);
-      }
     } catch {
       alert(isHe ? 'שגיאה בסנכרון' : 'Sync failed');
     } finally {

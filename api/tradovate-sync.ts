@@ -130,6 +130,33 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
   if (authErr || !user || user.id !== userId) return sendJson(res, { error: 'Forbidden' }, 403);
 
+  // ── CLIENT-SIDE PRE-FETCHED MODE ──────────────────────────────────────────
+  // When the client already fetched and processed trades (e.g. CORS worked, server IPs blocked),
+  // it sends pre_fetched_trades + connection_id for us to just save to DB.
+  const preFetched = body.pre_fetched_trades as unknown[] | undefined;
+  const connId     = body.connection_id as string | undefined;
+  const endTs      = body.end_timestamp as string | undefined;
+
+  if (preFetched && connId) {
+    if (!Array.isArray(preFetched) || preFetched.length === 0) {
+      await supabase.from('broker_connections').update({ last_synced_at: endTs ?? new Date().toISOString() }).eq('id', connId);
+      return sendJson(res, { success: true, inserted: 0 });
+    }
+    // Deduplicate against existing broker_trade_ids
+    const candidateIds = (preFetched as { broker_trade_id?: string }[]).map((r) => r.broker_trade_id).filter(Boolean);
+    const { data: existing } = await supabase
+      .from('trades').select('broker_trade_id').eq('user_id', userId).in('broker_trade_id', candidateIds);
+    const existingSet = new Set((existing ?? []).map((r: { broker_trade_id: string }) => r.broker_trade_id));
+    const newRows = (preFetched as Record<string, unknown>[]).filter((r) => !existingSet.has(r.broker_trade_id as string));
+    if (newRows.length > 0) {
+      const { error: insertErr } = await supabase.from('trades').insert(newRows);
+      if (insertErr) return sendJson(res, { error: insertErr.message }, 500);
+    }
+    await supabase.from('broker_connections').update({ last_synced_at: endTs ?? new Date().toISOString() }).eq('id', connId);
+    return sendJson(res, { success: true, inserted: newRows.length });
+  }
+
+  // ── SERVER-SIDE MODE (fallback) ───────────────────────────────────────────
   // Load active Tradovate connections
   const { data: connections, error: connErr } = await supabase
     .from('broker_connections')

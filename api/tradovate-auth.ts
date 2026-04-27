@@ -87,7 +87,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const userId    = body.user_id      as string | undefined;
     const username  = body.api_username as string | undefined;
     const password  = body.api_password as string | undefined;
-    const env       = body.env === 'demo' ? 'demo' : 'live';
+    const env          = body.env === 'demo' ? 'demo' : 'live';
+    const preAuthToken = body.pre_auth_token as string | undefined;
     const primaryUrl   = env === 'demo' ? DEMO_BASE : LIVE_BASE;
     const fallbackUrl  = env === 'demo' ? LIVE_BASE : DEMO_BASE;
 
@@ -106,38 +107,43 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
     if (authErr || !user || user.id !== userId) return sendJson(res, { error: 'Forbidden' }, 403);
 
-    // Authenticate with Tradovate — try primary env first, then fallback
+    // Authenticate with Tradovate — use pre_auth_token if provided (client-side auth), else try server-side
     let accessToken: string | undefined;
     let baseUrl = primaryUrl;
     let resolvedEnv = env;
-    try {
-      const primary = await authenticate(primaryUrl, username, password);
-      if (primary.token) {
-        accessToken = primary.token;
-      } else {
-        // Try the other environment automatically
-        const fallback = await authenticate(fallbackUrl, username, password);
-        if (fallback.token) {
-          accessToken = fallback.token;
-          baseUrl = fallbackUrl;
-          resolvedEnv = env === 'demo' ? 'live' : 'demo';
+
+    if (preAuthToken) {
+      // Token already obtained client-side — skip server-side re-auth
+      accessToken = preAuthToken;
+    } else {
+      try {
+        const primary = await authenticate(primaryUrl, username, password);
+        if (primary.token) {
+          accessToken = primary.token;
         } else {
-          return sendJson(res, {
-            error: 'Invalid Tradovate credentials — check username/password',
-            hint: 'Tried both Live and Demo endpoints. Verify credentials at trader.tradovate.com',
-            tradovateStatus: primary.httpStatus,
-            tradovateResponse: primary.rawBody,
-          }, 401);
+          const fallback = await authenticate(fallbackUrl, username, password);
+          if (fallback.token) {
+            accessToken = fallback.token;
+            baseUrl = fallbackUrl;
+            resolvedEnv = env === 'demo' ? 'live' : 'demo';
+          } else {
+            return sendJson(res, {
+              error: 'Invalid Tradovate credentials — check username/password',
+              hint: 'Tried both Live and Demo endpoints. Verify credentials at trader.tradovate.com',
+              tradovateStatus: primary.httpStatus,
+              tradovateResponse: primary.rawBody,
+            }, 401);
+          }
         }
+      } catch (e) {
+        const detail = e instanceof Error ? e.message : String(e);
+        const isTimeout = detail.includes('abort') || detail.includes('timeout');
+        return sendJson(res, {
+          error: isTimeout ? 'Tradovate API timed out (15s)' : 'Could not reach Tradovate API',
+          detail,
+          baseUrl,
+        }, 502);
       }
-    } catch (e) {
-      const detail = e instanceof Error ? e.message : String(e);
-      const isTimeout = detail.includes('abort') || detail.includes('timeout');
-      return sendJson(res, {
-        error: isTimeout ? 'Tradovate API timed out (15s)' : 'Could not reach Tradovate API',
-        detail,
-        baseUrl,
-      }, 502);
     }
 
     // ── LIST MODE: return accounts, don't save ──
