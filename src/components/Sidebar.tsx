@@ -84,7 +84,7 @@ export default function Sidebar() {
 
         {(() => {
           const activeAccounts = accounts.filter((a) => a.is_active);
-          if (activeAccounts.length <= 3) return null;
+          if (activeAccounts.length <= 1) return null;
           return (
             <div className="sidebar-account-wrap">
               <label>{lang === 'he' ? 'חשבון' : 'Account'}</label>
