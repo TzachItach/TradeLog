@@ -39,7 +39,7 @@ function makePropAccount(overrides: Partial<Account> = {}): Account {
     prop_max_drawdown: 3000,
     prop_daily_limit: 1000,
     prop_profit_target: 6000,
-    prop_drawdown_type: 'trailing',
+    prop_drawdown_type: 'trailing_eod',
     prop_start_date: '2026-01-01',
     ...overrides,
   };
