@@ -149,7 +149,7 @@ function PaywallScreen({ email }: { email?: string }) {
         התחל ניסיון חינם — 14 יום
       </a>
       <p style={{ color: '#737373', fontSize: '0.78rem', margin: 0 }}>
-        ₪69/חודש לאחר הניסיון · אחרי ההרשמה, רענן את הדף
+        $24.99/חודש לאחר הניסיון · אחרי ההרשמה, רענן את הדף
       </p>
     </div>
   );
@@ -227,8 +227,8 @@ function ProtectedRoute({ children, ready, hasUser }: { children: React.ReactNod
   // אין משתמש — עבור להתחברות
   if (!DEMO_MODE && !isLoggedIn) return <Navigate to="/auth" replace />;
 
-  // אין מנוי פעיל — הצג paywall
-  if (!DEMO_MODE && subscriptionStatus !== 'active') {
+  // מנוי פג — הצג paywall (null = טוען עדיין, לא חוסמים)
+  if (!DEMO_MODE && subscriptionStatus === 'expired') {
     return <PaywallScreen email={user?.email} />;
   }
 
