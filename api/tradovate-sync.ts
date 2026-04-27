@@ -4,9 +4,9 @@ import type { IncomingMessage, ServerResponse } from 'http';
 const LIVE_BASE = 'https://live.tradovateapi.com/v1';
 const DEMO_BASE = 'https://demo.tradovateapi.com/v1';
 
-const APP_ID      = process.env.TRADOVATE_APP_ID      ?? 'TradeLog';
+const APP_ID      = process.env.TRADOVATE_APP_ID      ?? 'tradovate_trader(web)';
 const APP_VERSION = process.env.TRADOVATE_APP_VERSION ?? '1.0';
-const CID         = parseInt(process.env.TRADOVATE_CID ?? '0');
+const CID         = parseInt(process.env.TRADOVATE_CID ?? '1');
 const SEC         = process.env.TRADOVATE_SEC          ?? '';
 const DEVICE_ID   = 'tradelog-server-v1';
 
