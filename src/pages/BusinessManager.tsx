@@ -921,7 +921,7 @@ export default function BusinessManager() {
       </div>
 
       {/* Break-even bar */}
-      <div style={{ background: 'var(--s2)', border: '1px solid var(--bd)', borderRadius: 14, padding: '18px 22px', marginBottom: 20 }}>
+      <div style={{ maxWidth: 720, background: 'var(--s2)', border: '1px solid var(--bd)', borderRadius: 14, padding: '18px 22px', marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10, flexWrap: 'wrap', gap: '4px 12px' }}>
           <span style={{ fontWeight: 700, fontSize: '.9rem', color: 'var(--t1)' }}>
             {isHe ? 'יעד Break-Even החודש' : 'Monthly Break-Even Target'}
