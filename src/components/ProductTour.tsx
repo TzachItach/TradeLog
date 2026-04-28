@@ -392,9 +392,9 @@ export default function ProductTour({ onDone }: { onDone: () => void }) {
             </label>
             <div style={{ display: 'flex', gap: 8 }}>
               {([
-                ['prop_firm', isHe ? 'Prop Firm' : 'Prop Firm'],
-                ['personal',  isHe ? 'Live אישי' : 'Personal Live'],
-                ['demo',      isHe ? 'Sim / Eval' : 'Sim / Eval'],
+                ['prop_firm', isHe ? 'ממומן' : 'Funded'],
+                ['personal',  isHe ? 'לייב' : 'Live'],
+                ['demo',      isHe ? 'תיק מבחן' : 'Eval'],
               ] as [AccountType, string][]).map(([val, label]) => (
                 <button
                   key={val}

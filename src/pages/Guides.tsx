@@ -36,7 +36,7 @@ function QuickStartMockup() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {[
             { label: 'שם החשבון', val: 'Apex — MNQ Live' },
-            { label: 'סוג חשבון', val: 'Prop Firm' },
+            { label: 'סוג חשבון', val: 'ממומן' },
             { label: 'יתרה התחלתית', val: '$50,000' },
           ].map(f => (
             <div key={f.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -657,8 +657,8 @@ export default function Guides() {
               <div className="guide-step">
                 <div className="guide-step-num">1</div>
                 <div className="guide-step-body">
-                  <h3>הגדרת חשבון Prop Firm</h3>
-                  <p>בהגדרות, צור חשבון חדש ובחר סוג <strong>"Prop Firm"</strong>. הגדר: יתרה התחלתית, Max Drawdown (דולרים), Daily Loss Limit, ו-Profit Target.</p>
+                  <h3>הגדרת חשבון ממומן</h3>
+                  <p>בהגדרות, צור חשבון חדש ובחר סוג <strong>"ממומן"</strong>. הגדר: יתרה התחלתית, Max Drawdown (דולרים), Daily Loss Limit, ו-Profit Target.</p>
                 </div>
               </div>
               <div className="guide-step">
