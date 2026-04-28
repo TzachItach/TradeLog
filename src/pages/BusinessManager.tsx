@@ -117,21 +117,28 @@ function BudgetModal({ settings, onSave, onClear, onClose, isHe }: {
   );
 }
 
-function BudgetKpiCard({ budget, spent, isHe, onClick }: {
+function BudgetSection({ budget, spent, isHe, onEdit }: {
   budget: BudgetSettings | null;
   spent: number;
   isHe: boolean;
-  onClick: () => void;
+  onEdit: () => void;
 }) {
+  const periodLabel = !budget ? '' : budget.period === 'monthly' ? (isHe ? 'חודשי' : 'Monthly') : (isHe ? 'רבעוני' : 'Quarterly');
+
   if (!budget) {
     return (
-      <div onClick={onClick} style={{ background: 'var(--s2)', border: '1px dashed var(--bd2)', borderRadius: 14, padding: '18px 20px', cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 6, minHeight: 90 }}>
-        <div style={{ fontSize: '.7rem', color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '.04em' }}>
-          {isHe ? 'תקציב' : 'Budget'}
+      <div style={{ background: 'var(--s2)', border: '1px dashed var(--bd2)', borderRadius: 14, padding: '22px 24px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: '.9rem', color: 'var(--t1)', marginBottom: 4 }}>
+            {isHe ? 'תקציב הוצאות' : 'Expense Budget'}
+          </div>
+          <div style={{ fontSize: '.8rem', color: 'var(--t3)' }}>
+            {isHe ? 'הגדר תקציב חודשי או רבעוני לצורך מעקב' : 'Set a monthly or quarterly budget to track your spending'}
+          </div>
         </div>
-        <div style={{ fontSize: '.82rem', color: 'var(--t3)' }}>
-          {isHe ? '+ הגדר תקציב' : '+ Set budget'}
-        </div>
+        <button className="btn btn-ghost" style={{ flexShrink: 0 }} onClick={onEdit}>
+          {isHe ? '+ הגדר תקציב' : '+ Set Budget'}
+        </button>
       </div>
     );
   }
@@ -140,27 +147,82 @@ function BudgetKpiCard({ budget, spent, isHe, onClick }: {
   const remaining = Math.max(0, budget.amount - spent);
   const isOver = spent > budget.amount;
   const barColor = pct >= 100 ? 'var(--r)' : pct >= 70 ? 'var(--o)' : 'var(--g)';
+
+  // Primary currency formatters
   const sym = budget.currency === 'ILS' ? '₪' : '$';
   const fmtB = (n: number) => sym + Math.round(n).toLocaleString('en-US');
-  const periodLabel = budget.period === 'monthly' ? (isHe ? 'חודשי' : 'Monthly') : (isHe ? 'רבעוני' : 'Quarterly');
+
+  // Secondary (USD equivalent when budget is in ILS, ILS equivalent when in USD)
+  const showDual = budget.currency === 'ILS';
+  const fmtUSD = (n: number) => '$' + Math.round(n / budget.ilsRate).toLocaleString('en-US');
+
+  const cols = [
+    { label: isHe ? 'הוצאת' : 'Spent',     primary: fmtB(spent),           secondary: showDual ? fmtUSD(spent) : null },
+    { label: isHe ? 'תקציב' : 'Budget',    primary: fmtB(budget.amount),    secondary: showDual ? fmtUSD(budget.amount) : null },
+    { label: isHe ? 'נותר' : 'Remaining', primary: isOver ? (isHe ? 'חרגת!' : 'Over!') : fmtB(remaining), secondary: showDual && !isOver ? fmtUSD(remaining) : null, color: barColor },
+  ];
 
   return (
-    <div onClick={onClick} style={{ background: 'var(--s2)', border: `1px solid ${isOver ? 'rgba(255,64,96,.45)' : 'var(--bd)'}`, borderRadius: 14, padding: '18px 20px', cursor: 'pointer' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-        <div style={{ fontSize: '.7rem', color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '.04em' }}>
-          {isHe ? 'תקציב' : 'Budget'} · {periodLabel}
+    <div style={{
+      background: 'var(--s2)',
+      border: `1px solid ${isOver ? 'rgba(255,64,96,.45)' : 'var(--bd)'}`,
+      borderRadius: 14, padding: '22px 24px', marginBottom: 20,
+    }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontWeight: 700, fontSize: '.9rem', color: 'var(--t1)' }}>
+            {isHe ? 'תקציב הוצאות' : 'Expense Budget'}
+          </span>
+          <span style={{ fontSize: '.72rem', fontWeight: 600, padding: '3px 10px', borderRadius: 99, background: 'var(--s3)', color: 'var(--t2)' }}>
+            {periodLabel}
+          </span>
+          {budget.currency === 'ILS' && (
+            <span style={{ fontSize: '.72rem', fontWeight: 600, padding: '3px 10px', borderRadius: 99, background: 'var(--s3)', color: 'var(--t2)' }}>
+              ₪ ILS
+            </span>
+          )}
         </div>
-        <span style={{ fontSize: '.68rem', color: 'var(--t3)' }}>⚙</span>
+        <button className="btn btn-ghost" style={{ fontSize: '.78rem', padding: '5px 14px' }} onClick={onEdit}>
+          ⚙ {isHe ? 'ערוך' : 'Edit'}
+        </button>
       </div>
-      <div style={{ fontSize: '1.4rem', fontWeight: 800, color: barColor, lineHeight: 1.1, marginBottom: 4 }}>
-        {isOver ? (isHe ? 'חרגת!' : 'Over!') : fmtB(remaining)}
+
+      {/* Three columns: Spent / Budget / Remaining */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
+        {cols.map((col) => (
+          <div key={col.label} style={{ background: 'var(--s1)', borderRadius: 10, padding: '14px 16px' }}>
+            <div style={{ fontSize: '.68rem', color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 6 }}>{col.label}</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: col.color ?? 'var(--t1)', lineHeight: 1.1, marginBottom: showDual ? 4 : 0 }}>
+              {col.primary}
+            </div>
+            {col.secondary && (
+              <div style={{ fontSize: '.75rem', color: 'var(--t3)' }}>{col.secondary}</div>
+            )}
+          </div>
+        ))}
       </div>
-      <div style={{ fontSize: '.72rem', color: 'var(--t3)', marginBottom: 8 }}>
-        {isOver
-          ? `+${fmtB(spent - budget.amount)} ${isHe ? 'מעל התקציב' : 'over budget'}`
-          : `${fmtB(spent)} / ${fmtB(budget.amount)} · ${Math.round(pct)}%`}
+
+      {/* Progress bar */}
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span style={{ fontSize: '.74rem', fontWeight: 700, color: barColor }}>
+            {Math.round(pct)}% {isHe ? 'נוצל' : 'used'}
+            {isOver && <span style={{ marginInlineStart: 6 }}>⚠</span>}
+          </span>
+          <span style={{ fontSize: '.72rem', color: 'var(--t3)' }}>
+            {fmtB(spent)} / {fmtB(budget.amount)}
+          </span>
+        </div>
+        <MeterBar pct={pct} color={barColor} height={12} />
       </div>
-      <MeterBar pct={pct} color={barColor} height={5} />
+
+      {/* Footer: exchange rate info */}
+      {budget.currency === 'ILS' && (
+        <div style={{ fontSize: '.72rem', color: 'var(--t3)' }}>
+          {isHe ? `שער: $1 = ₪${budget.ilsRate}` : `Rate: $1 = ₪${budget.ilsRate}`}
+        </div>
+      )}
     </div>
   );
 }
@@ -851,8 +913,10 @@ export default function BusinessManager() {
           sub={isHe ? 'עד הפסקה' : 'until breach'}
           color={stats.avgBurnDays > 0 && stats.avgBurnDays < 14 ? 'var(--r)' : 'var(--t1)'}
         />
-        <BudgetKpiCard budget={budgetSettings} spent={budgetSpent} isHe={isHe} onClick={() => setShowBudgetModal(true)} />
       </div>
+
+      {/* Budget Section */}
+      <BudgetSection budget={budgetSettings} spent={budgetSpent} isHe={isHe} onEdit={() => setShowBudgetModal(true)} />
 
       {/* Break-even bar */}
       <div style={{ background: 'var(--s2)', border: '1px solid var(--bd)', borderRadius: 14, padding: '18px 22px', marginBottom: 20 }}>
