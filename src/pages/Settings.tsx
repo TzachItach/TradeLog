@@ -440,8 +440,8 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
           </div>
           <div style={{ fontSize: '.74rem', color: 'var(--t3)' }}>
             {isHe
-              ? 'ייבוא CSV: עמוד הגדרות → ייבוא עסקאות, או דרך כפתור "ייבוא" בכל עמוד'
-              : 'CSV import: Settings → Import Trades, or use the "Import" button on any page'}
+              ? 'ייבוא CSV: עמוד עסקאות → כפתור "ייבוא" בראש העמוד'
+              : 'CSV import: go to Trades page → "Import" button at the top'}
           </div>
         </div>
       </div>
