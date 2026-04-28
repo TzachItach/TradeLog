@@ -43,7 +43,7 @@ function encryptPassword(name: string, password: string): string {
   return btoa(rotated);
 }
 
-async function getTradovateToken(baseUrl: string, username: string, password: string): Promise<string | null> {
+async function getTradovateToken(baseUrl: string, username: string, password: string, env: 'live' | 'demo' = 'live'): Promise<string | null> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
@@ -56,7 +56,7 @@ async function getTradovateToken(baseUrl: string, username: string, password: st
         'Referer': 'https://trader.tradovate.com/',
       },
       signal: controller.signal,
-      body: JSON.stringify({ name: username, password: encryptPassword(username, password), enc: true, chl: String(Math.floor(Math.random() * 1e12)), appId: APP_ID, appVersion: APP_VERSION, deviceId: DEVICE_ID, cid: CID, sec: SEC }),
+      body: JSON.stringify({ name: username, password: encryptPassword(username, password), enc: true, chl: String(Math.floor(Math.random() * 1e12)), environment: env, appId: APP_ID, appVersion: APP_VERSION, deviceId: DEVICE_ID, cid: CID, sec: SEC }),
     });
     const data = await res.json() as { accessToken?: string };
     return data.accessToken ?? null;
@@ -184,8 +184,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   for (const conn of connections) {
     const baseUrl = conn.broker_env === 'demo' ? DEMO_BASE : LIVE_BASE;
 
-    // Authenticate
-    const accessToken = await getTradovateToken(baseUrl, conn.api_username, conn.api_key);
+    // Auth always uses LIVE endpoint with environment field for account context
+    const accessToken = await getTradovateToken(LIVE_BASE, conn.api_username, conn.api_key, (conn.broker_env ?? 'live') as 'live' | 'demo');
     if (!accessToken) {
       console.error(`[tradovate-sync] Auth failed for account ${conn.account_id}`);
       continue;

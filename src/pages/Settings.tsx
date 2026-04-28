@@ -340,157 +340,11 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
   const [topstepKey, setTopstepKey] = useState('');
   const [topstepEmail, setTopstepEmail] = useState('');
   const [showTopstepInput, setShowTopstepInput] = useState(false);
-  const [tradovateUser, setTradovateUser] = useState('');
-  const [tradovatePass, setTradovatePass] = useState('');
-  const [tradovateEnv, setTradovateEnv] = useState<'live' | 'demo'>('live');
-  const [showTradovateInput, setShowTradovateInput] = useState(false);
-  const [tradovateStep, setTradovateStep] = useState<'credentials' | 'mapping'>('credentials');
-  const [tradovateAccounts, setTradovateAccounts] = useState<{ id: number; name: string; active: boolean }[]>([]);
-  const [tradovateMapping, setTradovateMapping] = useState<{ [tdvId: number]: string }>({});
-  const [loadingAccounts, setLoadingAccounts] = useState(false);
-  const [connectingTdv, setConnectingTdv] = useState<number | null>(null);
-  const [tradovateClientToken, setTradovateClientToken] = useState<string | null>(null);
   const [syncing, setSyncing] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<{ [k: string]: string }>({});
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL as string ?? '';
-
-  const resetTradovate = () => {
-    setShowTradovateInput(false);
-    setTradovateStep('credentials');
-    setTradovateUser('');
-    setTradovatePass('');
-    setTradovateEnv('live');
-    setTradovateAccounts([]);
-    setTradovateMapping({});
-  };
-
-  // Try authenticating directly from the browser (user's IP — not blocked by Tradovate)
-  const encryptTradovatePassword = (name: string, password: string): string => {
-    const o = name.length % password.length;
-    const rotated = password.slice(o) + password.slice(0, o);
-    return btoa(rotated);
-  };
-
-  const tryTradovateClientSide = async (username: string, password: string): Promise<
-    { ok: true; token: string; accounts: { id: number; name: string; active: boolean }[]; resolvedEnv: 'live' | 'demo' } |
-    { ok: false; reason: 'cors' | 'credentials' }
-  > => {
-    const LIVE = 'https://live.tradovateapi.com/v1';
-    const DEMO = 'https://demo.tradovateapi.com/v1';
-    const authBody = JSON.stringify({ name: username, password: encryptTradovatePassword(username, password), enc: true, chl: String(Math.floor(Math.random() * 1e12)), appId: 'tradovate_trader(web)', appVersion: '1.0', deviceId: 'tradelog-client-v1', cid: 1, sec: '' });
-
-    for (const [base, env] of [[LIVE, 'live'], [DEMO, 'demo']] as const) {
-      let authRes: Response;
-      try {
-        authRes = await fetch(`${base}/auth/accesstokenrequest`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: authBody,
-        });
-      } catch {
-        return { ok: false, reason: 'cors' }; // CORS blocked — fall back to server
-      }
-      const authData = await authRes.json().catch(() => ({}));
-      if (!authData.accessToken) continue;
-      try {
-        const acctRes = await fetch(`${base}/account/list`, {
-          headers: { Authorization: `Bearer ${authData.accessToken}`, Accept: 'application/json' },
-        });
-        const raw = await acctRes.json().catch(() => []);
-        const accounts = (Array.isArray(raw) ? raw : [])
-          .filter((a: { archived?: boolean }) => !a.archived)
-          .map((a: { id: number; name: string; active: boolean }) => ({ id: a.id, name: a.name, active: a.active }));
-        return { ok: true, token: authData.accessToken, accounts, resolvedEnv: env };
-      } catch {
-        return { ok: false, reason: 'cors' };
-      }
-    }
-    return { ok: false, reason: 'credentials' };
-  };
-
-  const fetchTradovateAccounts = async () => {
-    if (!tradovateUser.trim() || !tradovatePass.trim() || !supabase) return;
-    setLoadingAccounts(true);
-    try {
-      // 1. Try client-side first (user's IP — not blocked)
-      const clientResult = await tryTradovateClientSide(tradovateUser, tradovatePass);
-      if (clientResult.ok) {
-        setTradovateAccounts(clientResult.accounts);
-        setTradovateClientToken(clientResult.token);
-        if (clientResult.resolvedEnv !== tradovateEnv) setTradovateEnv(clientResult.resolvedEnv);
-        setTradovateStep('mapping');
-        return;
-      }
-      if (clientResult.reason === 'credentials') {
-        alert(isHe
-          ? 'שגיאה: שם משתמש או סיסמה שגויים — נסה להתחבר ב-trader.tradovate.com לאימות'
-          : 'Error: Invalid username or password — verify at trader.tradovate.com');
-        return;
-      }
-
-      // 2. CORS blocked — fall back to server-side
-      const { data: { session } } = await supabase.auth.getSession();
-      const jwt = session?.access_token;
-      if (!jwt) return alert(isHe ? 'לא מחובר' : 'Not authenticated');
-      const res = await fetch('/api/tradovate-auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
-        body: JSON.stringify({ action: 'list', user_id: user?.id, api_username: tradovateUser, api_password: tradovatePass, env: tradovateEnv }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok) {
-        setTradovateAccounts(data.accounts ?? []);
-        if (data.resolvedEnv && data.resolvedEnv !== tradovateEnv) setTradovateEnv(data.resolvedEnv);
-        setTradovateStep('mapping');
-      } else {
-        const errMsg = data.hint
-          ? `${data.error}\n\n${data.hint}`
-          : (data.tradovateStatus
-            ? `${data.error} (HTTP ${data.tradovateStatus})\n\nTradovate said: ${data.tradovateResponse ?? '(no body)'}`
-            : (data.detail ? `${data.error}\n${data.detail}` : (data.error ?? res.status)));
-        alert(isHe ? `שגיאה: ${errMsg}` : `Error: ${errMsg}`);
-      }
-    } catch {
-      alert(isHe ? 'שגיאה בחיבור לטריידובייט' : 'Could not reach Tradovate');
-    } finally {
-      setLoadingAccounts(false);
-    }
-  };
-
-  const connectTradovateAccount = async (tdvId: number, tradelogAccountId: string) => {
-    if (!supabase) return;
-    const { data: { session } } = await supabase.auth.getSession();
-    const jwt = session?.access_token;
-    if (!jwt) return;
-    setConnectingTdv(tdvId);
-    try {
-      const res = await fetch('/api/tradovate-auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
-        body: JSON.stringify({
-          user_id: user?.id,
-          account_id: tradelogAccountId,
-          api_username: tradovateUser,
-          api_password: tradovatePass,
-          env: tradovateEnv,
-          tradovate_account_id: tdvId,
-          pre_auth_token: tradovateClientToken ?? undefined,
-        }),
-      });
-      if (res.ok) {
-        setTxConn((c) => ({ ...c, [tradelogAccountId]: true }));
-        alert(isHe ? 'חובר בהצלחה!' : 'Connected!');
-      } else {
-        const data = await res.json().catch(() => ({}));
-        alert(isHe ? `שגיאה: ${data.error ?? res.status}` : `Error: ${data.error ?? res.status}`);
-      }
-    } catch {
-      alert(isHe ? 'שגיאה בחיבור' : 'Connection failed');
-    } finally {
-      setConnectingTdv(null);
-    }
-  };
 
   const connectTopstepX = async (accountId: string) => {
     if (!topstepKey.trim()) return;
@@ -531,136 +385,27 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
     }
   };
 
-  // Client-side Tradovate sync — fetches directly from user's browser (bypasses server IP blocks)
-  const syncTradovateClientSide = async (jwt: string): Promise<boolean> => {
-    const LIVE = 'https://live.tradovateapi.com/v1';
-    const DEMO = 'https://demo.tradovateapi.com/v1';
-
-    // Load connections from our DB
-    const { data: connections } = await supabase!.from('broker_connections')
-      .select('*').eq('user_id', user?.id).eq('broker', 'tradovate').eq('is_active', true);
-    if (!connections?.length) return false;
-
-    let totalInserted = 0;
-
-    for (const conn of connections) {
-      const base = conn.broker_env === 'demo' ? DEMO : LIVE;
-      const fallback = conn.broker_env === 'demo' ? LIVE : DEMO;
-
-      // Auth — try stored env, then fallback
-      let token: string | null = null;
-      let activeBase = base;
-      for (const b of [base, fallback]) {
-        try {
-          const r = await fetch(`${b}/auth/accesstokenrequest`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: conn.api_username, password: encryptTradovatePassword(conn.api_username, conn.api_key), enc: true, chl: String(Math.floor(Math.random() * 1e12)), appId: 'tradovate_trader(web)', appVersion: '1.0', deviceId: 'tradelog-client-v1', cid: 1, sec: '' }),
-          });
-          const d = await r.json().catch(() => ({}));
-          if (d.accessToken) { token = d.accessToken; activeBase = b; break; }
-        } catch { return false; } // CORS blocked — fall back to server
-      }
-      if (!token) continue;
-
-      // Fetch execution reports
-      let allReports: { id: number; accountId: number; contractId: number; timestamp: string; qty: number; side: string; grossPL?: number; commission?: number }[] = [];
-      try {
-        const r = await fetch(`${activeBase}/executionReport/list`, { headers: { Authorization: `Bearer ${token}` } });
-        const d = await r.json().catch(() => []);
-        allReports = Array.isArray(d) ? d : [];
-      } catch { return false; }
-
-      const tdvAccountId: number = conn.tradovate_account_id;
-      const startDate = conn.last_synced_at ? new Date(conn.last_synced_at) : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
-      const endTimestamp = new Date().toISOString();
-
-      const closingFills = allReports.filter((r) =>
-        r.accountId === tdvAccountId &&
-        new Date(r.timestamp) >= startDate &&
-        r.grossPL !== undefined && r.grossPL !== null && r.grossPL !== 0,
-      );
-      if (!closingFills.length) {
-        await fetch('/api/tradovate-sync', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
-          body: JSON.stringify({ user_id: user?.id, pre_fetched_trades: [], connection_id: conn.id, end_timestamp: endTimestamp }) });
-        continue;
-      }
-
-      // Resolve symbols
-      const uniqueIds = [...new Set(closingFills.map((r) => r.contractId))];
-      const symbolMap = new Map<number, string>();
-      await Promise.all(uniqueIds.map(async (cid) => {
-        try {
-          const r = await fetch(`${activeBase}/contract/item?id=${cid}`, { headers: { Authorization: `Bearer ${token!}` } });
-          const d = await r.json().catch(() => ({}));
-          if (d.name) symbolMap.set(cid, d.name.replace(/[FGHJKMNQUVXZ]\d{1,2}$/, '').replace(/\s+[FGHJKMNQUVXZ]\d{1,2}$/, '').toUpperCase().trim());
-        } catch { /* skip */ }
-      }));
-
-      const envLabel = conn.broker_env === 'demo' ? 'Tradovate Demo' : 'Tradovate';
-      const rows = closingFills.map((r) => {
-        const pnl = Math.round(((r.grossPL ?? 0) - (r.commission ?? 0)) * 100) / 100;
-        return {
-          id: crypto.randomUUID(), user_id: user?.id, account_id: conn.account_id,
-          symbol: symbolMap.get(r.contractId) ?? `CONTRACT-${r.contractId}`,
-          direction: r.side === 'Sell' ? 'long' : 'short',
-          trade_date: r.timestamp.split('T')[0], pnl, size: r.qty,
-          notes: (r.commission ?? 0) > 0 ? `Fees: $${(r.commission ?? 0).toFixed(2)} | ${envLabel}` : envLabel,
-          source: 'auto', broker_trade_id: `tradovate-${r.id}`, confirmations: {}, field_values: {},
-        };
-      });
-
-      const saveRes = await fetch('/api/tradovate-sync', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
-        body: JSON.stringify({ user_id: user?.id, pre_fetched_trades: rows, connection_id: conn.id, end_timestamp: endTimestamp }),
-      });
-      const saveData = await saveRes.json().catch(() => ({}));
-      totalInserted += saveData.inserted ?? 0;
-    }
-
-    alert(isHe ? `סנכרון הושלם — ${totalInserted} עסקאות חדשות` : `Sync complete — ${totalInserted} new trades`);
-    return true;
-  };
-
-  const triggerSync = async (broker: 'tradovate' | 'topstepx') => {
-    setSyncing(broker);
+  const triggerSync = async () => {
+    setSyncing('topstepx');
     if (!supabase) { setSyncing(null); return; }
     const { data: { session } } = await supabase.auth.getSession();
     const jwt = session?.access_token;
     if (!jwt) { setSyncing(null); return alert(isHe ? 'לא מחובר' : 'Not authenticated'); }
     try {
-      if (broker === 'tradovate') {
-        // Try client-side first (user's IP — bypasses server IP blocks)
-        const clientOk = await syncTradovateClientSide(jwt);
-        if (!clientOk) {
-          // CORS blocked — fall back to server-side
-          const res = await fetch('/api/tradovate-sync', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
-            body: JSON.stringify({ user_id: user?.id }),
-          });
-          const data = await res.json();
-          if (!res.ok) {
-            alert(isHe ? `שגיאה בסנכרון: ${data.error ?? res.status}` : `Sync failed: ${data.error ?? res.status}`);
-          } else {
-            alert(isHe ? `סנכרון הושלם — ${data.inserted ?? 0} עסקאות חדשות` : `Sync complete — ${data.inserted ?? 0} new trades`);
-          }
-        }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const anonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY as string;
+      const res = await fetch(`${supabaseUrl}/functions/v1/topstepx-sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
+        body: JSON.stringify({ user_id: user?.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(isHe ? `שגיאה בסנכרון: ${data.error ?? res.status}` : `Sync failed: ${data.error ?? res.status}`);
       } else {
-        const anonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY as string;
-        const res = await fetch(`${supabaseUrl}/functions/v1/topstepx-sync`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
-          body: JSON.stringify({ user_id: user?.id }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          alert(isHe ? `שגיאה בסנכרון: ${data.error ?? res.status}` : `Sync failed: ${data.error ?? res.status}`);
-        } else {
-          alert(isHe ? `סנכרון הושלם — ${data.inserted ?? 0} עסקאות חדשות` : `Sync complete — ${data.inserted ?? 0} new trades`);
-        }
+        alert(isHe ? `סנכרון הושלם — ${data.inserted ?? 0} עסקאות חדשות` : `Sync complete — ${data.inserted ?? 0} new trades`);
       }
-      setLastSync((s) => ({ ...s, [broker]: new Date().toLocaleTimeString() }));
+      setLastSync((s) => ({ ...s, topstepx: new Date().toLocaleTimeString() }));
     } catch {
       alert(isHe ? 'שגיאה בסנכרון' : 'Sync failed');
     } finally {
@@ -668,128 +413,36 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
     }
   };
 
-  const propAccounts = accounts.filter((a) => a.account_type === 'prop_firm' || a.broker !== 'manual');
   const allAccounts = accounts.length > 0 ? accounts : [];
 
   return (
     <div id="tour-broker-section" className="settings-section">
       <div className="section-title">{T.brokerConnections}</div>
 
-      {/* Tradovate */}
-      <div className="list-card" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
+      {/* Tradovate — Coming Soon */}
+      <div className="list-card" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10, opacity: 0.85 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div className="list-card-info">
-            <div className="list-card-name">Tradovate</div>
-            <div className="list-card-meta">Futures & Options · Username / Password</div>
-          </div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {lastSync.tradovate && (
-              <span style={{ fontSize: '.7rem', color: 'var(--t3)' }}>{T.lastSync}: {lastSync.tradovate}</span>
-            )}
-            <button className="btn btn-ghost" style={{ fontSize: '.78rem', padding: '5px 12px' }}
-              onClick={() => triggerSync('tradovate')}
-              disabled={syncing === 'tradovate'}>
-              {syncing === 'tradovate' ? '...' : T.syncNow}
-            </button>
+            <div className="list-card-name" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              Tradovate
+              <span style={{ fontSize: '.68rem', fontWeight: 700, background: 'rgba(245,155,35,.15)', color: 'var(--o)', border: '1px solid rgba(245,155,35,.35)', borderRadius: 20, padding: '2px 9px' }}>
+                {isHe ? 'בקרוב' : 'Coming Soon'}
+              </span>
+            </div>
+            <div className="list-card-meta">Futures & Options · {isHe ? 'סנכרון אוטומטי בפיתוח' : 'Auto-sync in development'}</div>
           </div>
         </div>
-        <div style={{ borderTop: '1px solid var(--bd)', paddingTop: 10 }}>
-          {!showTradovateInput ? (
-            <button className="btn btn-primary" style={{ fontSize: '.8rem', padding: '6px 14px' }}
-              onClick={() => setShowTradovateInput(true)}>
-              + {isHe ? 'הוסף פרטי כניסה' : 'Add Credentials'}
-            </button>
-          ) : tradovateStep === 'credentials' ? (
-            /* ── שלב 1: הכנסת פרטים ── */
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div style={{ fontSize: '.74rem', color: 'var(--t3)' }}>
-                {isHe ? 'שם משתמש + סיסמה של חשבון Tradovate' : 'Tradovate username & password'}
-              </div>
-              <div style={{ fontSize: '.72rem', padding: '7px 10px', background: 'rgba(245,155,35,.1)', border: '1px solid rgba(245,155,35,.3)', borderRadius: 7, color: 'var(--o)' }}>
-                {isHe
-                  ? '⚡ חשבונות Prop Firm (MFFU, Lucid וכו׳) — בחר "Demo / תיק מבחן". חשבון Live אישי — בחר "Live".'
-                  : '⚡ Prop Firm accounts (MFFU, Lucid, etc.) — select "Demo / Eval". Personal live account — select "Live".'}
-              </div>
-              <input
-                className="form-input"
-                type="text"
-                placeholder={isHe ? 'שם משתמש / אימייל...' : 'Username or email...'}
-                value={tradovateUser}
-                onChange={(e) => setTradovateUser(e.target.value)}
-              />
-              <input
-                className="form-input"
-                type="password"
-                placeholder={isHe ? 'סיסמה...' : 'Password...'}
-                value={tradovatePass}
-                onChange={(e) => setTradovatePass(e.target.value)}
-              />
-              <div style={{ display: 'flex', gap: 6 }}>
-                {(['live', 'demo'] as const).map((env) => (
-                  <button key={env} onClick={() => setTradovateEnv(env)} style={{
-                    flex: 1, padding: '6px 0', fontSize: '.78rem', fontWeight: 600,
-                    borderRadius: 'var(--rad)', border: '1.5px solid', cursor: 'pointer', transition: 'all .12s',
-                    borderColor: tradovateEnv === env ? 'var(--g)' : 'var(--bd2)',
-                    background: tradovateEnv === env ? 'rgba(29,185,84,.12)' : 'var(--s2)',
-                    color: tradovateEnv === env ? 'var(--g)' : 'var(--t2)',
-                  }}>
-                    {env === 'live' ? (isHe ? 'Live (חי)' : 'Live') : (isHe ? 'Demo / תיק מבחן' : 'Demo / Eval')}
-                  </button>
-                ))}
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn btn-primary" style={{ fontSize: '.8rem', padding: '6px 16px' }}
-                  onClick={fetchTradovateAccounts}
-                  disabled={!tradovateUser.trim() || !tradovatePass.trim() || loadingAccounts}>
-                  {loadingAccounts ? '...' : (isHe ? 'מצא חשבונות' : 'Find Accounts')}
-                </button>
-                <button className="btn btn-ghost" onClick={resetTradovate}>{T.cancel}</button>
-              </div>
-            </div>
-          ) : (
-            /* ── שלב 2: מיפוי חשבונות ── */
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div style={{ fontSize: '.74rem', color: 'var(--t3)' }}>
-                {isHe
-                  ? `נמצאו ${tradovateAccounts.length} חשבונות בטריידובייט — בחר לאיזה חשבון לקשר כל אחד:`
-                  : `Found ${tradovateAccounts.length} Tradovate account(s) — select which TraderYo account to link each:`}
-              </div>
-              {tradovateAccounts.map((tdv) => (
-                <div key={tdv.id} style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '10px', background: 'var(--s1)', borderRadius: 8, border: '1px solid var(--bd)' }}>
-                  <div style={{ fontSize: '.84rem', fontWeight: 600 }}>
-                    {tdv.name || `Account #${tdv.id}`}
-                    {!tdv.active && <span style={{ fontSize: '.72rem', color: 'var(--t3)', marginInlineStart: 6 }}>({isHe ? 'לא פעיל' : 'inactive'})</span>}
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <select
-                      className="form-input"
-                      style={{ flex: 1, fontSize: '.8rem' }}
-                      value={tradovateMapping[tdv.id] ?? ''}
-                      onChange={(e) => setTradovateMapping((m) => ({ ...m, [tdv.id]: e.target.value }))}>
-                      <option value="">{isHe ? '— בחר חשבון TraderYo —' : '— Select TraderYo account —'}</option>
-                      {allAccounts.map((acc) => (
-                        <option key={acc.id} value={acc.id}>{acc.name}</option>
-                      ))}
-                    </select>
-                    <button
-                      className="btn btn-primary"
-                      style={{ padding: '5px 14px', fontSize: '.78rem', whiteSpace: 'nowrap' }}
-                      disabled={!tradovateMapping[tdv.id] || connectingTdv === tdv.id}
-                      onClick={() => connectTradovateAccount(tdv.id, tradovateMapping[tdv.id])}>
-                      {connectingTdv === tdv.id ? '...' : (isHe ? 'חבר' : 'Connect')}
-                    </button>
-                  </div>
-                </div>
-              ))}
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn btn-ghost" style={{ fontSize: '.78rem' }}
-                  onClick={() => setTradovateStep('credentials')}>
-                  {isHe ? '← חזור' : '← Back'}
-                </button>
-                <button className="btn btn-ghost" onClick={resetTradovate}>{T.cancel}</button>
-              </div>
-            </div>
-          )}
+        <div style={{ borderTop: '1px solid var(--bd)', paddingTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ fontSize: '.78rem', padding: '10px 14px', background: 'rgba(245,155,35,.08)', border: '1px solid rgba(245,155,35,.25)', borderRadius: 8, color: 'var(--t2)', lineHeight: 1.6 }}>
+            {isHe
+              ? 'סנכרון אוטומטי עם Tradovate יגיע בקרוב. בינתיים ניתן לייבא עסקאות דרך קובץ CSV.'
+              : 'Tradovate auto-sync is coming soon. In the meantime, you can import trades via CSV file.'}
+          </div>
+          <div style={{ fontSize: '.74rem', color: 'var(--t3)' }}>
+            {isHe
+              ? 'ייבוא CSV: עמוד הגדרות → ייבוא עסקאות, או דרך כפתור "ייבוא" בכל עמוד'
+              : 'CSV import: Settings → Import Trades, or use the "Import" button on any page'}
+          </div>
         </div>
       </div>
 
@@ -805,7 +458,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
               <span style={{ fontSize: '.7rem', color: 'var(--t3)' }}>{T.lastSync}: {lastSync.topstepx}</span>
             )}
             <button className="btn btn-ghost" style={{ fontSize: '.78rem', padding: '5px 12px' }}
-              onClick={() => triggerSync('topstepx')}
+              onClick={() => triggerSync()}
               disabled={syncing === 'topstepx'}>
               {syncing === 'topstepx' ? '...' : T.syncNow}
             </button>
