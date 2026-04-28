@@ -468,16 +468,11 @@ function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; 
             <div className="list-card-meta">Futures & Options · {isHe ? 'סנכרון אוטומטי בפיתוח' : 'Auto-sync in development'}</div>
           </div>
         </div>
-        <div style={{ borderTop: '1px solid var(--bd)', paddingTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ fontSize: '.78rem', padding: '10px 14px', background: 'rgba(245,155,35,.08)', border: '1px solid rgba(245,155,35,.25)', borderRadius: 8, color: 'var(--t2)', lineHeight: 1.6 }}>
+        <div style={{ borderTop: '1px solid var(--bd)', paddingTop: 8 }}>
+          <div style={{ fontSize: '.77rem', color: 'var(--t3)', lineHeight: 1.5 }}>
             {isHe
-              ? 'סנכרון אוטומטי עם Tradovate יגיע בקרוב. בינתיים ניתן לייבא עסקאות דרך קובץ CSV.'
-              : 'Tradovate auto-sync is coming soon. In the meantime, you can import trades via CSV file.'}
-          </div>
-          <div style={{ fontSize: '.74rem', color: 'var(--t3)' }}>
-            {isHe
-              ? 'ייבוא CSV: עמוד עסקאות → כפתור "ייבוא" בראש העמוד'
-              : 'CSV import: go to Trades page → "Import" button at the top'}
+              ? 'סנכרון אוטומטי בפיתוח. ייבוא ידני: עמוד עסקאות ← כפתור "ייבוא"'
+              : 'Auto-sync coming soon. Import manually: Trades page → "Import" button'}
           </div>
         </div>
       </div>
@@ -501,41 +496,45 @@ function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; 
           </div>
         </div>
         <div style={{ borderTop: '1px solid var(--bd)', paddingTop: 10 }}>
-          <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 8 }}>
-            {isHe
-              ? 'הכנס את האימייל של TopstepX + API Token מ: TopstepX → Settings → API Key'
-              : 'Enter your TopstepX email + API Token from: TopstepX → Settings → API Key'}
-          </div>
           {!showTopstepInput ? (
-            <button className="btn btn-primary" style={{ fontSize: '.8rem', padding: '6px 14px' }}
-              onClick={() => setShowTopstepInput(true)}>
-              + {isHe ? 'הוסף API Token' : 'Add API Token'}
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+              <span style={{ fontSize: '.74rem', color: 'var(--t3)' }}>
+                {isHe ? 'TopstepX → Settings → API Key' : 'TopstepX → Settings → API Key'}
+              </span>
+              <button className="btn btn-primary" style={{ fontSize: '.78rem', padding: '5px 13px', flexShrink: 0 }}
+                onClick={() => setShowTopstepInput(true)}>
+                + {isHe ? 'הוסף' : 'Add Token'}
+              </button>
+            </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {/* Step 1: credentials */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
               <input
                 className="form-input"
                 type="email"
-                placeholder={isHe ? 'אימייל TopstepX שלך...' : 'Your TopstepX email...'}
+                placeholder={isHe ? 'אימייל TopstepX...' : 'TopstepX email...'}
                 value={topstepEmail}
                 onChange={(e) => { setTopstepEmail(e.target.value); setPxAccounts([]); setSelectedPxId(null); }}
               />
               <input
                 className="form-input"
                 type="password"
-                placeholder={isHe ? 'הדבק API Token מ-TopstepX...' : 'Paste API Token from TopstepX...'}
+                placeholder={isHe ? 'API Token מ-TopstepX...' : 'API Token from TopstepX...'}
                 value={topstepKey}
                 onChange={(e) => { setTopstepKey(e.target.value); setPxAccounts([]); setSelectedPxId(null); }}
               />
 
               {pxAccounts.length === 0 ? (
-                /* "Find Accounts" button — first action after entering creds */
-                <button className="btn btn-primary" style={{ fontSize: '.8rem', padding: '6px 14px' }}
-                  onClick={fetchPxAccounts}
-                  disabled={!topstepKey.trim() || !topstepEmail.trim() || fetchingPx}>
-                  {fetchingPx ? (isHe ? 'מחפש...' : 'Searching...') : (isHe ? 'מצא חשבונות' : 'Find Accounts')}
-                </button>
+                <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>
+                  <button className="btn btn-primary" style={{ fontSize: '.78rem', padding: '5px 14px' }}
+                    onClick={fetchPxAccounts}
+                    disabled={!topstepKey.trim() || !topstepEmail.trim() || fetchingPx}>
+                    {fetchingPx ? (isHe ? 'מחפש...' : 'Searching...') : (isHe ? 'מצא חשבונות' : 'Find Accounts')}
+                  </button>
+                  <button className="btn btn-ghost" style={{ fontSize: '.78rem', padding: '5px 12px' }}
+                    onClick={resetTopstepForm}>
+                    {T.cancel}
+                  </button>
+                </div>
               ) : (
                 <>
                   {/* Step 2: pick ProjectX account (only shown when >1 and none chosen yet) */}
@@ -577,7 +576,7 @@ function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; 
                         )}
                       </div>
                       <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 6 }}>
-                        {isHe ? 'קשר לחשבון TradeLog:' : 'Link to TradeLog account:'}
+                        {isHe ? 'קשר לחשבון TraderYo:' : 'Link to TraderYo account:'}
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                         {allAccounts.map((acc) => (
@@ -592,12 +591,13 @@ function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; 
                       </div>
                     </div>
                   )}
+                  <button className="btn btn-ghost" style={{ fontSize: '.76rem', padding: '4px 12px', alignSelf: 'flex-start', marginTop: 4 }}
+                    onClick={resetTopstepForm}>
+                    {T.cancel}
+                  </button>
                 </>
               )}
 
-              <button className="btn btn-ghost" onClick={resetTopstepForm}>
-                {T.cancel}
-              </button>
             </div>
           )}
         </div>
