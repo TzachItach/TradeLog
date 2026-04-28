@@ -91,7 +91,7 @@ function buildActivatedEmail(email: string): string {
             <tr><td>
               <table cellpadding="0" cellspacing="0" border="0"><tr>
                 <td style="width:36px;"><div style="width:28px;height:28px;background:rgba(29,185,84,0.12);border-radius:6px;text-align:center;line-height:28px;font-size:14px;">⚡</div></td>
-                <td style="padding-right:10px;"><div style="font-size:14px;color:#ffffff;font-weight:600;">ייבוא אוטומטי מ-TopstepX ו-Tradovate</div></td>
+                <td style="padding-right:10px;"><div style="font-size:14px;color:#ffffff;font-weight:600;">ייבוא אוטומטי מ-TopstepX</div></td>
               </tr></table>
             </td></tr>
           </table>
@@ -130,7 +130,7 @@ function buildExpiredEmail(email: string): string {
           </p>
           <div style="background:rgba(29,185,84,0.06);border:1px solid rgba(29,185,84,0.15);border-radius:12px;padding:20px 24px;margin-bottom:32px;">
             <div style="font-size:13px;color:#b3b3b3;margin-bottom:4px;">המשך לסחור חכם</div>
-            <div style="font-size:15px;color:#ffffff;font-weight:600;">$24.99 / חודש — כל הפיצ'רים, ביטול בכל עת</div>
+            <div style="font-size:15px;color:#ffffff;font-weight:600;">$21.99 / חודש — כל הפיצ'רים, ביטול בכל עת</div>
           </div>
           <div style="text-align:center;">
             <a href="https://whop.com/checkout/plan_prXodSeim1jYH/" style="display:inline-block;background:#1DB954;color:#000000;text-decoration:none;font-weight:700;font-size:15px;padding:14px 36px;border-radius:999px;">חדש מנוי &larr;</a>
