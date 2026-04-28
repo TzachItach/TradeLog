@@ -1,8 +1,18 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { calcPropFirmStats } from '../lib/propfirm';
 import type { Account } from '../types';
+
+function useIsMobile() {
+  const [mobile, setMobile] = useState(window.innerWidth <= 768);
+  useEffect(() => {
+    const handler = () => setMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return mobile;
+}
 
 const fmt = (n: number) =>
   (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -182,18 +192,48 @@ export default function PropFirm() {
   const { accounts, lang } = useStore();
   const navigate = useNavigate();
   const isHe = lang === 'he';
+  const isMobile = useIsMobile();
 
   const propAccounts = accounts.filter((a) => a.account_type === 'prop_firm');
 
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const showDropdown = propAccounts.length > (isMobile ? 1 : 2);
+  const activeId = showDropdown
+    ? (selectedId && propAccounts.find((a) => a.id === selectedId) ? selectedId : propAccounts[0]?.id)
+    : null;
+
+  const displayAccounts = showDropdown
+    ? propAccounts.filter((a) => a.id === activeId)
+    : propAccounts;
+
   return (
     <div id="tour-propfirm" className="page-content">
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 className="page-title">{isHe ? 'Prop Firm Tracker' : 'Prop Firm Tracker'}</h1>
-        {propAccounts.length > 0 && (
-          <button className="btn btn-ghost" style={{ fontSize: '.8rem' }} onClick={() => navigate('/dashboard/settings')}>
-            {isHe ? '⚙ ערוך חשבונות' : '⚙ Edit Accounts'}
-          </button>
-        )}
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+        <h1 className="page-title" style={{ flexShrink: 0 }}>Prop Firm Tracker</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          {showDropdown && (
+            <select
+              value={activeId ?? ''}
+              onChange={(e) => setSelectedId(e.target.value)}
+              style={{
+                background: 'var(--s2)', color: 'var(--t1)',
+                border: '1px solid var(--bd2)', borderRadius: 8,
+                padding: '6px 10px', fontSize: '.85rem', cursor: 'pointer',
+                maxWidth: 200,
+              }}
+            >
+              {propAccounts.map((a) => (
+                <option key={a.id} value={a.id}>{a.name}</option>
+              ))}
+            </select>
+          )}
+          {propAccounts.length > 0 && (
+            <button className="btn btn-ghost" style={{ fontSize: '.8rem', flexShrink: 0 }} onClick={() => navigate('/dashboard/settings')}>
+              {isHe ? '⚙ ערוך חשבונות' : '⚙ Edit Accounts'}
+            </button>
+          )}
+        </div>
       </div>
 
       {propAccounts.length === 0 ? (
@@ -211,7 +251,7 @@ export default function PropFirm() {
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
-          {propAccounts.map((acc) => (
+          {displayAccounts.map((acc) => (
             <AccountCard key={acc.id} account={acc} isHe={isHe} />
           ))}
         </div>
