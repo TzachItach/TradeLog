@@ -7,7 +7,7 @@ const CORS = {
 };
 
 const PROJECTX_BASE =
-  Deno.env.get('TOPSTEPX_BASE_URL') ?? 'https://api.topstepx.projectx.com';
+  Deno.env.get('TOPSTEPX_BASE_URL') ?? 'https://api.topstepx.com';
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {

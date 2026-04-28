@@ -7,7 +7,7 @@ const CORS = {
 };
 
 const PROJECTX_BASE =
-  Deno.env.get('TOPSTEPX_BASE_URL') ?? 'https://api.topstepx.projectx.com';
+  Deno.env.get('TOPSTEPX_BASE_URL') ?? 'https://api.topstepx.com';
 
 // MNQM5 → MNQ | CON.F.US.MNQ.M25 → MNQ
 function normalizeSymbol(raw: string): string {

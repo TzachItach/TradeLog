@@ -446,7 +446,7 @@ RESEND_API_KEY=re_G5aKAVqD_NSg8f2DJHZNNweYDZJpoGMij
 ---
 
 ### TopstepX Auto Import (ProjectX Gateway API)
-- **API Base**: `https://api.topstepx.projectx.com` (env var `TOPSTEPX_BASE_URL`)
+- **API Base**: `https://api.topstepx.com` (env var `TOPSTEPX_BASE_URL`)
 - **Auth endpoint**: `POST /api/Auth/loginKey` → `{userName, apiKey}` → `{token}`
 - **Accounts**: `POST /api/Account/search` → `{onlyActiveAccounts: true}` → `{accounts[].id}`
 - **Trades**: `POST /api/Trade/search` → `{accountId, startTimestamp, endTimestamp}` → `{trades[]}`
