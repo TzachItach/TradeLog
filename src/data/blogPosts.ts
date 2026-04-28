@@ -73,7 +73,7 @@ export const blogPosts: BlogPost[] = [
       { type: 'p', text: 'Yes. Toggle the "Demo / Eval" switch before connecting to point TraderYo at the Tradovate demo API endpoint. Your eval trades sync the same way as live trades.' },
       { type: 'h3', text: 'What if I also have a TopstepX account?' },
       { type: 'p', text: 'Connect both. TraderYo lets you link multiple brokers and accounts. Topstep trades and Tradovate trades stay in separate accounts, and you can view them together in the "All Accounts" dashboard view.' },
-      { type: 'cta', text: 'Connect your Tradovate account and have every trade logged automatically.', btn: 'Start Free 14-Day Trial' },
+      { type: 'cta', text: 'Connect your Tradovate account and have every trade logged automatically.', btn: 'Start Free 7-Day Trial' },
     ],
   },
   {
@@ -133,7 +133,7 @@ export const blogPosts: BlogPost[] = [
         'The Funded Trader: varies by plan — check your specific rules',
       ]},
       { type: 'callout', kind: 'warning', text: 'Prop firm rules change. Always verify the current drawdown rules in your specific account agreement — not on forums or third-party guides.' },
-      { type: 'cta', text: 'Track your Prop Firm trailing drawdown automatically — connect TopstepX or enter trades manually.', btn: 'Start Free 14-Day Trial' },
+      { type: 'cta', text: 'Track your Prop Firm trailing drawdown automatically — connect TopstepX or enter trades manually.', btn: 'Start Free 7-Day Trial' },
     ],
   },
   {
@@ -191,7 +191,7 @@ export const blogPosts: BlogPost[] = [
       { type: 'h2', text: 'A Useful Rule of Thumb' },
       { type: 'p', text: 'If your total payouts are less than 2× your total expenses, you\'re in marginal territory. Below 1× expenses means you\'re net negative. The Business Meter visualizes exactly this ratio and labels it clearly: Risky / Break-Even / Healthy.' },
       { type: 'callout', kind: 'info', text: 'This analysis only works if you log expenses consistently. Make it a habit: every new challenge or reset gets logged the day you pay for it.' },
-      { type: 'cta', text: 'Track your real prop trading profitability — challenges, resets, payouts, all in one place.', btn: 'Start Free 14-Day Trial' },
+      { type: 'cta', text: 'Track your real prop trading profitability — challenges, resets, payouts, all in one place.', btn: 'Start Free 7-Day Trial' },
     ],
   },
 ];

@@ -134,7 +134,7 @@ function PaywallScreen({ email }: { email?: string }) {
         קבל גישה מלאה ל-TraderYo
       </h2>
       <p style={{ color: '#b3b3b3', maxWidth: 360, margin: 0, lineHeight: 1.6 }}>
-        14 יום ניסיון חינם, ללא התחייבות. כל הנתונים שלך שמורים ומחכים לך.
+        7 ימי ניסיון חינם, ללא התחייבות. כל הנתונים שלך שמורים ומחכים לך.
       </p>
       <a
         href={url}
@@ -146,10 +146,10 @@ function PaywallScreen({ email }: { email?: string }) {
           fontSize: '1rem',
         }}
       >
-        התחל ניסיון חינם — 14 יום
+        התחל ניסיון חינם — 7 ימים
       </a>
       <p style={{ color: '#737373', fontSize: '0.78rem', margin: 0 }}>
-        $24.99/חודש לאחר הניסיון · אחרי ההרשמה, רענן את הדף
+        $21.99/חודש לאחר הניסיון · אחרי ההרשמה, רענן את הדף
       </p>
     </div>
   );

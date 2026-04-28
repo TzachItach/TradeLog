@@ -140,7 +140,7 @@ RLS: כל טבלה עם `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = u
 - דף נחיתה **דו-לשוני** (עברית RTL / אנגלית LTR) עם CSS מבודד `.lp-*`
 - **כפתור שפה** `עב / EN` ב-Nav → `setLang` → `dir` משתנה על `.lp` div
 - סקציות: Nav, Hero + mockup, Social Proof, Features Bento, Advanced (5 פריטים), Business Manager, Pricing, Testimonials (3 כרטיסים), FAQ (5 שאלות `<details>`), CTA, Footer
-- תמחור: USD — $24.99/חודש (תוכנית אחת, קהל בינלאומי + ישראלי)
+- תמחור: USD — $21.99/חודש (תוכנית אחת, קהל בינלאומי + ישראלי)
 - **שפת ברירת מחדל**: אנגלית (`lang: 'en'` ב-store) — כפתור עב/EN לשינוי
 - כפתורים: "התחל עכשיו" → `/auth`, "Live Demo" → demo data + `/dashboard`
 - Route `*` מפנה ל-`/` (לא ל-`/dashboard`)
@@ -414,7 +414,7 @@ RESEND_API_KEY=re_G5aKAVqD_NSg8f2DJHZNNweYDZJpoGMij
 6. **לוגו קליקבילי** בכל מקום → `/dashboard`
 7. **Landing CSS**: namespace `.lp-*` מבודד — אין קונפליקט עם CSS של האפליקציה
 8. **Trade Media**: bucket `trade-media` ב-Supabase Storage (private). טבלת `trade_media`: `id, trade_id, user_id, storage_path, label, created_at`
-9. **Currency**: P&L ועסקאות — USD בלבד (`formatPnL()` = `$`). **מחירי מנויים** — $24.99/mo (USD, Landing page pricing)
+9. **Currency**: P&L ועסקאות — USD בלבד (`formatPnL()` = `$`). **מחירי מנויים** — $21.99/mo (USD, Landing page pricing)
 10. **Design**: Spotify Dark — אין #0071e3, אין Apple Light. Accent = `#1DB954`
 
 ---
@@ -495,7 +495,7 @@ RESEND_API_KEY=re_G5aKAVqD_NSg8f2DJHZNNweYDZJpoGMij
 - Pricing feat6: "9 גרפי אנליטיקס + השוואת אסטרטגיות"
 
 ### Whop Subscription Integration (אפריל 2026)
-- **פלטפורמת תשלום**: Whop (whop.com) — USD, $24.99/חודש, 14 יום ניסיון
+- **פלטפורמת תשלום**: Whop (whop.com) — USD, $21.99/חודש, 7 ימי ניסיון
 - **Whop IDs**:
   - Plan ID: `plan_prXodSeim1jYH`
   - Product ID: `prod_snYEY756GdD92`
@@ -550,7 +550,7 @@ RESEND_API_KEY=re_G5aKAVqD_NSg8f2DJHZNNweYDZJpoGMij
 ---
 
 ## מה עוד דיברנו לבנות (לא הושלם)
-- ~~**מנויים בתשלום**~~ — **הושלם** (Whop, $24.99/חודש, ראה סעיף Whop Subscription Integration)
+- ~~**מנויים בתשלום**~~ — **הושלם** (Whop, $21.99/חודש, ראה סעיף Whop Subscription Integration)
 - Push notifications במובייל
 - ~~התראות יעד יומי~~ — DailyGoalBar **הושלם** (bar ב-Dashboard)
 - ~~Business Manager~~ — **הושלם** (`/dashboard/business`)

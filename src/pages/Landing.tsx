@@ -18,17 +18,17 @@ const equityFill   = equityPoints + ' 400,130 0,130';
 const T = {
   he: {
     nav: { features: 'פיצ׳רים', pricing: 'מחירים', tools: 'כלים', testimonials: 'המלצות', faq: 'שאלות', blog: 'בלוג', signin: 'התחבר', start: 'התחל בחינם' },
-    badge: '14 ימי ניסיון חינם',
+    badge: '7 ימי ניסיון חינם',
     h1a: 'לסחור כמו מקצוען,',
     h1b: 'לתעד כמו מכונה.',
     heroSub: 'יומן המסחר האוטומטי המתקדם ביותר לסוחרים בחוזים עתידיים. לעקוב אחרי כל עסקה, לשלוט בפסיכולוגיה, ולחדד את האדג׳ שלך.',
-    ctaPrimary: 'התחל ניסיון חינם — 14 יום',
+    ctaPrimary: 'התחל ניסיון חינם — 7 ימים',
     ctaDemo: 'Live Demo',
     importsFrom: 'ייבוא מ-',
     featuresTitle: 'כלים שעובדים בשבילך',
     featuresSub: 'כל מה שצריך כדי לנתח, להשתפר ולשלוט בביצועי המסחר שלך.',
     card1Title: 'ייבוא אוטומטי',
-    card1Desc: 'סנכרן את נתוני הביצוע מ-TopstepX בלחיצה אחת. ייבוא CSV מ-Tradovate ועוד ברוקרים. בלי הקלדה ידנית, בלי טעויות.',
+    card1Desc: 'סנכרן את נתוני הביצוע מ-TopstepX בלחיצה אחת. ייבוא CSV מכל ברוקר. בלי הקלדה ידנית, בלי טעויות.',
     card2Title: 'Analytics מקצועי',
     card2Desc: '9 גרפים מתקדמים כולל השוואת אסטרטגיות: Equity Curve, Drawdown, Heatmap, R:R Scatter ועוד — בזמן אמת.',
     card3Title: 'לוח שנה ויזואלי',
@@ -77,7 +77,7 @@ const T = {
     faqTitle: 'שאלות נפוצות',
     faqs: [
       { q: 'האם TraderYo תומך בחשבונות מרובים?', a: 'כן. ניתן להוסיף חשבונות Live, Prop Firm, Sim ולעקוב אחריהם בנפרד — כל אחד עם יתרה, P&L ו-Drawdown משלו.' },
-      { q: 'מאיזה ברוקרים אפשר לייבא עסקאות?', a: 'כרגע תומכים בייבוא אוטומטי מ-TopstepX. סנכרון אוטומטי עם Tradovate יגיע בקרוב. ניתן גם לייבא CSV ידנית מכל ברוקר.' },
+      { q: 'מאיזה ברוקרים אפשר לייבא עסקאות?', a: 'תומכים בייבוא אוטומטי מ-TopstepX. ניתן גם לייבא CSV ידנית מכל ברוקר.' },
       { q: 'האם יש תמיכה ב-Prop Firm Trailing Drawdown?', a: 'כן. TraderYo מחשב Trailing Drawdown (EOD ו-Intraday), Daily Loss Limit ו-Profit Target בדיוק מלא.' },
       { q: 'האם הנתונים שלי מאובטחים?', a: 'כל הנתונים מאוחסנים בצורה מוצפנת ב-Supabase עם Row-Level Security. רק אתה יכול לראות את הנתונים שלך.' },
       { q: 'האם ניתן לבטל בכל עת?', a: 'כן. ניתן לבטל מנוי בכל עת ישירות מהחשבון, ללא עמלות ביטול.' },
@@ -107,17 +107,17 @@ const T = {
   },
   en: {
     nav: { features: 'Features', pricing: 'Pricing', tools: 'Tools', testimonials: 'Reviews', faq: 'FAQ', blog: 'Blog', signin: 'Sign in', start: 'Start free' },
-    badge: '14-day free trial',
+    badge: '7-day free trial',
     h1a: 'Trade like a pro,',
     h1b: 'analyze like a machine',
     heroSub: 'The most advanced trading journal for futures traders. Track every trade, master your psychology, and sharpen your edge.',
-    ctaPrimary: 'Start free trial — 14 days',
+    ctaPrimary: 'Start free trial — 7 days',
     ctaDemo: 'Live demo',
     importsFrom: 'Imports from',
     featuresTitle: 'Tools that work for you',
     featuresSub: 'Everything you need to analyze, improve, and take control of your trading performance.',
     card1Title: 'Automated Trade Import',
-    card1Desc: 'Sync your execution data from TopstepX in one click. CSV import from Tradovate and more brokers. No manual entry, no errors.',
+    card1Desc: 'Sync your execution data from TopstepX in one click. CSV import from any broker. No manual entry, no errors.',
     card2Title: 'Professional Analytics',
     card2Desc: '9 advanced charts including strategy comparison: Equity Curve, Drawdown, Heatmap, R:R scatter and more — in real time.',
     card3Title: 'Visual Trading Calendar',
@@ -143,7 +143,7 @@ const T = {
     biz4: 'Business meter: instantly know if you\'re in the green or red',
     bizBtn: 'Try Business Manager',
     pricingTitle: 'Simple, transparent pricing',
-    pricingSub: '14-day free trial for all new users.',
+    pricingSub: '7-day free trial for all new users.',
     planMonthly: 'Monthly',
     planMonthlySub: 'Billed monthly · cancel anytime',
     feat1: 'Unlimited trading accounts',
@@ -156,7 +156,7 @@ const T = {
     feat8: 'PDF & CSV export',
     planBtn: 'Start free trial',
     ctaTitle: 'Ready to level up your trading?',
-    ctaSub: '14 days completely free. Cancel anytime.',
+    ctaSub: '7 days completely free. Cancel anytime.',
     testimonialsTitle: 'What traders are saying',
     testimonials: [
       { name: 'Alon M.', role: 'Topstep Funded Trader', text: 'TraderYo completely changed how I manage my accounts. The Drawdown Tracker saves me every single day.' },
@@ -166,7 +166,7 @@ const T = {
     faqTitle: 'Frequently asked questions',
     faqs: [
       { q: 'Does TraderYo support multiple accounts?', a: 'Yes. You can add Live, Prop Firm, and Sim accounts and track them separately — each with its own balance, P&L, and drawdown.' },
-      { q: 'Which brokers can I import trades from?', a: 'We currently support automatic import from TopstepX. Tradovate auto-sync is coming soon. You can also import CSV manually from any broker.' },
+      { q: 'Which brokers can I import trades from?', a: 'We support automatic import from TopstepX. You can also import CSV manually from any broker.' },
       { q: 'Does it support Prop Firm Trailing Drawdown?', a: 'Yes. TraderYo calculates Trailing Drawdown (EOD and Intraday), Daily Loss Limit, and Profit Target with full precision.' },
       { q: 'Is my data secure?', a: 'All data is stored encrypted in Supabase with Row-Level Security. Only you can access your data.' },
       { q: 'Can I cancel at any time?', a: 'Yes. You can cancel your subscription anytime directly from your account, with no cancellation fees.' },
@@ -383,9 +383,9 @@ export default function Landing() {
           <div className="lp-social-inner" dir="ltr">
             <span className="lp-social-label">{t.importsFrom}</span>
             <div className="lp-brokers">
-              <div className="lp-broker">Tradovate</div>
               <div className="lp-broker">TopstepX</div>
               <div className="lp-broker">NinjaTrader</div>
+              <div className="lp-broker">Tradovate</div>
               <div className="lp-broker">Rithmic</div>
             </div>
           </div>
@@ -541,7 +541,7 @@ export default function Landing() {
             <div className="lp-pricing-grid" dir="ltr">
               <div className="lp-plan">
                 <div className="lp-plan-name">{t.planMonthly}</div>
-                <div className="lp-plan-price">$24.99<span>/mo</span></div>
+                <div className="lp-plan-price">$21.99<span>/mo</span></div>
                 <div className="lp-plan-sub">{t.planMonthlySub}</div>
                 <ul className="lp-plan-features">
                   <li>{t.feat1}</li><li>{t.feat2}</li><li>{t.feat3}</li><li>{t.feat4}</li>
