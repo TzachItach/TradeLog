@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Account, Trade, Strategy, Language, ModalState, PropExpense, PropPayout } from './types';
+import type { Account, Trade, Strategy, Language, ModalState, PropExpense, PropPayout, BudgetSettings } from './types';
 import { MOCK_ACCOUNTS, MOCK_TRADES, MOCK_STRATEGIES, MOCK_EXPENSES, MOCK_PAYOUTS, TURTLE_SOUP_CHECKBOXES } from './mockData';
 import {
   loadUserData, dbSaveAccount, dbDeleteAccount,
   dbSaveTrade, dbDeleteTrade, dbSaveStrategy, dbDeleteStrategy, dbSeedNewUser,
   dbSaveProfile, dbSaveExpense, dbDeleteExpense, dbSavePayout, dbDeletePayout,
+  dbSaveBudgetSettings,
 } from './lib/db';
 
 export function createDefaultStrategies(): Strategy[] {
@@ -56,8 +57,10 @@ interface AppState {
   dailyGoalTarget: number;
   dailyMaxLoss: number;
   subscriptionStatus: 'active' | 'expired' | null;
+  budgetSettings: BudgetSettings | null;
   onboardingDone: boolean;
   setOnboardingDone: (v?: boolean) => void;
+  setBudgetSettings: (s: BudgetSettings | null) => void;
 
   setDemo: (v: boolean) => void;
   setUser: (u: AppState['user']) => void;
@@ -133,8 +136,14 @@ export const useStore = create<AppState>()(
       dailyGoalTarget: 0,
       dailyMaxLoss: 0,
       subscriptionStatus: null,
+      budgetSettings: null,
       onboardingDone: false,
       setOnboardingDone: (v = true) => set({ onboardingDone: v }),
+      setBudgetSettings: (s) => {
+        set({ budgetSettings: s });
+        const userId = get().user?.id;
+        if (userId) dbSaveBudgetSettings(userId, s);
+      },
 
       setDemo: (v) => set({ isDemo: v }),
       setUser: (u) => set({ user: u }),
@@ -262,7 +271,7 @@ export const useStore = create<AppState>()(
         }, 8000);
 
         try {
-          const { accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, subscriptionStatus } = await loadUserData(userId);
+          const { accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, subscriptionStatus, budgetSettings } = await loadUserData(userId);
           clearTimeout(timeout);
           const isNewUser = accounts.length === 0 && strategies.length === 0;
 
@@ -270,9 +279,9 @@ export const useStore = create<AppState>()(
             const defAccount = createDefaultAccount();
             const defStrategies = createDefaultStrategies();
             await dbSeedNewUser(userId, defAccount, defStrategies);
-            set({ accounts: [defAccount], strategies: defStrategies, trades: [], expenses: [], payouts: [], lastUserId: userId, selectedAccount: 'all', subscriptionStatus });
+            set({ accounts: [defAccount], strategies: defStrategies, trades: [], expenses: [], payouts: [], lastUserId: userId, selectedAccount: 'all', subscriptionStatus, budgetSettings });
           } else {
-            set({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, lastUserId: userId, selectedAccount: 'all', subscriptionStatus });
+            set({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, lastUserId: userId, selectedAccount: 'all', subscriptionStatus, budgetSettings });
           }
         } catch (err) {
           clearTimeout(timeout);
@@ -288,7 +297,7 @@ export const useStore = create<AppState>()(
       // טעינת נתונים ברקע — לא חוסם את הממשק
       loadDataInBackground: (userId, name, email) => {
         set({ user: { id: userId, name, email }, isDemo: false });
-        loadUserData(userId).then(({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, subscriptionStatus }) => {
+        loadUserData(userId).then(({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, subscriptionStatus, budgetSettings }) => {
           const isKnownUser = get().lastUserId === userId;
           const isNewUser = !isKnownUser && accounts.length === 0 && strategies.length === 0;
 
@@ -296,12 +305,12 @@ export const useStore = create<AppState>()(
             const defAccount = createDefaultAccount();
             const defStrategies = createDefaultStrategies();
             dbSeedNewUser(userId, defAccount, defStrategies);
-            set({ accounts: [defAccount], strategies: defStrategies, trades: [], expenses: [], payouts: [], lastUserId: userId, subscriptionStatus });
+            set({ accounts: [defAccount], strategies: defStrategies, trades: [], expenses: [], payouts: [], lastUserId: userId, subscriptionStatus, budgetSettings });
           } else if (accounts.length > 0) {
-            set({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, lastUserId: userId, selectedAccount: 'all', subscriptionStatus });
+            set({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, lastUserId: userId, selectedAccount: 'all', subscriptionStatus, budgetSettings });
           } else {
             console.warn('[Store] Known user returned 0 accounts — keeping cache');
-            set({ subscriptionStatus });
+            set({ subscriptionStatus, budgetSettings });
           }
         }).catch((err) => {
           console.warn('[Store] Background load failed, using cache:', err);
@@ -313,11 +322,11 @@ export const useStore = create<AppState>()(
         if (!userId) return;
         set({ dataLoading: true });
         try {
-          const { accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, subscriptionStatus } = await loadUserData(userId);
+          const { accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, subscriptionStatus, budgetSettings } = await loadUserData(userId);
           if (accounts.length > 0) {
-            set({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, selectedAccount: 'all', subscriptionStatus });
+            set({ accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, selectedAccount: 'all', subscriptionStatus, budgetSettings });
           } else {
-            set({ subscriptionStatus });
+            set({ subscriptionStatus, budgetSettings });
           }
         } catch (err) {
           console.error('[Store] reloadFromCloud failed:', err);

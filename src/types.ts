@@ -129,3 +129,10 @@ export interface PropPayout {
   date: string;            // ISO date
   notes?: string;
 }
+
+export interface BudgetSettings {
+  amount: number;
+  period: 'monthly' | 'quarterly';
+  currency: 'USD' | 'ILS';
+  ilsRate: number;
+}

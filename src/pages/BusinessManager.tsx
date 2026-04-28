@@ -2,7 +2,7 @@ import { useMemo, useRef, useEffect, useState } from 'react';
 import { useStore } from '../store';
 import { calcBusinessStats } from '../lib/business';
 import type { MonthlySnapshot } from '../lib/business';
-import type { PropExpense, PropPayout, ExpenseFeeType } from '../types';
+import type { PropExpense, PropPayout, ExpenseFeeType, BudgetSettings } from '../types';
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmt = (n: number) =>
@@ -27,6 +27,140 @@ function KpiCard({ label, value, sub, color }: { label: string; value: string; s
       <div style={{ fontSize: '.7rem', color: 'var(--t3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.04em' }}>{label}</div>
       <div style={{ fontSize: '1.4rem', fontWeight: 800, color: color ?? 'var(--t1)', lineHeight: 1.1 }}>{value}</div>
       {sub && <div style={{ fontSize: '.72rem', color: 'var(--t3)', marginTop: 5 }}>{sub}</div>}
+    </div>
+  );
+}
+
+// ─── Budget ───────────────────────────────────────────────────────────────────
+
+function BudgetModal({ settings, onSave, onClear, onClose, isHe }: {
+  settings: BudgetSettings | null;
+  onSave: (s: BudgetSettings) => void;
+  onClear: () => void;
+  onClose: () => void;
+  isHe: boolean;
+}) {
+  const [amount, setAmount] = useState(settings?.amount ? String(settings.amount) : '');
+  const [period, setPeriod] = useState<'monthly' | 'quarterly'>(settings?.period ?? 'monthly');
+  const [currency, setCurrency] = useState<'USD' | 'ILS'>(settings?.currency ?? 'USD');
+  const [ilsRate, setIlsRate] = useState(String(settings?.ilsRate ?? '3.70'));
+
+  const handleSave = () => {
+    const n = parseFloat(amount);
+    if (!n || n <= 0) return;
+    onSave({ amount: n, period, currency, ilsRate: parseFloat(ilsRate) || 3.7 });
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%', height: 44, padding: '0 12px', borderRadius: 8,
+    border: '1px solid var(--bd2)', background: 'var(--s1)', color: 'var(--t1)',
+    fontSize: '.88rem', boxSizing: 'border-box',
+  };
+  const labelStyle: React.CSSProperties = { fontSize: '.75rem', color: 'var(--t3)', marginBottom: 4, display: 'block' };
+  const toggleBtn = (active: boolean): React.CSSProperties => ({
+    flex: 1, height: 44, borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: '.84rem',
+    border: `1.5px solid ${active ? 'var(--g)' : 'var(--bd2)'}`,
+    background: active ? 'rgba(29,185,84,.1)' : 'var(--s1)',
+    color: active ? 'var(--g)' : 'var(--t2)',
+  });
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16, boxSizing: 'border-box' }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div style={{ background: 'var(--s2)', borderRadius: 16, padding: '28px 24px', width: '100%', maxWidth: 380, boxShadow: '0 24px 60px rgba(0,0,0,.5)' }}>
+        <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--t1)', marginBottom: 20 }}>
+          {isHe ? '⚙ הגדרת תקציב' : '⚙ Budget Settings'}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div>
+            <label style={labelStyle}>{isHe ? 'סכום תקציב' : 'Budget Amount'}</label>
+            <input style={inputStyle} type="number" value={amount} onChange={(e) => setAmount(e.target.value)}
+              placeholder={currency === 'ILS' ? '15000' : '3000'} />
+          </div>
+          <div>
+            <label style={labelStyle}>{isHe ? 'תקופה' : 'Period'}</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button style={toggleBtn(period === 'monthly')} onClick={() => setPeriod('monthly')}>
+                {isHe ? 'חודשי' : 'Monthly'}
+              </button>
+              <button style={toggleBtn(period === 'quarterly')} onClick={() => setPeriod('quarterly')}>
+                {isHe ? 'רבעוני' : 'Quarterly'}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>{isHe ? 'מטבע' : 'Currency'}</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button style={toggleBtn(currency === 'USD')} onClick={() => setCurrency('USD')}>$ USD</button>
+              <button style={toggleBtn(currency === 'ILS')} onClick={() => setCurrency('ILS')}>₪ ILS</button>
+            </div>
+          </div>
+          {currency === 'ILS' && (
+            <div>
+              <label style={labelStyle}>{isHe ? 'שער חליפין ₪/$' : 'Exchange Rate ₪/$'}</label>
+              <input style={inputStyle} type="number" step="0.01" value={ilsRate}
+                onChange={(e) => setIlsRate(e.target.value)} placeholder="3.70" />
+            </div>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
+          {settings && (
+            <button className="btn btn-danger" style={{ padding: '0 16px', height: 44, flexShrink: 0 }} onClick={onClear}>
+              {isHe ? 'הסר' : 'Clear'}
+            </button>
+          )}
+          <button className="btn btn-ghost" style={{ flex: 1, minWidth: 0 }} onClick={onClose}>{isHe ? 'ביטול' : 'Cancel'}</button>
+          <button className="btn btn-primary" style={{ flex: 1, minWidth: 0 }} onClick={handleSave}>{isHe ? 'שמור' : 'Save'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BudgetKpiCard({ budget, spent, isHe, onClick }: {
+  budget: BudgetSettings | null;
+  spent: number;
+  isHe: boolean;
+  onClick: () => void;
+}) {
+  if (!budget) {
+    return (
+      <div onClick={onClick} style={{ background: 'var(--s2)', border: '1px dashed var(--bd2)', borderRadius: 14, padding: '18px 20px', cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 6, minHeight: 90 }}>
+        <div style={{ fontSize: '.7rem', color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '.04em' }}>
+          {isHe ? 'תקציב' : 'Budget'}
+        </div>
+        <div style={{ fontSize: '.82rem', color: 'var(--t3)' }}>
+          {isHe ? '+ הגדר תקציב' : '+ Set budget'}
+        </div>
+      </div>
+    );
+  }
+
+  const pct = budget.amount > 0 ? Math.min(100, (spent / budget.amount) * 100) : 0;
+  const remaining = Math.max(0, budget.amount - spent);
+  const isOver = spent > budget.amount;
+  const barColor = pct >= 100 ? 'var(--r)' : pct >= 70 ? 'var(--o)' : 'var(--g)';
+  const sym = budget.currency === 'ILS' ? '₪' : '$';
+  const fmtB = (n: number) => sym + Math.round(n).toLocaleString('en-US');
+  const periodLabel = budget.period === 'monthly' ? (isHe ? 'חודשי' : 'Monthly') : (isHe ? 'רבעוני' : 'Quarterly');
+
+  return (
+    <div onClick={onClick} style={{ background: 'var(--s2)', border: `1px solid ${isOver ? 'rgba(255,64,96,.45)' : 'var(--bd)'}`, borderRadius: 14, padding: '18px 20px', cursor: 'pointer' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+        <div style={{ fontSize: '.7rem', color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '.04em' }}>
+          {isHe ? 'תקציב' : 'Budget'} · {periodLabel}
+        </div>
+        <span style={{ fontSize: '.68rem', color: 'var(--t3)' }}>⚙</span>
+      </div>
+      <div style={{ fontSize: '1.4rem', fontWeight: 800, color: barColor, lineHeight: 1.1, marginBottom: 4 }}>
+        {isOver ? (isHe ? 'חרגת!' : 'Over!') : fmtB(remaining)}
+      </div>
+      <div style={{ fontSize: '.72rem', color: 'var(--t3)', marginBottom: 8 }}>
+        {isOver
+          ? `+${fmtB(spent - budget.amount)} ${isHe ? 'מעל התקציב' : 'over budget'}`
+          : `${fmtB(spent)} / ${fmtB(budget.amount)} · ${Math.round(pct)}%`}
+      </div>
+      <MeterBar pct={pct} color={barColor} height={5} />
     </div>
   );
 }
@@ -200,7 +334,12 @@ function MonthlyChart({ monthly, isHe, hasAnyData }: {
 
 // ─── Smart Insights ───────────────────────────────────────────────────────────
 
-function InsightsPanel({ stats, isHe }: { stats: ReturnType<typeof calcBusinessStats>; isHe: boolean }) {
+function InsightsPanel({ stats, isHe, budget, budgetSpent }: {
+  stats: ReturnType<typeof calcBusinessStats>;
+  isHe: boolean;
+  budget: BudgetSettings | null;
+  budgetSpent: number;
+}) {
   const insights: { icon: string; color: string; bg: string; border: string; title: string; body: string }[] = [];
 
   if (stats.tiltAlert) {
@@ -238,6 +377,32 @@ function InsightsPanel({ stats, isHe }: { stats: ReturnType<typeof calcBusinessS
       title: isHe ? 'אופטימיזציה של גודל החשבון' : 'Account Size Optimization',
       body: stats.sizeOptimizationTip,
     });
+  }
+
+  if (budget && budget.amount > 0) {
+    const pct = (budgetSpent / budget.amount) * 100;
+    if (pct >= 80) {
+      const sym = budget.currency === 'ILS' ? '₪' : '$';
+      const fmtB = (n: number) => sym + Math.round(n).toLocaleString('en-US');
+      const periodLabel = budget.period === 'monthly' ? (isHe ? 'החודש' : 'this month') : (isHe ? 'הרבעון' : 'this quarter');
+      const isOver = pct >= 100;
+      insights.push({
+        icon: isOver ? '🚨' : '⚠️',
+        color: isOver ? 'var(--r)' : 'var(--o)',
+        bg: isOver ? 'rgba(255,64,96,.08)' : 'rgba(245,155,35,.08)',
+        border: isOver ? 'rgba(255,64,96,.3)' : 'rgba(245,155,35,.3)',
+        title: isOver
+          ? (isHe ? 'חרגת מהתקציב!' : 'Budget Exceeded!')
+          : (isHe ? `ניצלת ${Math.round(pct)}% מהתקציב` : `${Math.round(pct)}% of budget used`),
+        body: isOver
+          ? (isHe
+            ? `הוצאת ${fmtB(budgetSpent)} ${periodLabel} — ${fmtB(budgetSpent - budget.amount)} מעל התקציב שהגדרת.`
+            : `You've spent ${fmtB(budgetSpent)} ${periodLabel} — ${fmtB(budgetSpent - budget.amount)} over your set budget.`)
+          : (isHe
+            ? `הוצאת ${fmtB(budgetSpent)} מתוך ${fmtB(budget.amount)} ${periodLabel}. נותר ${fmtB(budget.amount - budgetSpent)}.`
+            : `Spent ${fmtB(budgetSpent)} of your ${fmtB(budget.amount)} budget ${periodLabel}. ${fmtB(budget.amount - budgetSpent)} remaining.`),
+      });
+    }
   }
 
   if (stats.breakEvenProgress < 50 && stats.currentMonthExpenses > 0) {
@@ -592,7 +757,7 @@ function LogsSection({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function BusinessManager() {
-  const { accounts, trades, expenses, payouts, lang, deleteExpense, deletePayout } = useStore();
+  const { accounts, trades, expenses, payouts, lang, deleteExpense, deletePayout, budgetSettings, setBudgetSettings } = useStore();
   const isHe = lang === 'he';
 
   const stats = useMemo(
@@ -605,8 +770,23 @@ export default function BusinessManager() {
     [accounts],
   );
 
+  // Budget spent calculation
+  const budgetSpent = useMemo(() => {
+    if (!budgetSettings) return 0;
+    const now = new Date();
+    const qMonth = Math.floor(now.getMonth() / 3) * 3;
+    const periodStart = budgetSettings.period === 'monthly'
+      ? new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10)
+      : new Date(now.getFullYear(), qMonth, 1).toISOString().slice(0, 10);
+    const totalUSD = expenses
+      .filter((e) => e.date >= periodStart)
+      .reduce((sum, e) => sum + e.amount, 0);
+    return budgetSettings.currency === 'ILS' ? totalUSD * budgetSettings.ilsRate : totalUSD;
+  }, [budgetSettings, expenses]);
+
   // Modal state
   const [modal, setModal] = useState<null | { mode: 'expense' | 'payout'; editId?: string }>(null);
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
 
   const editExpense = modal?.mode === 'expense' && modal.editId
     ? expenses.find((e) => e.id === modal.editId) : undefined;
@@ -671,6 +851,7 @@ export default function BusinessManager() {
           sub={isHe ? 'עד הפסקה' : 'until breach'}
           color={stats.avgBurnDays > 0 && stats.avgBurnDays < 14 ? 'var(--r)' : 'var(--t1)'}
         />
+        <BudgetKpiCard budget={budgetSettings} spent={budgetSpent} isHe={isHe} onClick={() => setShowBudgetModal(true)} />
       </div>
 
       {/* Break-even bar */}
@@ -703,7 +884,7 @@ export default function BusinessManager() {
           <div style={{ fontWeight: 700, fontSize: '.9rem', color: 'var(--t1)', marginBottom: 10 }}>
             {isHe ? 'תובנות חכמות' : 'Smart Insights'}
           </div>
-          <InsightsPanel stats={stats} isHe={isHe} />
+          <InsightsPanel stats={stats} isHe={isHe} budget={budgetSettings} budgetSpent={budgetSpent} />
         </div>
       </div>
 
@@ -731,6 +912,16 @@ export default function BusinessManager() {
           onClose={() => setModal(null)}
           isHe={isHe}
           accounts={propAccounts}
+        />
+      )}
+
+      {showBudgetModal && (
+        <BudgetModal
+          settings={budgetSettings}
+          onSave={(s) => { setBudgetSettings(s); setShowBudgetModal(false); }}
+          onClear={() => { setBudgetSettings(null); setShowBudgetModal(false); }}
+          onClose={() => setShowBudgetModal(false)}
+          isHe={isHe}
         />
       )}
     </div>

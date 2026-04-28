@@ -1,5 +1,5 @@
 import { supabase, DEMO_MODE } from './supabase';
-import type { Account, Trade, Strategy, PropExpense, PropPayout } from '../types';
+import type { Account, Trade, Strategy, PropExpense, PropPayout, BudgetSettings } from '../types';
 
 // לוג שגיאות Supabase בצורה ברורה
 function logErr(fn: string, error: { message: string; code?: string } | null) {
@@ -12,8 +12,9 @@ export async function loadUserData(userId: string): Promise<{
   expenses: PropExpense[]; payouts: PropPayout[];
   dailyGoalTarget: number; dailyMaxLoss: number;
   subscriptionStatus: 'active' | 'expired' | null;
+  budgetSettings: BudgetSettings | null;
 }> {
-  if (DEMO_MODE || !supabase) return { accounts: [], strategies: [], trades: [], expenses: [], payouts: [], dailyGoalTarget: 0, dailyMaxLoss: 0, subscriptionStatus: null };
+  if (DEMO_MODE || !supabase) return { accounts: [], strategies: [], trades: [], expenses: [], payouts: [], dailyGoalTarget: 0, dailyMaxLoss: 0, subscriptionStatus: null, budgetSettings: null };
 
   // צור profile אם לא קיים (fallback על המקרה שה-trigger לא רץ)
   const { error: pe } = await supabase
@@ -22,7 +23,7 @@ export async function loadUserData(userId: string): Promise<{
   if (pe) logErr('profiles.upsert', pe);
 
   const [profileRes, accRes, stratRes, tradeRes, expRes, payRes] = await Promise.all([
-    supabase.from('profiles').select('daily_goal_target, daily_max_loss, subscription_status').eq('id', userId).single(),
+    supabase.from('profiles').select('daily_goal_target, daily_max_loss, subscription_status, budget_settings').eq('id', userId).single(),
     supabase.from('accounts').select('*').eq('user_id', userId).order('created_at'),
     supabase.from('strategies').select('*, strategy_fields(*)').eq('user_id', userId).order('created_at'),
     supabase.from('trades').select('*, trade_media(*)').eq('user_id', userId).order('trade_date', { ascending: false }),
@@ -44,6 +45,7 @@ export async function loadUserData(userId: string): Promise<{
   const dailyGoalTarget    = profileRes.data?.daily_goal_target ?? 0;
   const dailyMaxLoss       = profileRes.data?.daily_max_loss ?? 0;
   const subscriptionStatus = (profileRes.data?.subscription_status ?? null) as 'active' | 'expired' | null;
+  const budgetSettings     = (profileRes.data?.budget_settings ?? null) as BudgetSettings | null;
 
   const accounts: Account[] = (accRes.data ?? []).map((r) => ({
     id: r.id, user_id: r.user_id, name: r.name,
@@ -105,7 +107,7 @@ export async function loadUserData(userId: string): Promise<{
   }));
 
   console.log(`[DB] Loaded: ${accounts.length} accounts, ${strategies.length} strategies, ${trades.length} trades, ${expenses.length} expenses, ${payouts.length} payouts`);
-  return { accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, subscriptionStatus };
+  return { accounts, strategies, trades, expenses, payouts, dailyGoalTarget, dailyMaxLoss, subscriptionStatus, budgetSettings };
 }
 
 // ─── PROP EXPENSES ───────────────────────────────────────────────────────────
@@ -146,14 +148,22 @@ export async function dbDeletePayout(id: string) {
 }
 
 // ─── PROFILE ─────────────────────────────────────────────────
-export async function dbSaveProfile(userId: string, data: { dailyGoalTarget: number; dailyMaxLoss: number }) {
+export async function dbSaveProfile(userId: string, data: { dailyGoalTarget: number; dailyMaxLoss: number; budgetSettings?: BudgetSettings | null }) {
   if (DEMO_MODE || !supabase) return;
-  const { error } = await supabase.from('profiles').upsert({
+  const payload: Record<string, unknown> = {
     id: userId,
     daily_goal_target: data.dailyGoalTarget,
     daily_max_loss: data.dailyMaxLoss,
-  }, { onConflict: 'id' });
+  };
+  if ('budgetSettings' in data) payload.budget_settings = data.budgetSettings ?? null;
+  const { error } = await supabase.from('profiles').upsert(payload, { onConflict: 'id' });
   logErr('profiles.upsert', error);
+}
+
+export async function dbSaveBudgetSettings(userId: string, settings: BudgetSettings | null) {
+  if (DEMO_MODE || !supabase) return;
+  const { error } = await supabase.from('profiles').upsert({ id: userId, budget_settings: settings }, { onConflict: 'id' });
+  logErr('profiles.budget_settings.upsert', error);
 }
 
 // ─── ACCOUNTS ────────────────────────────────────────────────
