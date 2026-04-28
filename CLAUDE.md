@@ -211,7 +211,7 @@ RLS: כל טבלה עם `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = u
   - `monthly: MonthlySnapshot[]` — 12 חודשים אחרונים לגרף
 - **UI** (הכל ב-`BusinessManager.tsx`):
   - 5 KPI cards: Revenue | Expenses | Net Profit | CPA | Avg Account Life (padding: `12px 16px`, font: `1.15rem`)
-  - **BudgetSection** — full-width card בין KPI grid לbreak-even bar:
+  - **BudgetSection** — card (max-width 720px) בין KPI grid לbreak-even bar:
     - Empty state: CTA עם btn-ghost לפתיחת BudgetModal
     - Active: כותרת + period/currency badges + edit btn; 3 עמודות (Spent/Budget/Remaining); progress bar 12px; footer עם שער חליפין
     - תמיכה ב-USD ו-ILS (dual display: ILS ראשי + USD משני)
@@ -480,6 +480,15 @@ RESEND_API_KEY=re_G5aKAVqD_NSg8f2DJHZNNweYDZJpoGMij
 
 ---
 
+## שיפורים שנעשו (אפריל 2026 — גל 5)
+
+### UI — צמצום רוחב כרטיסים בדסקטופ
+- **`.settings-section`** (`index.css`): `max-width: 720px` — מגביל את כל סקציות Settings (חשבונות, אסטרטגיות, יעדים יומיים, ברוקרים)
+- **BrokerSection** (`Settings.tsx`): Tradovate + TopstepX בגריד 2 עמודות (`repeat(auto-fit, minmax(260px, 1fr))`) — זה לצד זה בדסקטופ, מוערמים במובייל
+- **BudgetSection + Break-Even bar** (`BusinessManager.tsx`): עטופים ב-`maxWidth: 720` כדי לא לתפוס את רוחב המסך המלא
+
+---
+
 ## שיפורים שנעשו (אפריל 2026 — גל 4)
 
 ### Prop Firm Tracker — "All Accounts" + Pagination + Global selector hiding
@@ -498,7 +507,7 @@ RESEND_API_KEY=re_G5aKAVqD_NSg8f2DJHZNNweYDZJpoGMij
 - **`dbSaveBudgetSettings`** נוסף ל-`db.ts` — upserts `profiles.budget_settings` (JSONB)
 - **Store** (`store.ts`): `budgetSettings: BudgetSettings | null` + `setBudgetSettings` action (שומר ב-Supabase)
   - כל 3 נתיבי טעינה עודכנו: `initRealUser`, `loadDataInBackground`, `reloadFromCloud`
-- **BudgetSection** (full-width card) ב-`BusinessManager.tsx`:
+- **BudgetSection** (`BusinessManager.tsx`, `max-width: 720px`):
   - מיקום: בין KPI grid לbreak-even bar
   - Empty state → ghost button לפתיחת BudgetModal
   - Active state: Spent/Budget/Remaining + progress bar + ILS dual-display
