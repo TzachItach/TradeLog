@@ -333,46 +333,81 @@ function StrategyForm({ strategy, onSave, onCancel, lang }: {
 }
 
 /* ── ניהול חיבורי ברוקר ── */
-function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Account[]; user: { id: string; email?: string; name?: string } | null }) {
+function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; accounts: Account[]; user: { id: string; email?: string; name?: string } | null; onSyncSuccess?: () => void }) {
   const isHe = lang === 'he';
   const T = useT(lang as 'he' | 'en');
-  const [txConn, setTxConn] = useState<{ [k: string]: boolean }>({});
   const [topstepKey, setTopstepKey] = useState('');
   const [topstepEmail, setTopstepEmail] = useState('');
   const [showTopstepInput, setShowTopstepInput] = useState(false);
   const [syncing, setSyncing] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<{ [k: string]: string }>({});
+  const [pxAccounts, setPxAccounts] = useState<{ id: number; name: string; balance: number }[]>([]);
+  const [selectedPxId, setSelectedPxId] = useState<number | null>(null);
+  const [fetchingPx, setFetchingPx] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL as string ?? '';
 
-  const connectTopstepX = async (accountId: string) => {
-    if (!topstepKey.trim()) return;
+  const resetTopstepForm = () => {
+    setShowTopstepInput(false);
+    setTopstepKey('');
+    setTopstepEmail('');
+    setPxAccounts([]);
+    setSelectedPxId(null);
+  };
+
+  const fetchPxAccounts = async () => {
+    if (!topstepKey.trim() || !topstepEmail.trim() || !supabase) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    const jwt = session?.access_token;
+    if (!jwt) return alert(isHe ? 'לא מחובר' : 'Not authenticated');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const anonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY as string;
+    setFetchingPx(true);
+    try {
+      const res = await fetch(`${supabaseUrl}/functions/v1/broker-oauth`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
+        body: JSON.stringify({ broker: 'topstepx', user_id: user?.id, api_token: topstepKey, api_username: topstepEmail.trim(), step: 'validate' }),
+      });
+      const data = await res.json();
+      if (res.ok && data.accounts?.length > 0) {
+        setPxAccounts(data.accounts);
+        if (data.accounts.length === 1) setSelectedPxId(data.accounts[0].id);
+      } else {
+        alert(isHe ? `שגיאה: ${data.error ?? res.status}` : `Error: ${data.error ?? res.status}`);
+      }
+    } catch {
+      alert(isHe ? 'שגיאה בגישה ל-TopstepX' : 'Could not reach TopstepX');
+    } finally {
+      setFetchingPx(false);
+    }
+  };
+
+  const connectTopstepX = async (tradelogAccountId: string) => {
+    if (!topstepKey.trim() || selectedPxId === null) return;
     if (!supabase) return;
     const { data: { session } } = await supabase.auth.getSession();
     const jwt = session?.access_token;
     if (!jwt) return alert(isHe ? 'לא מחובר' : 'Not authenticated');
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const anonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY as string;
     try {
-      const res = await fetch(
-        `${supabaseUrl}/functions/v1/broker-oauth`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
-          body: JSON.stringify({
-            broker: 'topstepx',
-            user_id: user?.id,
-            account_id: accountId,
-            api_token: topstepKey,
-            api_username: topstepEmail.trim(),
-          }),
-        },
-      );
+      const res = await fetch(`${supabaseUrl}/functions/v1/broker-oauth`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
+        body: JSON.stringify({
+          broker: 'topstepx',
+          user_id: user?.id,
+          account_id: tradelogAccountId,
+          api_token: topstepKey,
+          api_username: topstepEmail.trim(),
+          projectx_account_id: selectedPxId,
+          step: 'connect',
+        }),
+      });
       if (res.ok) {
-        setTxConn((c) => ({ ...c, [accountId]: true }));
-        setShowTopstepInput(false);
-        setTopstepKey('');
-        setTopstepEmail('');
+        resetTopstepForm();
         alert(isHe ? 'TopstepX חובר בהצלחה!' : 'TopstepX connected!');
       } else {
         const data = await res.json().catch(() => ({}));
@@ -404,6 +439,7 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
         alert(isHe ? `שגיאה בסנכרון: ${data.error ?? res.status}` : `Sync failed: ${data.error ?? res.status}`);
       } else {
         alert(isHe ? `סנכרון הושלם — ${data.inserted ?? 0} עסקאות חדשות` : `Sync complete — ${data.inserted ?? 0} new trades`);
+        if (data.inserted > 0) onSyncSuccess?.();
       }
       setLastSync((s) => ({ ...s, topstepx: new Date().toLocaleTimeString() }));
     } catch {
@@ -477,36 +513,89 @@ function BrokerSection({ lang, accounts, user }: { lang: string; accounts: Accou
             </button>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {/* Step 1: credentials */}
               <input
                 className="form-input"
                 type="email"
                 placeholder={isHe ? 'אימייל TopstepX שלך...' : 'Your TopstepX email...'}
                 value={topstepEmail}
-                onChange={(e) => setTopstepEmail(e.target.value)}
+                onChange={(e) => { setTopstepEmail(e.target.value); setPxAccounts([]); setSelectedPxId(null); }}
               />
               <input
                 className="form-input"
                 type="password"
                 placeholder={isHe ? 'הדבק API Token מ-TopstepX...' : 'Paste API Token from TopstepX...'}
                 value={topstepKey}
-                onChange={(e) => setTopstepKey(e.target.value)}
+                onChange={(e) => { setTopstepKey(e.target.value); setPxAccounts([]); setSelectedPxId(null); }}
               />
-              <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 4 }}>
-                {isHe ? 'קשר לחשבון:' : 'Link to account:'}
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {allAccounts.map((acc) => (
-                  <div key={acc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'var(--s1)', borderRadius: 7, border: '1px solid var(--bd)' }}>
-                    <span style={{ fontSize: '.84rem' }}>{acc.name}</span>
-                    <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '.76rem' }}
-                      onClick={() => connectTopstepX(acc.id)}
-                      disabled={!topstepKey.trim() || !topstepEmail.trim()}>
-                      {isHe ? 'חבר' : 'Connect'}
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <button className="btn btn-ghost" onClick={() => { setShowTopstepInput(false); setTopstepKey(''); setTopstepEmail(''); }}>
+
+              {pxAccounts.length === 0 ? (
+                /* "Find Accounts" button — first action after entering creds */
+                <button className="btn btn-primary" style={{ fontSize: '.8rem', padding: '6px 14px' }}
+                  onClick={fetchPxAccounts}
+                  disabled={!topstepKey.trim() || !topstepEmail.trim() || fetchingPx}>
+                  {fetchingPx ? (isHe ? 'מחפש...' : 'Searching...') : (isHe ? 'מצא חשבונות' : 'Find Accounts')}
+                </button>
+              ) : (
+                <>
+                  {/* Step 2: pick ProjectX account (only shown when >1 and none chosen yet) */}
+                  {pxAccounts.length > 1 && selectedPxId === null && (
+                    <div>
+                      <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 6 }}>
+                        {isHe ? `נמצאו ${pxAccounts.length} חשבונות — בחר חשבון TopstepX:` : `Found ${pxAccounts.length} accounts — select a TopstepX account:`}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {pxAccounts.map((pxa) => (
+                          <div key={pxa.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', background: 'var(--s1)', borderRadius: 7, border: '1px solid var(--bd)' }}>
+                            <div>
+                              <div style={{ fontSize: '.84rem', fontWeight: 600 }}>{pxa.name}</div>
+                              <div style={{ fontSize: '.72rem', color: 'var(--t3)' }}>${pxa.balance.toLocaleString()}</div>
+                            </div>
+                            <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '.76rem' }}
+                              onClick={() => setSelectedPxId(pxa.id)}>
+                              {isHe ? 'בחר' : 'Select'}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 3: pick TradeLog account to link to */}
+                  {selectedPxId !== null && (
+                    <div>
+                      {/* Show which PX account was chosen + allow changing */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, padding: '6px 10px', background: 'var(--s2)', borderRadius: 7, border: '1px solid var(--bd)' }}>
+                        <span style={{ fontSize: '.8rem', color: 'var(--g)', flex: 1 }}>
+                          ✓ {pxAccounts.find((a) => a.id === selectedPxId)?.name ?? `Account #${selectedPxId}`}
+                        </span>
+                        {pxAccounts.length > 1 && (
+                          <button className="btn btn-ghost" style={{ fontSize: '.72rem', padding: '3px 10px' }}
+                            onClick={() => setSelectedPxId(null)}>
+                            {isHe ? 'שנה' : 'Change'}
+                          </button>
+                        )}
+                      </div>
+                      <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 6 }}>
+                        {isHe ? 'קשר לחשבון TradeLog:' : 'Link to TradeLog account:'}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {allAccounts.map((acc) => (
+                          <div key={acc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'var(--s1)', borderRadius: 7, border: '1px solid var(--bd)' }}>
+                            <span style={{ fontSize: '.84rem' }}>{acc.name}</span>
+                            <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '.76rem' }}
+                              onClick={() => connectTopstepX(acc.id)}>
+                              {isHe ? 'חבר' : 'Connect'}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              <button className="btn btn-ghost" onClick={resetTopstepForm}>
                 {T.cancel}
               </button>
             </div>
@@ -766,7 +855,7 @@ export default function Settings() {
 
       {/* חיבורי ברוקר */}
       {!DEMO_MODE && (
-        <BrokerSection lang={lang} accounts={accounts} user={user} />
+        <BrokerSection lang={lang} accounts={accounts} user={user} onSyncSuccess={reloadFromCloud} />
       )}
 
       {/* פרופיל + התנתקות */}

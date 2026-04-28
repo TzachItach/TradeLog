@@ -16,22 +16,35 @@ function json(body: unknown, status = 200) {
   });
 }
 
+interface ProjectXAccount {
+  id: number;
+  name: string;
+  balance: number;
+  canTrade: boolean;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
-  // ── 0. Parse body (POST JSON) ──────────────────────────────
-  const body        = await req.json().catch(() => ({}));
-  const broker      = body.broker      as string | undefined;
-  const userId      = body.user_id     as string | undefined;
-  const accountId   = body.account_id  as string | undefined;
-  const apiToken    = body.api_token   as string | undefined;
-  const apiUsername = body.api_username as string | undefined;
+  const body         = await req.json().catch(() => ({}));
+  const broker       = body.broker               as string | undefined;
+  const userId       = body.user_id              as string | undefined;
+  const accountId    = body.account_id           as string | undefined; // TradeLog account UUID
+  const apiToken     = body.api_token            as string | undefined;
+  const apiUsername  = body.api_username         as string | undefined;
+  const step         = body.step                 as 'validate' | 'connect' | undefined;
+  const pxAccountId  = body.projectx_account_id  as number | undefined;
 
-  if (broker !== 'topstepx' || !userId || !accountId || !apiToken || !apiUsername) {
+  const isValidate = step === 'validate';
+
+  if (broker !== 'topstepx' || !userId || !apiToken || !apiUsername) {
     return json({ error: 'Missing required parameters' }, 400);
   }
+  if (!isValidate && !accountId) {
+    return json({ error: 'Missing account_id for connect step' }, 400);
+  }
 
-  // ── 1. Verify JWT — caller must be the same user ───────────
+  // ── Verify JWT ─────────────────────────────────────────────
   const authHeader = req.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
     return json({ error: 'Unauthorized' }, 401);
@@ -47,10 +60,8 @@ serve(async (req) => {
     return json({ error: 'Forbidden' }, 403);
   }
 
-  // ── 2. Validate credentials with ProjectX ──────────────────
+  // ── Authenticate with ProjectX ─────────────────────────────
   let sessionToken: string;
-  let projectxAccountId: number | null = null;
-
   try {
     const authRes = await fetch(`${PROJECTX_BASE}/api/Auth/loginKey`, {
       method: 'POST',
@@ -58,7 +69,6 @@ serve(async (req) => {
       body: JSON.stringify({ userName: apiUsername, apiKey: apiToken }),
     });
     const authData = await authRes.json();
-
     if (!authData.success || !authData.token) {
       return json({ error: 'Invalid TopstepX credentials', detail: authData.errorMessage }, 401);
     }
@@ -67,7 +77,8 @@ serve(async (req) => {
     return json({ error: 'Could not reach TopstepX API', detail: String(e) }, 502);
   }
 
-  // ── 3. Fetch ProjectX account ID ───────────────────────────
+  // ── Fetch ProjectX accounts ────────────────────────────────
+  let accounts: ProjectXAccount[] = [];
   try {
     const acctRes = await fetch(`${PROJECTX_BASE}/api/Account/search`, {
       method: 'POST',
@@ -79,22 +90,35 @@ serve(async (req) => {
     });
     const acctData = await acctRes.json();
     if (acctData.success && acctData.accounts?.length > 0) {
-      projectxAccountId = acctData.accounts[0].id;
+      accounts = acctData.accounts as ProjectXAccount[];
     }
-  } catch {
-    // Non-fatal — sync will re-fetch accounts if this is null
+  } catch (e) {
+    if (isValidate) {
+      return json({ error: 'Could not fetch TopstepX accounts', detail: String(e) }, 502);
+    }
   }
 
-  // ── 4. Store credentials ───────────────────────────────────
+  // ── Validate step: return account list, no DB write ────────
+  if (isValidate) {
+    if (!accounts.length) {
+      return json({ error: 'No active TopstepX accounts found' }, 404);
+    }
+    return json({ success: true, accounts });
+  }
+
+  // ── Connect step: save chosen account to DB ────────────────
+  // Use the explicitly chosen pxAccountId, or fall back to accounts[0]
+  const resolvedPxId = pxAccountId ?? accounts[0]?.id ?? null;
+
   const { error } = await supabase.from('broker_connections').upsert(
     {
-      user_id:              userId,
-      account_id:           accountId,
-      broker:               'topstepx',
-      api_username:         apiUsername,
-      api_key:              apiToken,
-      projectx_account_id:  projectxAccountId,
-      is_active:            true,
+      user_id:             userId,
+      account_id:          accountId,
+      broker:              'topstepx',
+      api_username:        apiUsername,
+      api_key:             apiToken,
+      projectx_account_id: resolvedPxId,
+      is_active:           true,
     },
     { onConflict: 'user_id,account_id,broker' },
   );
