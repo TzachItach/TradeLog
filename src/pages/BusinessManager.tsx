@@ -23,10 +23,10 @@ function MeterBar({ pct, color, height = 8 }: { pct: number; color: string; heig
 
 function KpiCard({ label, value, sub, color }: { label: string; value: string; sub?: string; color?: string }) {
   return (
-    <div style={{ background: 'var(--s2)', border: '1px solid var(--bd)', borderRadius: 14, padding: '18px 20px' }}>
-      <div style={{ fontSize: '.7rem', color: 'var(--t3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.04em' }}>{label}</div>
-      <div style={{ fontSize: '1.4rem', fontWeight: 800, color: color ?? 'var(--t1)', lineHeight: 1.1 }}>{value}</div>
-      {sub && <div style={{ fontSize: '.72rem', color: 'var(--t3)', marginTop: 5 }}>{sub}</div>}
+    <div style={{ background: 'var(--s2)', border: '1px solid var(--bd)', borderRadius: 12, padding: '12px 16px' }}>
+      <div style={{ fontSize: '.66rem', color: 'var(--t3)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.04em' }}>{label}</div>
+      <div style={{ fontSize: '1.15rem', fontWeight: 800, color: color ?? 'var(--t1)', lineHeight: 1.1 }}>{value}</div>
+      {sub && <div style={{ fontSize: '.68rem', color: 'var(--t3)', marginTop: 4 }}>{sub}</div>}
     </div>
   );
 }
@@ -166,10 +166,10 @@ function BudgetSection({ budget, spent, isHe, onEdit }: {
     <div style={{
       background: 'var(--s2)',
       border: `1px solid ${isOver ? 'rgba(255,64,96,.45)' : 'var(--bd)'}`,
-      borderRadius: 14, padding: '22px 24px', marginBottom: 20,
+      borderRadius: 14, padding: '16px 20px', marginBottom: 16,
     }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontWeight: 700, fontSize: '.9rem', color: 'var(--t1)' }}>
             {isHe ? 'תקציב הוצאות' : 'Expense Budget'}
@@ -189,11 +189,11 @@ function BudgetSection({ budget, spent, isHe, onEdit }: {
       </div>
 
       {/* Three columns: Spent / Budget / Remaining */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 14 }}>
         {cols.map((col) => (
-          <div key={col.label} style={{ background: 'var(--s1)', borderRadius: 10, padding: '14px 16px' }}>
-            <div style={{ fontSize: '.68rem', color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 6 }}>{col.label}</div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: col.color ?? 'var(--t1)', lineHeight: 1.1, marginBottom: showDual ? 4 : 0 }}>
+          <div key={col.label} style={{ background: 'var(--s1)', borderRadius: 10, padding: '10px 14px' }}>
+            <div style={{ fontSize: '.66rem', color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 5 }}>{col.label}</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: col.color ?? 'var(--t1)', lineHeight: 1.1, marginBottom: showDual ? 3 : 0 }}>
               {col.primary}
             </div>
             {col.secondary && (
@@ -204,7 +204,7 @@ function BudgetSection({ budget, spent, isHe, onEdit }: {
       </div>
 
       {/* Progress bar */}
-      <div style={{ marginBottom: 12 }}>
+      <div style={{ marginBottom: 8 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
           <span style={{ fontSize: '.74rem', fontWeight: 700, color: barColor }}>
             {Math.round(pct)}% {isHe ? 'נוצל' : 'used'}
@@ -885,7 +885,7 @@ export default function BusinessManager() {
       </div>
 
       {/* KPI Cards */}
-      <div id="tour-business-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 14, marginBottom: 20 }}>
+      <div id="tour-business-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 10, marginBottom: 16 }}>
         <KpiCard
           label={isHe ? 'סה"כ הכנסות' : 'Total Revenue'}
           value={fmtPos(stats.totalPayouts)}
