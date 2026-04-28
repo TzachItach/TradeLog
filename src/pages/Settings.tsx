@@ -455,6 +455,8 @@ function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; 
     <div id="tour-broker-section" className="settings-section">
       <div className="section-title">{T.brokerConnections}</div>
 
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 10, alignItems: 'start' }}>
+
       {/* Tradovate — Coming Soon */}
       <div className="list-card" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10, opacity: 0.85 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -478,7 +480,7 @@ function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; 
       </div>
 
       {/* TopstepX */}
-      <div className="list-card" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10, marginTop: 8 }}>
+      <div className="list-card" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div className="list-card-info">
             <div className="list-card-name">TopstepX</div>
@@ -603,6 +605,7 @@ function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; 
         </div>
       </div>
 
+      </div>{/* end broker grid */}
     </div>
   );
 }

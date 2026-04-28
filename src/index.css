@@ -796,6 +796,7 @@ body:not(.dark) .table-wrap { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
   background: var(--s1); border-radius: var(--rad-l);
   padding: 22px; margin-bottom: 14px;
   box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  max-width: 720px;
 }
 body:not(.dark) .settings-section { box-shadow: 0 2px 8px rgba(0,0,0,.05); }
 

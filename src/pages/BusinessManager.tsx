@@ -916,7 +916,9 @@ export default function BusinessManager() {
       </div>
 
       {/* Budget Section */}
-      <BudgetSection budget={budgetSettings} spent={budgetSpent} isHe={isHe} onEdit={() => setShowBudgetModal(true)} />
+      <div style={{ maxWidth: 720 }}>
+        <BudgetSection budget={budgetSettings} spent={budgetSpent} isHe={isHe} onEdit={() => setShowBudgetModal(true)} />
+      </div>
 
       {/* Break-even bar */}
       <div style={{ background: 'var(--s2)', border: '1px solid var(--bd)', borderRadius: 14, padding: '18px 22px', marginBottom: 20 }}>
