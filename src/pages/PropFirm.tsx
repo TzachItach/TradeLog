@@ -66,121 +66,105 @@ function AccountCard({ account, isHe }: { account: Account; isHe: boolean }) {
   const todayColor = stats.todayPnL > 0 ? 'var(--g)' : stats.todayPnL < 0 ? 'var(--r)' : 'var(--t3)';
 
   return (
-    <div style={{ background: 'var(--s2)', border: `1px solid ${borderColor}`, borderRadius: 14, padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ background: 'var(--s2)', border: `1px solid ${borderColor}`, borderRadius: 14, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--t1)' }}>{account.name}</div>
-          <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginTop: 3 }}>
-            {phaseLabel} · {ddTypeLabel} · {fmt(account.initial_balance)}
+          <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--t1)' }}>{account.name}</div>
+          <div style={{ fontSize: '.72rem', color: 'var(--t3)', marginTop: 2, display: 'flex', flexWrap: 'wrap', gap: '0 6px' }}>
+            <span>{phaseLabel} · {ddTypeLabel} · {fmt(account.initial_balance)}</span>
+            {hasMinDays && (
+              <span style={{ color: stats.daysTraded >= (account.prop_min_days ?? 0) ? 'var(--g)' : 'var(--t3)' }}>
+                · {isHe ? 'ימים' : 'days'} {stats.daysTraded}/{account.prop_min_days}
+                {stats.daysTraded >= (account.prop_min_days ?? 0) && ' ✓'}
+              </span>
+            )}
+            {hasMaxDays && (
+              <span style={{ color: stats.daysRemaining < 3 ? 'var(--r)' : 'var(--t3)' }}>
+                · {Math.max(0, stats.daysRemaining)} {isHe ? 'ימים נותרים' : 'days left'}
+                {stats.daysRemaining < 0 && ' ⚠'}
+              </span>
+            )}
           </div>
         </div>
         <StatusBadge status={stats.status} isHe={isHe} />
       </div>
 
       {/* Key numbers */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 10 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 8 }}>
         {[
-          { label: isHe ? 'יתרה נוכחית' : 'Balance',     value: fmt(stats.currentBalance),                                    color: 'var(--t1)' },
-          { label: isHe ? 'רצפה'         : 'Floor',        value: fmt(stats.trailingFloor),                                     color: 'var(--r)'  },
+          { label: isHe ? 'יתרה' : 'Balance',      value: fmt(stats.currentBalance),                                                color: 'var(--t1)' },
+          { label: isHe ? 'רצפה' : 'Floor',         value: fmt(stats.trailingFloor),                                                 color: 'var(--r)'  },
           ...(hasTarget ? [
-            { label: isHe ? 'יעד'         : 'Target',       value: fmt(stats.profitTargetBalance),                               color: 'var(--g)'  },
-            { label: isHe ? 'נותר ליעד'  : 'To Target',     value: stats.profitRemaining === 0 ? '✓' : fmt(stats.profitRemaining), color: stats.profitRemaining === 0 ? 'var(--g)' : 'var(--t1)' },
+            { label: isHe ? 'יעד'        : 'Target',    value: fmt(stats.profitTargetBalance),                                         color: 'var(--g)'  },
+            { label: isHe ? 'נותר ליעד' : 'To Target',  value: stats.profitRemaining === 0 ? '✓' : fmt(stats.profitRemaining),          color: stats.profitRemaining === 0 ? 'var(--g)' : 'var(--t1)' },
           ] : []),
-          { label: isHe ? 'P&L היום'    : "Today's P&L",   value: stats.todayPnL === 0 ? '—' : fmt(stats.todayPnL),             color: todayColor },
+          { label: isHe ? 'P&L היום' : "Today",      value: stats.todayPnL === 0 ? '—' : fmt(stats.todayPnL),                        color: todayColor },
         ].map((kpi) => (
-          <div key={kpi.label} style={{ background: 'var(--s1)', borderRadius: 10, padding: '12px 14px' }}>
-            <div style={{ fontSize: '.68rem', color: 'var(--t3)', marginBottom: 4 }}>{kpi.label}</div>
-            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: kpi.color }}>{kpi.value}</div>
+          <div key={kpi.label} style={{ background: 'var(--s1)', borderRadius: 8, padding: '8px 10px' }}>
+            <div style={{ fontSize: '.62rem', color: 'var(--t3)', marginBottom: 3 }}>{kpi.label}</div>
+            <div style={{ fontSize: '.92rem', fontWeight: 800, color: kpi.color }}>{kpi.value}</div>
           </div>
         ))}
       </div>
 
-      {/* Drawdown meter */}
-      {hasDD && (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '2px 8px' }}>
-            <span style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--t1)' }}>
-              {isHe ? 'Drawdown נותר' : 'Drawdown Remaining'}
-            </span>
-            <span style={{ fontSize: '.74rem', color: stats.drawdownPct >= 80 ? 'var(--r)' : 'var(--t3)' }}>
-              {fmt(stats.drawdownRemaining)} / {fmt(account.prop_max_drawdown!)}
-              &nbsp;·&nbsp;{(100 - stats.drawdownPct).toFixed(0)}% {isHe ? 'נשאר' : 'left'}
-            </span>
-          </div>
-          <MeterBar pct={stats.drawdownPct} color={stats.drawdownPct >= 80 ? 'var(--r)' : stats.drawdownPct >= 50 ? 'var(--o)' : 'var(--b)'} />
-          {account.prop_drawdown_type !== 'static' && (
-            <div style={{ fontSize: '.68rem', color: 'var(--t3)', marginTop: 4 }}>
-              Peak: {fmt(stats.highWaterMark)}
+      {/* Meters */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {hasDD && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+              <span style={{ fontSize: '.74rem', fontWeight: 700, color: 'var(--t1)' }}>
+                {isHe ? 'Drawdown נותר' : 'Drawdown Remaining'}
+              </span>
+              <span style={{ fontSize: '.68rem', color: stats.drawdownPct >= 80 ? 'var(--r)' : 'var(--t3)' }}>
+                {fmt(stats.drawdownRemaining)} / {fmt(account.prop_max_drawdown!)}
+                &nbsp;·&nbsp;{(100 - stats.drawdownPct).toFixed(0)}% {isHe ? 'נשאר' : 'left'}
+                {account.prop_drawdown_type !== 'static' && <span style={{ color: 'var(--t3)' }}> · Peak {fmt(stats.highWaterMark)}</span>}
+              </span>
             </div>
-          )}
-        </div>
-      )}
-
-      {/* Daily limit meter */}
-      {hasDailyLim && (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '2px 8px' }}>
-            <span style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--t1)' }}>
-              {isHe ? 'גבול הפסד יומי' : 'Daily Loss Limit'}
-            </span>
-            <span style={{ fontSize: '.74rem', color: stats.dailyLimitPct >= 80 ? 'var(--r)' : 'var(--t3)' }}>
-              {fmt(stats.dailyLimitRemaining)} {isHe ? 'נשאר' : 'left'} / {fmt(account.prop_daily_limit!)}
-            </span>
+            <MeterBar pct={stats.drawdownPct} color={stats.drawdownPct >= 80 ? 'var(--r)' : stats.drawdownPct >= 50 ? 'var(--o)' : 'var(--b)'} />
           </div>
-          <MeterBar pct={stats.dailyLimitPct} color={stats.dailyLimitPct >= 80 ? 'var(--r)' : stats.dailyLimitPct >= 50 ? 'var(--o)' : 'var(--g)'} />
-        </div>
-      )}
+        )}
 
-      {/* Profit target meter */}
-      {hasTarget && (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '2px 8px' }}>
-            <span style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--t1)' }}>
-              {isHe ? 'יעד רווח' : 'Profit Target'}
-            </span>
-            <span style={{ fontSize: '.74rem', color: stats.profitPct >= 100 ? 'var(--g)' : 'var(--t3)' }}>
-              {fmt(stats.profitPnL)} / {fmt(account.prop_profit_target!)}
-              &nbsp;·&nbsp;{stats.profitPct.toFixed(0)}%
-            </span>
+        {hasDailyLim && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+              <span style={{ fontSize: '.74rem', fontWeight: 700, color: 'var(--t1)' }}>
+                {isHe ? 'גבול הפסד יומי' : 'Daily Loss Limit'}
+              </span>
+              <span style={{ fontSize: '.68rem', color: stats.dailyLimitPct >= 80 ? 'var(--r)' : 'var(--t3)' }}>
+                {fmt(stats.dailyLimitRemaining)} {isHe ? 'נשאר' : 'left'} / {fmt(account.prop_daily_limit!)}
+              </span>
+            </div>
+            <MeterBar pct={stats.dailyLimitPct} color={stats.dailyLimitPct >= 80 ? 'var(--r)' : stats.dailyLimitPct >= 50 ? 'var(--o)' : 'var(--g)'} />
           </div>
-          <MeterBar pct={stats.profitPct} color={stats.profitPct >= 100 ? 'var(--g)' : 'var(--b)'} />
-        </div>
-      )}
+        )}
 
-      {/* Days row */}
-      {(hasMinDays || hasMaxDays) && (
-        <div style={{ display: 'flex', gap: 24, paddingTop: 4, borderTop: '1px solid var(--bd)', flexWrap: 'wrap' }}>
-          {hasMinDays && (
-            <div>
-              <div style={{ fontSize: '.68rem', color: 'var(--t3)', marginBottom: 2 }}>{isHe ? 'ימי מסחר' : 'Trading Days'}</div>
-              <div style={{ fontSize: '.9rem', fontWeight: 700, color: stats.daysTraded >= (account.prop_min_days ?? 0) ? 'var(--g)' : 'var(--t1)' }}>
-                {stats.daysTraded} / {account.prop_min_days}
-                {stats.daysTraded >= (account.prop_min_days ?? 0) && <span style={{ fontSize: '.72rem', marginInlineStart: 5 }}>✓</span>}
-              </div>
+        {hasTarget && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+              <span style={{ fontSize: '.74rem', fontWeight: 700, color: 'var(--t1)' }}>
+                {isHe ? 'יעד רווח' : 'Profit Target'}
+              </span>
+              <span style={{ fontSize: '.68rem', color: stats.profitPct >= 100 ? 'var(--g)' : 'var(--t3)' }}>
+                {fmt(stats.profitPnL)} / {fmt(account.prop_profit_target!)}
+                &nbsp;·&nbsp;{stats.profitPct.toFixed(0)}%
+              </span>
             </div>
-          )}
-          {hasMaxDays && (
-            <div>
-              <div style={{ fontSize: '.68rem', color: 'var(--t3)', marginBottom: 2 }}>{isHe ? 'ימים נותרים' : 'Days Remaining'}</div>
-              <div style={{ fontSize: '.9rem', fontWeight: 700, color: stats.daysRemaining < 3 ? 'var(--r)' : 'var(--t1)' }}>
-                {Math.max(0, stats.daysRemaining)}
-                {stats.daysRemaining < 0 && <span style={{ fontSize: '.72rem', color: 'var(--r)', marginInlineStart: 5 }}>⚠ {isHe ? 'חרגת' : 'overdue'}</span>}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+            <MeterBar pct={stats.profitPct} color={stats.profitPct >= 100 ? 'var(--g)' : 'var(--b)'} />
+          </div>
+        )}
+      </div>
 
       {/* Alerts */}
       {stats.status === 'breached' && (
-        <div style={{ background: 'rgba(255,64,96,.1)', border: '1px solid rgba(255,64,96,.4)', borderRadius: 8, padding: '12px 16px', fontSize: '.82rem', color: 'var(--r)', fontWeight: 600 }}>
+        <div style={{ background: 'rgba(255,64,96,.1)', border: '1px solid rgba(255,64,96,.4)', borderRadius: 8, padding: '10px 14px', fontSize: '.8rem', color: 'var(--r)', fontWeight: 600 }}>
           ⛔ {isHe ? 'החשבון הגיע ל-Drawdown — פנה לחברת ה-Prop לבדיקה' : 'Account has breached its drawdown limit — contact your Prop Firm'}
         </div>
       )}
       {stats.status === 'passed' && (
-        <div style={{ background: 'rgba(0,224,168,.08)', border: '1px solid rgba(0,224,168,.4)', borderRadius: 8, padding: '12px 16px', fontSize: '.82rem', color: 'var(--g)', fontWeight: 600 }}>
+        <div style={{ background: 'rgba(0,224,168,.08)', border: '1px solid rgba(0,224,168,.4)', borderRadius: 8, padding: '10px 14px', fontSize: '.8rem', color: 'var(--g)', fontWeight: 600 }}>
           🎉 {isHe ? 'כל הכבוד — עברת את יעד ה-Challenge!' : 'Congratulations — you hit the Challenge profit target!'}
         </div>
       )}
