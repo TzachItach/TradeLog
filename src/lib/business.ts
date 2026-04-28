@@ -91,13 +91,19 @@ export function calcBusinessStats(
   const cpa = totalFundedCycles > 0 ? totalExpenses / totalFundedCycles : totalExpenses;
 
   // ── Burn rate ─────────────────────────────────────────────────────────────
-  // Use prop accounts that have been breached to determine average lifespan
+  // Lifespan = prop_start_date → last trade date on that account (not today).
   const propAccounts = accounts.filter((a) => a.account_type === 'prop_firm');
   const breachedLifespans: number[] = [];
   for (const acc of propAccounts) {
     const stats = calcPropFirmStats(acc, trades);
     if (stats.status === 'breached' && acc.prop_start_date) {
-      breachedLifespans.push(stats.daysSinceStart);
+      const accTrades = trades.filter((t) => t.account_id === acc.id);
+      if (accTrades.length === 0) continue;
+      const lastTradeDate = accTrades.reduce((max, t) => (t.trade_date > max ? t.trade_date : max), '');
+      const lifespanDays = Math.max(0, Math.floor(
+        (new Date(lastTradeDate).getTime() - new Date(acc.prop_start_date).getTime()) / 86_400_000,
+      ));
+      breachedLifespans.push(lifespanDays);
     }
   }
   const avgBurnDays = breachedLifespans.length > 0
