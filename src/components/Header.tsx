@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useStore } from '../store';
@@ -25,6 +25,7 @@ export default function Header() {
   const { lang, setLang, accounts, selectedAccount, setSelectedAccount, setModal, user, sidebarCollapsed, setSidebarCollapsed, darkMode, setDarkMode } = useStore();
   const T = useT(lang);
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
   const avatarRef = useRef<HTMLDivElement>(null);
@@ -92,8 +93,14 @@ export default function Header() {
         <AppLogo size="md" onClick={() => navigate('/dashboard')} />
       </div>
 
-      {/* Account tabs / dropdown */}
+      {/* Account tabs / dropdown — hidden on PropFirm page when its own dropdown is shown */}
       {(() => {
+        const isPropFirmPage = location.pathname.endsWith('/propfirm');
+        const propAccounts = accounts.filter((a) => a.account_type === 'prop_firm' && a.is_active);
+        const isMobileWidth = window.innerWidth <= 768;
+        const propFirmHasDropdown = isPropFirmPage && propAccounts.length > (isMobileWidth ? 1 : 2);
+        if (propFirmHasDropdown) return null;
+
         const activeAccounts = accounts.filter((a) => a.is_active);
         if (activeAccounts.length > 3) {
           return (

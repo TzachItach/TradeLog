@@ -172,6 +172,9 @@ function AccountCard({ account, isHe }: { account: Account; isHe: boolean }) {
   );
 }
 
+const PAGE_SIZE = 3;
+const ALL = 'all';
+
 export default function PropFirm() {
   const { accounts, lang } = useStore();
   const navigate = useNavigate();
@@ -180,16 +183,37 @@ export default function PropFirm() {
 
   const propAccounts = accounts.filter((a) => a.account_type === 'prop_firm');
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string>(ALL);
+  const [page, setPage] = useState(0);
 
   const showDropdown = propAccounts.length > (isMobile ? 1 : 2);
-  const activeId = showDropdown
-    ? (selectedId && propAccounts.find((a) => a.id === selectedId) ? selectedId : propAccounts[0]?.id)
-    : null;
 
-  const displayAccounts = showDropdown
-    ? propAccounts.filter((a) => a.id === activeId)
-    : propAccounts;
+  // When dropdown appears/disappears, reset to showing first account
+  useEffect(() => {
+    setSelectedId(showDropdown ? (propAccounts[0]?.id ?? ALL) : ALL);
+    setPage(0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showDropdown]);
+
+  const activeSelection = showDropdown
+    ? (selectedId === ALL || propAccounts.find((a) => a.id === selectedId) ? selectedId : (propAccounts[0]?.id ?? ALL))
+    : ALL;
+
+  const filteredAccounts = activeSelection === ALL
+    ? propAccounts
+    : propAccounts.filter((a) => a.id === activeSelection);
+
+  // Paginate only when showing all accounts on mobile
+  const usePagination = activeSelection === ALL && isMobile && filteredAccounts.length > PAGE_SIZE;
+  const totalPages = usePagination ? Math.ceil(filteredAccounts.length / PAGE_SIZE) : 1;
+  const displayAccounts = usePagination
+    ? filteredAccounts.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+    : filteredAccounts;
+
+  const handleSelect = (val: string) => {
+    setSelectedId(val);
+    setPage(0);
+  };
 
   return (
     <div id="tour-propfirm" className="page-content">
@@ -198,8 +222,8 @@ export default function PropFirm() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           {showDropdown && (
             <select
-              value={activeId ?? ''}
-              onChange={(e) => setSelectedId(e.target.value)}
+              value={activeSelection}
+              onChange={(e) => handleSelect(e.target.value)}
               style={{
                 background: 'var(--s2)', color: 'var(--t1)',
                 border: '1px solid var(--bd2)', borderRadius: 8,
@@ -207,6 +231,7 @@ export default function PropFirm() {
                 maxWidth: 200,
               }}
             >
+              <option value={ALL}>{isHe ? 'כל החשבונות' : 'All Accounts'}</option>
               {propAccounts.map((a) => (
                 <option key={a.id} value={a.id}>{a.name}</option>
               ))}
@@ -234,11 +259,37 @@ export default function PropFirm() {
           </button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
-          {displayAccounts.map((acc) => (
-            <AccountCard key={acc.id} account={acc} isHe={isHe} />
-          ))}
-        </div>
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
+            {displayAccounts.map((acc) => (
+              <AccountCard key={acc.id} account={acc} isHe={isHe} />
+            ))}
+          </div>
+
+          {usePagination && (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginTop: 20 }}>
+              <button
+                className="btn btn-ghost"
+                style={{ fontSize: '.8rem', padding: '6px 16px', opacity: page === 0 ? 0.35 : 1 }}
+                disabled={page === 0}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                {isHe ? '→ הקודם' : '← Prev'}
+              </button>
+              <span style={{ fontSize: '.8rem', color: 'var(--t3)' }}>
+                {page + 1} / {totalPages}
+              </span>
+              <button
+                className="btn btn-ghost"
+                style={{ fontSize: '.8rem', padding: '6px 16px', opacity: page >= totalPages - 1 ? 0.35 : 1 }}
+                disabled={page >= totalPages - 1}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                {isHe ? '← הבא' : 'Next →'}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
