@@ -72,7 +72,7 @@ supabase/
     PropFirm.tsx           — Prop Firm Tracker: כרטיסי חשבון עם מדים
     BusinessManager.tsx    — ניהול עסקי: הוצאות, משיכות, KPIs, גרף, מדד עסקי
     Reports.tsx            — Export PDF + CSV
-    Settings.tsx           — חשבונות + אסטרטגיות + BrokerSection (TopstepX/Tradovate connect/sync) + logout + כפתורי "סנכרן" ו-"מדריך כניסה" (btn-ghost)
+    Settings.tsx           — חשבונות + אסטרטגיות + BrokerSection (TopstepX בלבד — connect/sync; Tradovate = "Coming Soon" banner + הפניה ל-CSV) + logout + כפתורי "סנכרן" ו-"מדריך כניסה" (btn-ghost)
     AppLogo.tsx            — קומפוננטת לוגו responsive עם dark/light switching
     Auth.tsx               — Google OAuth בלבד
     Accessibility.tsx      — הצהרת נגישות עב/en (מתייחסת ל-Negishot)
@@ -436,12 +436,12 @@ RESEND_API_KEY=re_G5aKAVqD_NSg8f2DJHZNNweYDZJpoGMij
 ---
 
 ### Tradovate Auto Import (Tradovate REST API)
+> ⚠️ **סטטוס: ON HOLD** — ה-UI הוסר מ-Settings. מציג banner "Coming Soon" + הפניה ל-CSV import. ממתין ל-API רשמי מ-Tradovate.
+
 - **API Base**: `https://live.tradovateapi.com/v1` (live) | `https://demo.tradovateapi.com/v1` (eval/demo)
-  - ⚠️ Domain ישן `tradovate.com` → **לא עובד** (Supabase IPs חסומות + domain שינה)
-- **Auth מבוצע דרך Vercel Serverless Function** (`api/tradovate-auth.ts`) — לא Supabase Edge Function
-  - הסיבה: Supabase IPs חסומות ע"י Tradovate; Vercel IPs עוברות
-  - פורמט: Node.js `IncomingMessage/ServerResponse` (לא Web API `Request/Response`)
-  - Settings.tsx קורא ל-`/api/tradovate-auth` (לא ל-Supabase function)
+- **הקוד קיים** ב-`api/tradovate-auth.ts` + `api/tradovate-sync.ts` (Vercel Serverless Functions) — מוכן להפעלה מחדש
+  - `api/tradovate-sync.ts`: מעביר `conn.broker_env` ל-`getTradovateToken` (תוקן)
+  - הסיבה להשהייה: Supabase IPs היו חסומות; ממתין ל-API key רשמי מ-Tradovate
 - **Auth endpoint**: `POST /auth/accesstokenrequest` → `{name, password, appId, appVersion, deviceId, cid:0, sec:""}` → `{accessToken}`
 - **Accounts**: `GET /account/list` → `{accounts[].id}`
 - **Trades**: `GET /executionReport/list` → סינון closing fills (grossPL !== 0)
@@ -449,11 +449,20 @@ RESEND_API_KEY=re_G5aKAVqD_NSg8f2DJHZNNweYDZJpoGMij
   - `pnl = grossPL - commission`
   - contractId נומרי → `GET /contract/item?id={id}` → `name` → normalizeSymbol (parallel)
   - `broker_trade_id = tradovate-{id}`
-- **Env vars** (Supabase Secrets, אופציונלי — cid:0 עובד ל-read-only):
-  `TRADOVATE_APP_ID`, `TRADOVATE_CID`, `TRADOVATE_SEC`
-- **Flow בSettings**: בחר Live/Demo → הכנס email+password → Connect (קורא `tradovate-auth`) → Sync Now (קורא `tradovate-sync`)
-- **Demo/Eval accounts**: toggle "Demo / תיק מבחן" שולח לדמו URL — שומר `broker_env='demo'` ב-DB
-- **Deployed**: פרוס ב-Supabase project `mxzyfmuktsyazkfxglzb`
+- **Env vars** (Supabase Secrets): `TRADOVATE_APP_ID`, `TRADOVATE_CID`, `TRADOVATE_SEC`
+- **בינתיים**: ייבוא ידני דרך CSV ב-Settings → Import Trades
+
+---
+
+## שיפורים שנעשו (אפריל 2026 — גל 3)
+
+### Tradovate — מעבר ל-"Coming Soon" + פישוט BrokerSection
+- **הסיבה**: Supabase IPs חסומות ע"י Tradovate; ממתינים ל-API key רשמי
+- **Settings.tsx BrokerSection**: הוסרו כל state/functions של Tradovate (`tradovateUser`, `tradovatePass`, `tradovateEnv`, `showTradovateInput`, `tradovateStep`, `tradovateAccounts`, `tradovateMapping`, `loadingAccounts`, `connectingTdv`, `tradovateClientToken`, `encryptTradovatePassword`, `tryTradovateClientSide`, `fetchTradovateAccounts`, `connectTradovateAccount`, `syncTradovateClientSide`, `resetTradovate`)
+- **`triggerSync`** פושט מ-`async (broker)` ל-`async ()` — TopstepX בלבד
+- **Tradovate JSX** הוחלף ב-banner "Coming Soon" עם הסבר + הפניה ל-CSV import
+- **Landing page**: עודכנו 6 טקסטים — features, FAQ — לשקף TopstepX פעיל, Tradovate בקרוב
+- **`api/tradovate-sync.ts`**: תוקן — מעביר `conn.broker_env` ל-`getTradovateToken`
 
 ---
 

@@ -35,11 +35,12 @@ function encryptPassword(name: string, password: string): string {
   return btoa(rotated);
 }
 
-async function authenticate(baseUrl: string, username: string, password: string) {
+// Auth always goes to LIVE endpoint — environment field in body selects account context
+async function authenticate(env: 'live' | 'demo', username: string, password: string) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
-    const res = await fetch(`${baseUrl}/auth/accesstokenrequest`, {
+    const res = await fetch(`${LIVE_BASE}/auth/accesstokenrequest`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -53,6 +54,7 @@ async function authenticate(baseUrl: string, username: string, password: string)
         password: encryptPassword(username, password),
         enc: true,
         chl: String(Math.floor(Math.random() * 1e12)),
+        environment: env,
         appId: APP_ID,
         appVersion: APP_VERSION,
         deviceId: DEVICE_ID,
@@ -102,8 +104,6 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const password  = body.api_password as string | undefined;
     const env          = body.env === 'demo' ? 'demo' : 'live';
     const preAuthToken = body.pre_auth_token as string | undefined;
-    const primaryUrl   = env === 'demo' ? DEMO_BASE : LIVE_BASE;
-    const fallbackUrl  = env === 'demo' ? LIVE_BASE : DEMO_BASE;
 
     if (!userId || !username || !password) return sendJson(res, { error: 'Missing required parameters' }, 400);
 
@@ -120,29 +120,28 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
     if (authErr || !user || user.id !== userId) return sendJson(res, { error: 'Forbidden' }, 403);
 
-    // Authenticate with Tradovate — use pre_auth_token if provided (client-side auth), else try server-side
+    // Auth always uses LIVE endpoint — environment field selects account context (live/demo)
     let accessToken: string | undefined;
-    let baseUrl = primaryUrl;
-    let resolvedEnv = env;
+    const baseUrl = LIVE_BASE;
+    const resolvedEnv = env;
 
     if (preAuthToken) {
-      // Token already obtained client-side — skip server-side re-auth
       accessToken = preAuthToken;
     } else {
       try {
-        const primary = await authenticate(primaryUrl, username, password);
+        const primary = await authenticate(env, username, password);
         if (primary.token) {
           accessToken = primary.token;
         } else {
-          const fallback = await authenticate(fallbackUrl, username, password);
+          // Try the other env as fallback
+          const fallbackEnv = env === 'demo' ? 'live' : 'demo';
+          const fallback = await authenticate(fallbackEnv, username, password);
           if (fallback.token) {
             accessToken = fallback.token;
-            baseUrl = fallbackUrl;
-            resolvedEnv = env === 'demo' ? 'live' : 'demo';
           } else {
             return sendJson(res, {
               error: 'Invalid Tradovate credentials — check username/password',
-              hint: 'Tried both Live and Demo endpoints. Verify credentials at trader.tradovate.com',
+              hint: 'Tried both Live and Demo environments. Verify credentials at trader.tradovate.com',
               tradovateStatus: primary.httpStatus,
               tradovateResponse: primary.rawBody,
             }, 401);
