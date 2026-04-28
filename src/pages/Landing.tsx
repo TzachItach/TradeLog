@@ -54,7 +54,7 @@ const T = {
     biz4: 'מד עסקי: תדע מיד אם אתה ברווח או בהפסד',
     bizBtn: 'נסה את הניהול העסקי',
     pricingTitle: 'תמחור פשוט ושקוף',
-    pricingSub: '14 ימי ניסיון חינם לכל משתמש חדש.',
+    pricingSub: '7 ימי ניסיון חינם לכל משתמש חדש.',
     planMonthly: 'חודשי',
     planMonthlySub: 'חיוב חודשי · ביטול בכל עת',
     feat1: 'חשבונות מסחר ללא הגבלה',
@@ -67,7 +67,7 @@ const T = {
     feat8: 'ייצוא PDF ו-CSV',
     planBtn: 'התחל ניסיון חינם',
     ctaTitle: 'מוכן לשפר את המסחר שלך?',
-    ctaSub: '14 ימים חינם לגמרי. ביטול בכל עת.',
+    ctaSub: '7 ימים חינם לגמרי. ביטול בכל עת.',
     testimonialsTitle: 'מה הסוחרים אומרים',
     testimonials: [
       { name: 'אלון מ.', role: 'Topstep Funded Trader', text: 'TraderYo שינה לי לגמרי את האופן שבו אני מנהל את החשבונות שלי. ה-Drawdown Tracker מציל אותי כל יום.' },
