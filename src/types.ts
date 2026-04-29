@@ -3,7 +3,7 @@ export type TradeDirection = 'long' | 'short';
 export type AccountType = 'personal' | 'prop_firm' | 'demo';
 export type BrokerName = 'manual' | 'tradovate' | 'topstepx';
 export type FieldType = 'checkbox' | 'text' | 'select' | 'tag';
-export type TradeSource = 'manual' | 'auto';
+export type TradeSource = 'manual' | 'tradovate' | 'topstepx';
 
 export interface Account {
   id: string;

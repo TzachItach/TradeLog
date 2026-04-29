@@ -561,7 +561,7 @@ export default function BrokerImport({ onClose }: Props) {
         size: t.size,
         notes: t.notes,
         broker_trade_id: t.broker_trade_id,
-        source: broker,
+        source: (broker === 'tradovate' || broker === 'topstepx') ? broker : 'manual',
         confirmations: {},
         field_values: {},
       });

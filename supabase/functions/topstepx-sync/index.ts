@@ -9,11 +9,18 @@ const CORS = {
 const PROJECTX_BASE =
   Deno.env.get('TOPSTEPX_BASE_URL') ?? 'https://api.topstepx.com';
 
-// MNQM5 → MNQ | CON.F.US.MNQ.M25 → MNQ
+// ProjectX uses non-standard symbols for some contracts
+const PX_ALIAS: Record<string, string> = {
+  EP: 'ES',   // E-mini S&P 500
+};
+
+// MNQM5 → MNQ | CON.F.US.MNQ.M25 → MNQ | CON.F.US.EP.H25 → ES
 function normalizeSymbol(raw: string): string {
   const parts = raw.split('.');
-  if (parts.length >= 4) return parts[3].toUpperCase();
-  return raw.replace(/[FGHJKMNQUVXZ]\d{1,2}$/, '').toUpperCase().trim();
+  const base = parts.length >= 4
+    ? parts[3].toUpperCase()
+    : raw.replace(/[FGHJKMNQUVXZ]\d{1,2}$/, '').toUpperCase().trim();
+  return PX_ALIAS[base] ?? base;
 }
 
 interface ProjectXTrade {
@@ -192,7 +199,7 @@ serve(async (req) => {
       pnl:             Math.round(((t.profitAndLoss ?? 0) - (t.fees ?? 0)) * 100) / 100,
       size:            t.size,
       notes:           (t.fees ?? 0) > 0 ? `Fees: $${(t.fees).toFixed(2)} | TopstepX` : 'TopstepX',
-      source:          'auto',
+      source:          'topstepx',
       broker_trade_id: `topstepx-${t.id}`,
       confirmations:   {},
       field_values:    {},

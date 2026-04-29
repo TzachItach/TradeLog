@@ -19,8 +19,8 @@ function json(body: unknown, status = 200) {
 interface ProjectXAccount {
   id: number;
   name: string;
-  balance: number;
   canTrade: boolean;
+  isVisible: boolean;
 }
 
 serve(async (req) => {
