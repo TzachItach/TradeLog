@@ -341,7 +341,7 @@ function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; 
   const [showTopstepInput, setShowTopstepInput] = useState(false);
   const [syncing, setSyncing] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<{ [k: string]: string }>({});
-  const [pxAccounts, setPxAccounts] = useState<{ id: number; name: string; balance: number }[]>([]);
+  const [pxAccounts, setPxAccounts] = useState<{ id: number; name: string; canTrade: boolean; isVisible: boolean }[]>([]);
   const [selectedPxId, setSelectedPxId] = useState<number | null>(null);
   const [fetchingPx, setFetchingPx] = useState(false);
 
@@ -375,7 +375,8 @@ function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; 
         setPxAccounts(data.accounts);
         if (data.accounts.length === 1) setSelectedPxId(data.accounts[0].id);
       } else {
-        alert(isHe ? `שגיאה: ${data.error ?? res.status}` : `Error: ${data.error ?? res.status}`);
+        const msg = [data.error, data.detail].filter(Boolean).join(' — ');
+        alert(isHe ? `שגיאה: ${msg || res.status}` : `Error: ${msg || res.status}`);
       }
     } catch {
       alert(isHe ? 'שגיאה בגישה ל-TopstepX' : 'Could not reach TopstepX');
@@ -411,9 +412,10 @@ function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; 
         alert(isHe ? 'TopstepX חובר בהצלחה!' : 'TopstepX connected!');
       } else {
         const data = await res.json().catch(() => ({}));
+        const msg = [data.error, data.detail].filter(Boolean).join(' — ');
         alert(isHe
-          ? `שגיאה בחיבור TopstepX: ${data.error ?? res.status}`
-          : `TopstepX connection failed: ${data.error ?? res.status}`);
+          ? `שגיאה בחיבור TopstepX: ${msg || res.status}`
+          : `TopstepX connection failed: ${msg || res.status}`);
       }
     } catch {
       alert(isHe ? 'שגיאה בחיבור TopstepX' : 'TopstepX connection failed');
@@ -438,8 +440,18 @@ function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; 
       if (!res.ok) {
         alert(isHe ? `שגיאה בסנכרון: ${data.error ?? res.status}` : `Sync failed: ${data.error ?? res.status}`);
       } else {
-        alert(isHe ? `סנכרון הושלם — ${data.inserted ?? 0} עסקאות חדשות` : `Sync complete — ${data.inserted ?? 0} new trades`);
-        if (data.inserted > 0) onSyncSuccess?.();
+        const errs: string[] = data.errors ?? [];
+        const inserted: number = data.inserted ?? 0;
+        if (errs.length > 0 && inserted === 0) {
+          alert(isHe ? `שגיאה בסנכרון: ${errs[0]}` : `Sync failed: ${errs[0]}`);
+        } else if (errs.length > 0) {
+          alert(isHe
+            ? `סנכרון הושלם — ${inserted} עסקאות חדשות (שגיאה: ${errs[0]})`
+            : `Sync complete — ${inserted} new trades (error: ${errs[0]})`);
+        } else {
+          alert(isHe ? `סנכרון הושלם — ${inserted} עסקאות חדשות` : `Sync complete — ${inserted} new trades`);
+        }
+        if (inserted > 0) onSyncSuccess?.();
       }
       setLastSync((s) => ({ ...s, topstepx: new Date().toLocaleTimeString() }));
     } catch {
@@ -550,7 +562,7 @@ function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; 
                           <div key={pxa.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', background: 'var(--s1)', borderRadius: 7, border: '1px solid var(--bd)' }}>
                             <div>
                               <div style={{ fontSize: '.84rem', fontWeight: 600 }}>{pxa.name}</div>
-                              <div style={{ fontSize: '.72rem', color: 'var(--t3)' }}>${pxa.balance.toLocaleString()}</div>
+                              {!pxa.canTrade && <div style={{ fontSize: '.72rem', color: 'var(--r)' }}>{isHe ? 'לא ניתן למסחר' : 'Cannot trade'}</div>}
                             </div>
                             <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '.76rem' }}
                               onClick={() => setSelectedPxId(pxa.id)}>

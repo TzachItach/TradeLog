@@ -70,7 +70,9 @@ serve(async (req) => {
     });
     const authData = await authRes.json();
     if (!authData.success || !authData.token) {
-      return json({ error: 'Invalid TopstepX credentials', detail: authData.errorMessage }, 401);
+      // Official docs: errorCode 0=success, 3=invalid credentials; errorMessage often null
+      const detail = authData.errorMessage ?? (authData.errorCode != null ? `errorCode: ${authData.errorCode}` : null);
+      return json({ error: 'Invalid TopstepX credentials', detail }, 401);
     }
     sessionToken = authData.token;
   } catch (e) {

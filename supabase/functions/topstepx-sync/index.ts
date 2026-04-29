@@ -79,9 +79,12 @@ serve(async (req) => {
   }
 
   let totalInserted = 0;
+  const errors: string[] = [];
 
   for (const conn of connections) {
     // ── 2. Authenticate with ProjectX ────────────────────────
+    // Official docs: POST /api/Auth/loginKey → {token, success, errorCode, errorMessage}
+    // errorCode 0 = success; token valid for 24 hours
     let sessionToken: string;
     try {
       const authRes = await fetch(`${PROJECTX_BASE}/api/Auth/loginKey`, {
@@ -91,16 +94,23 @@ serve(async (req) => {
       });
       const authData = await authRes.json();
       if (!authData.success || !authData.token) {
-        console.error(`[topstepx-sync] Auth failed for account ${conn.account_id}:`, authData.errorMessage);
+        const msg = authData.errorCode === 3
+          ? 'Invalid TopstepX credentials — please reconnect in Settings'
+          : `TopstepX auth failed (errorCode: ${authData.errorCode ?? 'unknown'})`;
+        console.error(`[topstepx-sync] ${msg} for account ${conn.account_id}`);
+        errors.push(msg);
         continue;
       }
       sessionToken = authData.token;
     } catch (e) {
+      const msg = 'Could not reach TopstepX API';
       console.error('[topstepx-sync] Auth request failed:', e);
+      errors.push(msg);
       continue;
     }
 
     // ── 3. Resolve ProjectX account ID ───────────────────────
+    // Official docs: POST /api/Account/search → {accounts[{id,name,canTrade,isVisible}], success, errorCode}
     let projectxAccountId: number = conn.projectx_account_id;
     if (!projectxAccountId) {
       try {
@@ -115,17 +125,18 @@ serve(async (req) => {
         const acctData = await acctRes.json();
         if (acctData.success && acctData.accounts?.length > 0) {
           projectxAccountId = acctData.accounts[0].id;
-          // Cache it for next sync
           await supabase.from('broker_connections')
             .update({ projectx_account_id: projectxAccountId })
             .eq('id', conn.id);
         }
       } catch {
-        // ignore
+        // non-fatal: if already cached above this won't run
       }
     }
     if (!projectxAccountId) {
-      console.error('[topstepx-sync] Could not resolve ProjectX account ID');
+      const msg = 'Could not resolve TopstepX account ID';
+      console.error('[topstepx-sync]', msg);
+      errors.push(msg);
       continue;
     }
 
@@ -137,6 +148,10 @@ serve(async (req) => {
     const endTimestamp = new Date().toISOString();
 
     // ── 5. Fetch trades from ProjectX ─────────────────────────
+    // Official docs: POST /api/Trade/search → {trades[{id,contractId,creationTimestamp,
+    //   profitAndLoss,fees,side,size,voided}], success, errorCode}
+    // side: 0=Sell(closed long)→direction:'long', 1=Buy(closed short)→direction:'short'
+    // profitAndLoss: null = half-turn (open position), skip it
     let rawTrades: ProjectXTrade[] = [];
     try {
       const tradeRes = await fetch(`${PROJECTX_BASE}/api/Trade/search`, {
@@ -152,13 +167,20 @@ serve(async (req) => {
         }),
       });
       const tradeData = await tradeRes.json();
-      if (tradeData.success && tradeData.trades?.length) {
-        // Only completed round-trips (profitAndLoss non-null) that aren't voided
+      if (!tradeData.success) {
+        const msg = `Trade fetch failed (errorCode: ${tradeData.errorCode ?? 'unknown'})`;
+        console.error('[topstepx-sync]', msg);
+        errors.push(msg);
+        continue;
+      }
+      if (tradeData.trades?.length) {
         rawTrades = (tradeData.trades as ProjectXTrade[])
           .filter(t => t.profitAndLoss !== null && !t.voided);
       }
     } catch (e) {
+      const msg = 'Could not fetch trades from TopstepX';
       console.error('[topstepx-sync] Trade fetch failed:', e);
+      errors.push(msg);
       continue;
     }
 
@@ -193,7 +215,6 @@ serve(async (req) => {
       user_id:         userId,
       account_id:      conn.account_id,
       symbol:          normalizeSymbol(t.contractId),
-      // Closing fill side: 0=sell(closed a long)→'long', 1=buy(closed a short)→'short'
       direction:       t.side === 0 ? 'long' : 'short',
       trade_date:      t.creationTimestamp.split('T')[0],
       pnl:             Math.round(((t.profitAndLoss ?? 0) - (t.fees ?? 0)) * 100) / 100,
@@ -207,7 +228,9 @@ serve(async (req) => {
 
     const { error: insertErr } = await supabase.from('trades').insert(rows);
     if (insertErr) {
-      console.error('[topstepx-sync] Insert failed:', insertErr.message);
+      const msg = `Failed to save trades: ${insertErr.message}`;
+      console.error('[topstepx-sync]', msg);
+      errors.push(msg);
     } else {
       totalInserted += rows.length;
     }
@@ -218,5 +241,5 @@ serve(async (req) => {
       .eq('id', conn.id);
   }
 
-  return json({ success: true, inserted: totalInserted });
+  return json({ success: true, inserted: totalInserted, errors });
 });
