@@ -446,16 +446,24 @@ RESEND_API_KEY=re_G5aKAVqD_NSg8f2DJHZNNweYDZJpoGMij
 ---
 
 ### TopstepX Auto Import (ProjectX Gateway API)
+- **תיעוד רשמי**: `https://gateway.docs.projectx.com/docs/category/getting-started`
 - **API Base**: `https://api.topstepx.com` (env var `TOPSTEPX_BASE_URL`)
-- **Auth endpoint**: `POST /api/Auth/loginKey` → `{userName, apiKey}` → `{token}`
-- **Accounts**: `POST /api/Account/search` → `{onlyActiveAccounts: true}` → `{accounts[].id}`
-- **Trades**: `POST /api/Trade/search` → `{accountId, startTimestamp, endTimestamp}` → `{trades[]}`
+- **Auth**: `POST /api/Auth/loginKey` → `{userName, apiKey}` → `{token, success, errorCode, errorMessage}`
+  - `errorCode: 0` = success | `errorCode: 3` = credentials שגויים | `errorMessage` בד"כ `null`
+  - Token תקף **24 שעות** — מתחברים מחדש בכל סנכרון
+- **Accounts**: `POST /api/Account/search` → `{onlyActiveAccounts: true}` → `{accounts[{id, name, canTrade, isVisible}]}`
+  - ⚠️ **אין שדה `balance`** בתגובה הרשמית
+- **Trades**: `POST /api/Trade/search` → `{accountId, startTimestamp, endTimestamp}` → `{trades[], success, errorCode}`
   - `profitAndLoss === null` = half-turn (לא עסקה שלמה) — מדלגים
   - `voided === true` — מדלגים
   - `side: 0` (sell=סגר long) → `direction: 'long'` | `side: 1` (buy=סגר short) → `direction: 'short'`
   - `contractId` נורמלי: `CON.F.US.MNQ.M25` → `MNQ` | `MNQM5` → `MNQ`
+  - ⚠️ **`EP` = `ES`** — ProjectX משתמש ב-`EP` עבור E-mini S&P 500 (לא `ES`). מוגדר ב-`PX_ALIAS` ב-topstepx-sync
   - `pnl = profitAndLoss - fees`
   - `broker_trade_id = topstepx-{id}`
+  - `source = 'topstepx'` (enum בDB: `'manual' | 'tradovate' | 'topstepx'`)
+- **Rate limits**: 200 req/60s (כל endpoints) | 50 req/30s (History/retrieveBars בלבד)
+- **שגיאות**: `topstepx-sync` מחזיר `{success, inserted, errors[]}` — שגיאות per-account (auth fail, trade fetch fail, insert fail) נאספות ב-`errors[]` ומוצגות ל-UI
 - **Flow בSettings**: Enter API Key → Connect (קורא `broker-oauth`) → Sync Now (קורא `topstepx-sync`)
 - **Deployed**: פרוס ב-Supabase project `mxzyfmuktsyazkfxglzb`
 
@@ -477,6 +485,27 @@ RESEND_API_KEY=re_G5aKAVqD_NSg8f2DJHZNNweYDZJpoGMij
   - `broker_trade_id = tradovate-{id}`
 - **Env vars** (Supabase Secrets): `TRADOVATE_APP_ID`, `TRADOVATE_CID`, `TRADOVATE_SEC`
 - **בינתיים**: ייבוא ידני דרך CSV — **עמוד Trades** → כפתור "Import" בראש העמוד (לא Settings)
+
+---
+
+## שיפורים שנעשו (אפריל 2026 — גל 6)
+
+### TopstepX — תיקונים מול תיעוד רשמי (ProjectX Gateway API)
+- **`source` enum תוקן**: `'auto'` → `'topstepx'` ב-topstepx-sync (הערך `'auto'` לא קיים ב-DB enum — כל insert נכשל בשקט)
+- **`TradeSource` type תוקן**: `'manual' | 'auto'` → `'manual' | 'tradovate' | 'topstepx'` (תואם ל-DB enum)
+- **EP→ES symbol alias**: `PX_ALIAS` ב-topstepx-sync ממיר `EP` ל-`ES` (ProjectX משתמש ב-`EP` עבור E-mini S&P 500)
+- **`ProjectXAccount` interface תוקן**: הוסף `isVisible`, הוסר `balance` (לא קיים בתגובה הרשמית)
+- **שגיאות גלויות מ-sync**: `topstepx-sync` מחזיר `errors[]` — שגיאות auth/fetch/insert per-account במקום `continue` שקט
+  - `errorCode: 3` → הודעה: "Invalid TopstepX credentials — please reconnect in Settings"
+  - שגיאות trade fetch → "Trade fetch failed (errorCode: X)"
+  - שגיאות insert → "Failed to save trades: ..."
+- **broker-oauth תוקן**: מחזיר `errorCode` מ-ProjectX ב-`detail` כשה-`errorMessage` הוא `null`
+- **Settings.tsx תוקן**:
+  - `pxAccounts` state: `canTrade + isVisible` במקום `balance`
+  - כל alert מציג `data.detail` בנוסף ל-`data.error` כשזמין
+  - `triggerSync`: מטפל ב-`errors[]` — מציג שגיאה ברורה כש-inserted=0, או "X עסקאות + שגיאה" כשיש גם וגם
+  - רשימת חשבונות להתחבר: מציג אזהרה אדומה "לא ניתן למסחר" כש-`canTrade: false`
+- **BrokerImport תוקן**: broker שאינו `tradovate`/`topstepx` (ninjatrader, rithmic, apex) ממופה ל-`source: 'manual'`
 
 ---
 
