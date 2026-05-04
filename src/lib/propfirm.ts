@@ -46,20 +46,40 @@ export function calcPropFirmStats(account: Account, trades: Trade[]): PropFirmSt
   }
   const sortedDays = Object.keys(dailyMap).sort();
 
-  // Build running balance and find high water mark
+  // Replay day by day — stop as soon as the account is finalized (breach or pass).
+  // Trades added after the finalization date are intentionally ignored so the card
+  // reflects the state at the moment the challenge ended.
   let runningBalance = start;
   let highWaterMark = start;
+  let daysTraded = 0;
+  let finalizedDay: string | null = null;
 
   for (const day of sortedDays) {
     runningBalance += dailyMap[day];
     if (runningBalance > highWaterMark) highWaterMark = runningBalance;
+    daysTraded++;
+
+    const floor = ddType === 'static' ? start - maxDD : highWaterMark - maxDD;
+
+    // Breach: balance hit or crossed the floor on this day
+    if (maxDD > 0 && runningBalance <= floor) {
+      finalizedDay = day;
+      break;
+    }
+
+    // Pass: challenge profit target reached with minimum days met
+    const pnlSoFar = runningBalance - start;
+    const minDaysMetSoFar = !minDays || daysTraded >= minDays;
+    if (account.prop_phase === 'challenge' && profitTarget > 0 && pnlSoFar >= profitTarget && minDaysMetSoFar) {
+      finalizedDay = day;
+      break;
+    }
   }
 
   const currentBalance = runningBalance;
   const totalPnL = currentBalance - start;
 
   // trailing_eod / trailing_intraday: floor follows high water mark of daily closes
-  // (intraday approximated as EOD since trades are logged end-of-day)
   // static: floor is fixed from starting balance, never moves
   const trailingFloor =
     ddType === 'static'
@@ -70,9 +90,9 @@ export function calcPropFirmStats(account: Account, trades: Trade[]): PropFirmSt
   const drawdownUsed = Math.max(0, maxDD - drawdownRemaining);
   const drawdownPct = maxDD > 0 ? Math.min(100, (drawdownUsed / maxDD) * 100) : 0;
 
-  // Today's P&L
+  // Today's P&L — zero if the account was finalized before today
   const today = new Date().toISOString().slice(0, 10);
-  const todayPnL = dailyMap[today] ?? 0;
+  const todayPnL = finalizedDay && finalizedDay < today ? 0 : (dailyMap[today] ?? 0);
 
   // Daily limit: only counts when today is a losing day
   const dailyLossToday = todayPnL < 0 ? Math.abs(todayPnL) : 0;
@@ -87,7 +107,6 @@ export function calcPropFirmStats(account: Account, trades: Trade[]): PropFirmSt
   const profitTargetBalance = start + profitTarget;
 
   // Days
-  const daysTraded = sortedDays.length;
   let daysSinceStart = 0;
   let daysRemaining = 0;
   if (startDate) {
