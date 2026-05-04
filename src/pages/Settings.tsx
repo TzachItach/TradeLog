@@ -223,7 +223,8 @@ function StrategyForm({ strategy, onSave, onCancel, lang }: {
       const to = idx + dir;
       if (to < 0 || to >= fields.length) return f;
       [fields[idx], fields[to]] = [fields[to], fields[idx]];
-      return { ...f, fields };
+      // Update sort_order to match the new visual order so it persists
+      return { ...f, fields: fields.map((field, i) => ({ ...field, sort_order: i + 1 })) };
     });
   };
 
@@ -341,7 +342,10 @@ function StrategyForm({ strategy, onSave, onCancel, lang }: {
 
       <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', borderTop: '1px solid var(--bd)', paddingTop: 14 }}>
         <button className="btn btn-ghost" onClick={onCancel}>{T.cancel}</button>
-        <button className="btn btn-primary" onClick={() => form.name.trim() && onSave(form)}>{T.save}</button>
+        <button className="btn btn-primary" onClick={() => {
+          if (!form.name.trim()) { alert(isHe ? 'נא להזין שם אסטרטגיה' : 'Please enter a strategy name'); return; }
+          onSave(form);
+        }}>{T.save}</button>
       </div>
     </div>
   );

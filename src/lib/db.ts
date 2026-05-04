@@ -214,7 +214,7 @@ export async function dbSaveStrategy(strategy: Strategy, userId: string) {
         id: f.id, strategy_id: strategy.id, user_id: userId,
         field_type: f.field_type, label: f.label,
         placeholder: f.placeholder ?? null,
-        is_required: f.is_required, sort_order: f.sort_order ?? i + 1,
+        is_required: f.is_required, sort_order: i + 1,
       }))
     );
     logErr('strategy_fields.insert', fe);
