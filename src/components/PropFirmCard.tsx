@@ -141,7 +141,7 @@ function SingleAccountCard({ account, isHe }: { account: Account; isHe: boolean 
             </span>
           </div>
           <MeterBar pct={stats.drawdownPct} status={stats.status} />
-          {account.prop_drawdown_type === 'trailing' && (
+          {(account.prop_drawdown_type === 'trailing_eod' || account.prop_drawdown_type === 'trailing_intraday') && (
             <div style={{ fontSize: '.68rem', color: 'var(--t3)', marginTop: 3 }}>
               Peak: {fmt(stats.highWaterMark)}
             </div>

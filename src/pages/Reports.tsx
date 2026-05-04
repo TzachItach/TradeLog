@@ -64,7 +64,7 @@ function exportCSV(trades: StoreTrade[], strategies: StoreStrategy[]) {
     return [
       t.trade_date, t.symbol, t.direction, t.pnl, t.size ?? '', t.stop_loss_pts ?? '',
       t.take_profit_pts ?? '', strat, t.htf_pd_array ?? '', t.psychology ?? '', t.notes ?? '',
-    ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',');
+    ].map((v) => `"${String(v).replace(/"/g, '""').replace(/\r?\n/g, ' ')}"`).join(',');
   });
   const csv = [headers.join(','), ...rows].join('\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -84,7 +84,12 @@ function exportPDF(
   toDate: string,
 ) {
   const win = window.open('', '_blank');
-  if (!win) return;
+  if (!win) {
+    alert(lang === 'he'
+      ? 'הדפדפן חסם את החלון הקופץ. אנא אפשר חלונות קופצים עבור אתר זה ונסה שנית.'
+      : 'Popup was blocked. Please allow popups for this site and try again.');
+    return;
+  }
 
   const stats = calcStats(trades);
   const byStrat = calcByStrategy(trades, strategies);

@@ -48,7 +48,9 @@ function BudgetModal({ settings, onSave, onClear, onClose, isHe }: {
   const handleSave = () => {
     const n = parseFloat(amount);
     if (!n || n <= 0) return;
-    onSave({ amount: n, period, currency, ilsRate: parseFloat(ilsRate) || 3.7 });
+    const rate = parseFloat(ilsRate);
+    if (currency === 'ILS' && (!rate || rate <= 0)) return;
+    onSave({ amount: n, period, currency, ilsRate: rate > 0 ? rate : 1 });
   };
 
   const inputStyle: React.CSSProperties = {

@@ -88,11 +88,13 @@ export default function TradeModal() {
 
   const save = () => {
     if (!form.symbol.trim()) { alert(isHe ? 'נא להזין סמל' : 'Please enter a symbol'); return; }
+    if (!form.account_id) { alert(isHe ? 'נא לבחור חשבון' : 'Please select an account'); return; }
     const tradeId = existingTrade ? existingTrade.id : crypto.randomUUID();
+    const pnl = Number(form.pnl) || 0;
     if (existingTrade) {
-      updateTrade({ ...form, id: tradeId });
+      updateTrade({ ...form, id: tradeId, pnl });
     } else {
-      addTrade({ ...form, id: tradeId, pnl: Number(form.pnl) || 0 });
+      addTrade({ ...form, id: tradeId, pnl });
     }
     if (mediaFiles.length > 0 && user?.id) {
       dbUploadTradeMedia(tradeId, user.id, mediaFiles);
@@ -258,7 +260,7 @@ export default function TradeModal() {
             <div>
               <label className="form-label">{T.strategy}</label>
               <select className="form-input" value={form.strategy_id ?? ''}
-                onChange={e => set('strategy_id', e.target.value || undefined)}>
+                onChange={e => setForm(f => ({ ...f, strategy_id: e.target.value || undefined, confirmations: {} }))}>
                 <option value="">— {T.allStrategies} —</option>
                 {strategies.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>

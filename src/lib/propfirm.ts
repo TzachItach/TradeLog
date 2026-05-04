@@ -25,10 +25,11 @@ export interface PropFirmStats {
 export function calcPropFirmStats(account: Account, trades: Trade[]): PropFirmStats {
   const {
     initial_balance: start,
-    prop_drawdown_type: ddType = 'trailing',
+    prop_drawdown_type: ddType = 'trailing_eod',
     prop_max_drawdown: maxDD = 0,
     prop_daily_limit: dailyLimit = 0,
     prop_profit_target: profitTarget = 0,
+    prop_min_days: minDays = 0,
     prop_max_days: maxDays = 0,
     prop_start_date: startDate,
   } = account;
@@ -97,19 +98,25 @@ export function calcPropFirmStats(account: Account, trades: Trade[]): PropFirmSt
   }
 
   // Status
+  const minDaysMet = !minDays || daysTraded >= minDays;
   let status: PropFirmStats['status'] = 'safe';
   if (currentBalance <= trailingFloor) {
     status = 'breached';
   } else if (
     account.prop_phase === 'challenge' &&
     profitTarget > 0 &&
-    profitPnL >= profitTarget
+    profitPnL >= profitTarget &&
+    minDaysMet
   ) {
     status = 'passed';
   } else if (drawdownPct >= 80 || dailyLimitPct >= 80) {
     status = 'danger';
   } else if (drawdownPct >= 50 || dailyLimitPct >= 50) {
     status = 'warning';
+  }
+  // Overdue: past max days deadline but neither breached nor passed
+  if (maxDays > 0 && daysRemaining < 0 && (status === 'safe' || status === 'warning')) {
+    status = 'danger';
   }
 
   return {
