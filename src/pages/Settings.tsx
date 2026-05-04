@@ -352,7 +352,7 @@ function StrategyForm({ strategy, onSave, onCancel, lang }: {
 }
 
 /* ── ניהול חיבורי ברוקר ── */
-function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; accounts: Account[]; user: { id: string; email?: string; name?: string } | null; onSyncSuccess?: () => void }) {
+function BrokerSection({ lang, accounts, user, addAccount, onSyncSuccess }: { lang: string; accounts: Account[]; user: { id: string; email?: string; name?: string } | null; addAccount: (a: Account) => void; onSyncSuccess?: () => void }) {
   const isHe = lang === 'he';
   const T = useT(lang as 'he' | 'en');
   const [topstepKey, setTopstepKey] = useState('');
@@ -363,6 +363,7 @@ function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; 
   const [pxAccounts, setPxAccounts] = useState<{ id: number; name: string; canTrade: boolean; isVisible: boolean }[]>([]);
   const [selectedPxId, setSelectedPxId] = useState<number | null>(null);
   const [fetchingPx, setFetchingPx] = useState(false);
+  const [autoConnecting, setAutoConnecting] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL as string ?? '';
@@ -404,40 +405,77 @@ function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; 
     }
   };
 
-  const connectTopstepX = async (tradelogAccountId: string) => {
-    if (!topstepKey.trim() || selectedPxId === null) return;
+  const connectTopstepX = async (tradelogAccountId: string, pxId = selectedPxId) => {
+    if (!topstepKey.trim() || pxId === null) return;
     if (!supabase) return;
     const { data: { session } } = await supabase.auth.getSession();
     const jwt = session?.access_token;
     if (!jwt) return alert(isHe ? 'לא מחובר' : 'Not authenticated');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const anonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY as string;
-    try {
-      const res = await fetch(`${supabaseUrl}/functions/v1/broker-oauth`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
-        body: JSON.stringify({
-          broker: 'topstepx',
-          user_id: user?.id,
-          account_id: tradelogAccountId,
-          api_token: topstepKey,
-          api_username: topstepEmail.trim(),
-          projectx_account_id: selectedPxId,
-          step: 'connect',
-        }),
-      });
-      if (res.ok) {
-        resetTopstepForm();
-        alert(isHe ? 'TopstepX חובר בהצלחה!' : 'TopstepX connected!');
-      } else {
-        const data = await res.json().catch(() => ({}));
-        const msg = [data.error, data.detail].filter(Boolean).join(' — ');
-        alert(isHe
-          ? `שגיאה בחיבור TopstepX: ${msg || res.status}`
-          : `TopstepX connection failed: ${msg || res.status}`);
+    const res = await fetch(`${supabaseUrl}/functions/v1/broker-oauth`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
+      body: JSON.stringify({
+        broker: 'topstepx',
+        user_id: user?.id,
+        account_id: tradelogAccountId,
+        api_token: topstepKey,
+        api_username: topstepEmail.trim(),
+        projectx_account_id: pxId,
+        step: 'connect',
+      }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error([data.error, data.detail].filter(Boolean).join(' — ') || String(res.status));
+    }
+  };
+
+  const autoCreateAndConnect = async () => {
+    if (!topstepKey.trim() || !user?.id || !supabase) return;
+    setAutoConnecting(true);
+    let connected = 0;
+    const failed: string[] = [];
+    for (const pxa of pxAccounts) {
+      const newAcc: Account = {
+        id: crypto.randomUUID(),
+        name: pxa.name,
+        account_type: 'prop_firm',
+        broker: 'topstepx',
+        initial_balance: 0,
+        currency: 'USD',
+        is_active: pxa.canTrade,
+      };
+      addAccount(newAcc);
+      try {
+        await connectTopstepX(newAcc.id, pxa.id);
+        connected++;
+      } catch (e) {
+        failed.push(pxa.name);
       }
-    } catch {
-      alert(isHe ? 'שגיאה בחיבור TopstepX' : 'TopstepX connection failed');
+    }
+    setAutoConnecting(false);
+    resetTopstepForm();
+    if (failed.length === 0) {
+      alert(isHe
+        ? `${connected} חשבונות נוצרו וחוברו. כעת תוכל להגדיר יתרה ופרמטרי Prop Firm בכל חשבון.`
+        : `${connected} accounts created and connected. You can now configure the balance and prop firm settings for each account.`);
+      triggerSync();
+    } else {
+      alert(isHe
+        ? `חוברו ${connected}/${pxAccounts.length} חשבונות. נכשל: ${failed.join(', ')}`
+        : `Connected ${connected}/${pxAccounts.length} accounts. Failed: ${failed.join(', ')}`);
+    }
+  };
+
+  const connectTopstepXManual = async (tradelogAccountId: string) => {
+    try {
+      await connectTopstepX(tradelogAccountId);
+      resetTopstepForm();
+      alert(isHe ? 'TopstepX חובר בהצלחה!' : 'TopstepX connected!');
+    } catch (e) {
+      alert(isHe ? `שגיאה בחיבור TopstepX: ${e}` : `TopstepX connection failed: ${e}`);
     }
   };
 
@@ -570,61 +608,82 @@ function BrokerSection({ lang, accounts, user, onSyncSuccess }: { lang: string; 
                 </div>
               ) : (
                 <>
-                  {/* Step 2: pick ProjectX account (only shown when >1 and none chosen yet) */}
-                  {pxAccounts.length > 1 && selectedPxId === null && (
-                    <div>
-                      <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 6 }}>
-                        {isHe ? `נמצאו ${pxAccounts.length} חשבונות — בחר חשבון TopstepX:` : `Found ${pxAccounts.length} accounts — select a TopstepX account:`}
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {pxAccounts.map((pxa) => (
-                          <div key={pxa.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', background: 'var(--s1)', borderRadius: 7, border: '1px solid var(--bd)' }}>
-                            <div>
-                              <div style={{ fontSize: '.84rem', fontWeight: 600 }}>{pxa.name}</div>
-                              {!pxa.canTrade && <div style={{ fontSize: '.72rem', color: 'var(--r)' }}>{isHe ? 'לא ניתן למסחר' : 'Cannot trade'}</div>}
-                            </div>
-                            <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '.76rem' }}
-                              onClick={() => setSelectedPxId(pxa.id)}>
-                              {isHe ? 'בחר' : 'Select'}
-                            </button>
-                          </div>
-                        ))}
-                      </div>
+                  {/* Auto-create: primary option — shown whenever accounts are fetched */}
+                  <div style={{ padding: '10px 12px', background: 'rgba(29,185,84,.07)', border: '1px solid rgba(29,185,84,.3)', borderRadius: 8, marginBottom: 8 }}>
+                    <div style={{ fontSize: '.78rem', fontWeight: 600, color: 'var(--g)', marginBottom: 4 }}>
+                      {isHe
+                        ? `✓ נמצאו ${pxAccounts.length} חשבון${pxAccounts.length > 1 ? 'ות' : ''}`
+                        : `✓ Found ${pxAccounts.length} account${pxAccounts.length > 1 ? 's' : ''}`}
                     </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
+                      {pxAccounts.map((pxa) => (
+                        <div key={pxa.id} style={{ fontSize: '.8rem', color: 'var(--t2)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ color: pxa.canTrade ? 'var(--g)' : 'var(--r)' }}>●</span>
+                          {pxa.name}
+                          {!pxa.canTrade && <span style={{ fontSize: '.7rem', color: 'var(--r)' }}>({isHe ? 'לא פעיל' : 'inactive'})</span>}
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      className="btn btn-primary"
+                      style={{ width: '100%', fontSize: '.8rem', padding: '7px 0' }}
+                      onClick={autoCreateAndConnect}
+                      disabled={autoConnecting}
+                    >
+                      {autoConnecting
+                        ? (isHe ? 'יוצר חשבונות...' : 'Creating accounts...')
+                        : (isHe ? `צור ${pxAccounts.length > 1 ? 'את כל ' + pxAccounts.length + ' החשבונות' : 'חשבון'} וסנכרן` : `Create ${pxAccounts.length > 1 ? 'all ' + pxAccounts.length + ' accounts' : 'account'} & sync`)}
+                    </button>
+                  </div>
+
+                  {/* Manual option: link to existing TraderYo account */}
+                  {allAccounts.length > 0 && (
+                    <details style={{ marginBottom: 4 }}>
+                      <summary style={{ fontSize: '.74rem', color: 'var(--t3)', cursor: 'pointer', userSelect: 'none', marginBottom: 6 }}>
+                        {isHe ? '▸ קשר לחשבון קיים במקום זאת' : '▸ Link to an existing account instead'}
+                      </summary>
+                      <div style={{ marginTop: 8 }}>
+                        {/* pick ProjectX account if multiple */}
+                        {pxAccounts.length > 1 && (
+                          <div style={{ marginBottom: 8 }}>
+                            <div style={{ fontSize: '.72rem', color: 'var(--t3)', marginBottom: 5 }}>
+                              {isHe ? 'בחר חשבון TopstepX:' : 'Select TopstepX account:'}
+                            </div>
+                            <select
+                              className="form-input"
+                              value={selectedPxId ?? ''}
+                              onChange={(e) => setSelectedPxId(Number(e.target.value) || null)}
+                            >
+                              <option value="">{isHe ? '— בחר —' : '— Select —'}</option>
+                              {pxAccounts.map((pxa) => (
+                                <option key={pxa.id} value={pxa.id}>{pxa.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                        <div style={{ fontSize: '.72rem', color: 'var(--t3)', marginBottom: 5 }}>
+                          {isHe ? 'קשר לחשבון TraderYo:' : 'Link to TraderYo account:'}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                          {allAccounts.map((acc) => (
+                            <div key={acc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'var(--s1)', borderRadius: 7, border: '1px solid var(--bd)' }}>
+                              <span style={{ fontSize: '.84rem' }}>{acc.name}</span>
+                              <button
+                                className="btn btn-primary"
+                                style={{ padding: '4px 12px', fontSize: '.76rem' }}
+                                disabled={pxAccounts.length > 1 && selectedPxId === null}
+                                onClick={() => connectTopstepXManual(acc.id)}
+                              >
+                                {isHe ? 'חבר' : 'Connect'}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </details>
                   )}
 
-                  {/* Step 3: pick TradeLog account to link to */}
-                  {selectedPxId !== null && (
-                    <div>
-                      {/* Show which PX account was chosen + allow changing */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, padding: '6px 10px', background: 'var(--s2)', borderRadius: 7, border: '1px solid var(--bd)' }}>
-                        <span style={{ fontSize: '.8rem', color: 'var(--g)', flex: 1 }}>
-                          ✓ {pxAccounts.find((a) => a.id === selectedPxId)?.name ?? `Account #${selectedPxId}`}
-                        </span>
-                        {pxAccounts.length > 1 && (
-                          <button className="btn btn-ghost" style={{ fontSize: '.72rem', padding: '3px 10px' }}
-                            onClick={() => setSelectedPxId(null)}>
-                            {isHe ? 'שנה' : 'Change'}
-                          </button>
-                        )}
-                      </div>
-                      <div style={{ fontSize: '.74rem', color: 'var(--t3)', marginBottom: 6 }}>
-                        {isHe ? 'קשר לחשבון TraderYo:' : 'Link to TraderYo account:'}
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {allAccounts.map((acc) => (
-                          <div key={acc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'var(--s1)', borderRadius: 7, border: '1px solid var(--bd)' }}>
-                            <span style={{ fontSize: '.84rem' }}>{acc.name}</span>
-                            <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '.76rem' }}
-                              onClick={() => connectTopstepX(acc.id)}>
-                              {isHe ? 'חבר' : 'Connect'}
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  <button className="btn btn-ghost" style={{ fontSize: '.76rem', padding: '4px 12px', alignSelf: 'flex-start', marginTop: 4 }}
+                  <button className="btn btn-ghost" style={{ fontSize: '.76rem', padding: '4px 12px', alignSelf: 'flex-start' }}
                     onClick={resetTopstepForm}>
                     {T.cancel}
                   </button>
@@ -889,7 +948,7 @@ export default function Settings() {
 
       {/* חיבורי ברוקר */}
       {!DEMO_MODE && (
-        <BrokerSection lang={lang} accounts={accounts} user={user} onSyncSuccess={reloadFromCloud} />
+        <BrokerSection lang={lang} accounts={accounts} user={user} addAccount={addAccount} onSyncSuccess={reloadFromCloud} />
       )}
 
       {/* פרופיל + התנתקות */}
