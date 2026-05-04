@@ -181,7 +181,7 @@ export default function PropFirm() {
   const isHe = lang === 'he';
   const isMobile = useIsMobile();
 
-  const propAccounts = accounts.filter((a) => a.account_type === 'prop_firm');
+  const propAccounts = accounts.filter((a) => a.account_type === 'prop_firm' || a.account_type === 'demo');
 
   const [selectedId, setSelectedId] = useState<string>(ALL);
   const [page, setPage] = useState(0);
