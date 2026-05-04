@@ -199,7 +199,8 @@ export default function CalendarView() {
     });
     if (row.length > 0) {
       while (row.length < 7) row.push(null);
-      rows.push(row);
+      // Skip overflow row that only contains Sunday/Saturday (no trading days Mon–Fri)
+      if (row.slice(1, 6).some(c => c !== null)) rows.push(row);
     }
     return rows;
   }, [cells]);
