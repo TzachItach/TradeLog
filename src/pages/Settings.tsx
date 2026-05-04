@@ -362,6 +362,7 @@ function BrokerSection({ lang, accounts, user, addAccount, onSyncSuccess }: { la
   const [lastSync, setLastSync] = useState<{ [k: string]: string }>({});
   const [pxAccounts, setPxAccounts] = useState<{ id: number; name: string; canTrade: boolean; isVisible: boolean }[]>([]);
   const [selectedPxId, setSelectedPxId] = useState<number | null>(null);
+  const [checkedPxIds, setCheckedPxIds] = useState<Set<number>>(new Set());
   const [fetchingPx, setFetchingPx] = useState(false);
   const [autoConnecting, setAutoConnecting] = useState(false);
 
@@ -374,6 +375,7 @@ function BrokerSection({ lang, accounts, user, addAccount, onSyncSuccess }: { la
     setTopstepEmail('');
     setPxAccounts([]);
     setSelectedPxId(null);
+    setCheckedPxIds(new Set());
   };
 
   const fetchPxAccounts = async () => {
@@ -393,6 +395,8 @@ function BrokerSection({ lang, accounts, user, addAccount, onSyncSuccess }: { la
       const data = await res.json();
       if (res.ok && data.accounts?.length > 0) {
         setPxAccounts(data.accounts);
+        // pre-check all active accounts
+        setCheckedPxIds(new Set((data.accounts as { id: number; canTrade: boolean }[]).filter(a => a.canTrade).map(a => a.id)));
         if (data.accounts.length === 1) setSelectedPxId(data.accounts[0].id);
       } else {
         const msg = [data.error, data.detail].filter(Boolean).join(' — ');
@@ -434,10 +438,12 @@ function BrokerSection({ lang, accounts, user, addAccount, onSyncSuccess }: { la
 
   const autoCreateAndConnect = async () => {
     if (!topstepKey.trim() || !user?.id || !supabase) return;
+    const toCreate = pxAccounts.filter(a => checkedPxIds.has(a.id));
+    if (toCreate.length === 0) return;
     setAutoConnecting(true);
     let connected = 0;
     const failed: string[] = [];
-    for (const pxa of pxAccounts) {
+    for (const pxa of toCreate) {
       const newAcc: Account = {
         id: crypto.randomUUID(),
         name: pxa.name,
@@ -464,8 +470,8 @@ function BrokerSection({ lang, accounts, user, addAccount, onSyncSuccess }: { la
       triggerSync();
     } else {
       alert(isHe
-        ? `חוברו ${connected}/${pxAccounts.length} חשבונות. נכשל: ${failed.join(', ')}`
-        : `Connected ${connected}/${pxAccounts.length} accounts. Failed: ${failed.join(', ')}`);
+        ? `חוברו ${connected}/${toCreate.length} חשבונות. נכשל: ${failed.join(', ')}`
+        : `Connected ${connected}/${toCreate.length} accounts. Failed: ${failed.join(', ')}`);
     }
   };
 
@@ -610,29 +616,42 @@ function BrokerSection({ lang, accounts, user, addAccount, onSyncSuccess }: { la
                 <>
                   {/* Auto-create: primary option — shown whenever accounts are fetched */}
                   <div style={{ padding: '10px 12px', background: 'rgba(29,185,84,.07)', border: '1px solid rgba(29,185,84,.3)', borderRadius: 8, marginBottom: 8 }}>
-                    <div style={{ fontSize: '.78rem', fontWeight: 600, color: 'var(--g)', marginBottom: 4 }}>
+                    <div style={{ fontSize: '.78rem', fontWeight: 600, color: 'var(--g)', marginBottom: 8 }}>
                       {isHe
-                        ? `✓ נמצאו ${pxAccounts.length} חשבון${pxAccounts.length > 1 ? 'ות' : ''}`
-                        : `✓ Found ${pxAccounts.length} account${pxAccounts.length > 1 ? 's' : ''}`}
+                        ? `✓ נמצאו ${pxAccounts.length} חשבון${pxAccounts.length > 1 ? 'ות' : ''} — בחר אילו ליצור:`
+                        : `✓ Found ${pxAccounts.length} account${pxAccounts.length > 1 ? 's' : ''} — select which to create:`}
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 10 }}>
                       {pxAccounts.map((pxa) => (
-                        <div key={pxa.id} style={{ fontSize: '.8rem', color: 'var(--t2)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ color: pxa.canTrade ? 'var(--g)' : 'var(--r)' }}>●</span>
-                          {pxa.name}
-                          {!pxa.canTrade && <span style={{ fontSize: '.7rem', color: 'var(--r)' }}>({isHe ? 'לא פעיל' : 'inactive'})</span>}
-                        </div>
+                        <label key={pxa.id} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '5px 8px', borderRadius: 6, background: checkedPxIds.has(pxa.id) ? 'rgba(29,185,84,.08)' : 'transparent' }}>
+                          <input
+                            type="checkbox"
+                            checked={checkedPxIds.has(pxa.id)}
+                            onChange={(e) => {
+                              setCheckedPxIds(prev => {
+                                const next = new Set(prev);
+                                e.target.checked ? next.add(pxa.id) : next.delete(pxa.id);
+                                return next;
+                              });
+                            }}
+                            style={{ width: 15, height: 15, accentColor: 'var(--g)', flexShrink: 0 }}
+                          />
+                          <span style={{ fontSize: '.83rem', flex: 1 }}>{pxa.name}</span>
+                          {!pxa.canTrade && <span style={{ fontSize: '.7rem', color: 'var(--r)' }}>{isHe ? 'לא פעיל' : 'inactive'}</span>}
+                        </label>
                       ))}
                     </div>
                     <button
                       className="btn btn-primary"
                       style={{ width: '100%', fontSize: '.8rem', padding: '7px 0' }}
                       onClick={autoCreateAndConnect}
-                      disabled={autoConnecting}
+                      disabled={autoConnecting || checkedPxIds.size === 0}
                     >
                       {autoConnecting
                         ? (isHe ? 'יוצר חשבונות...' : 'Creating accounts...')
-                        : (isHe ? `צור ${pxAccounts.length > 1 ? 'את כל ' + pxAccounts.length + ' החשבונות' : 'חשבון'} וסנכרן` : `Create ${pxAccounts.length > 1 ? 'all ' + pxAccounts.length + ' accounts' : 'account'} & sync`)}
+                        : checkedPxIds.size === 0
+                          ? (isHe ? 'בחר חשבון אחד לפחות' : 'Select at least one account')
+                          : (isHe ? `צור ${checkedPxIds.size} חשבון${checkedPxIds.size > 1 ? 'ות' : ''} וסנכרן` : `Create ${checkedPxIds.size} account${checkedPxIds.size > 1 ? 's' : ''} & sync`)}
                     </button>
                   </div>
 
