@@ -9,7 +9,7 @@ import { dbUploadTradeMedia, dbGetTradeMediaUrls } from '../lib/db';
 
 const EMPTY_TRADE = (date: string, accountId: string): Omit<Trade, 'id'> => ({
   account_id: accountId,
-  strategy_id: 's1',
+  strategy_id: undefined,
   symbol: '',
   direction: 'long',
   trade_date: date,
@@ -258,7 +258,7 @@ export default function TradeModal() {
             <div>
               <label className="form-label">{T.strategy}</label>
               <select className="form-input" value={form.strategy_id ?? ''}
-                onChange={e => set('strategy_id', e.target.value)}>
+                onChange={e => set('strategy_id', e.target.value || undefined)}>
                 <option value="">— {T.allStrategies} —</option>
                 {strategies.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
