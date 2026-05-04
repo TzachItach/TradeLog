@@ -70,7 +70,8 @@ export function calcPropFirmStats(account: Account, trades: Trade[]): PropFirmSt
     // Pass: challenge profit target reached with minimum days met
     const pnlSoFar = runningBalance - start;
     const minDaysMetSoFar = !minDays || daysTraded >= minDays;
-    if (account.prop_phase === 'challenge' && profitTarget > 0 && pnlSoFar >= profitTarget && minDaysMetSoFar) {
+    const isChallengeSoFar = (account.prop_phase ?? (account.account_type === 'demo' ? 'challenge' : 'funded')) === 'challenge';
+    if (isChallengeSoFar && profitTarget > 0 && pnlSoFar >= profitTarget && minDaysMetSoFar) {
       finalizedDay = day;
       break;
     }
@@ -122,7 +123,7 @@ export function calcPropFirmStats(account: Account, trades: Trade[]): PropFirmSt
   if (currentBalance <= trailingFloor) {
     status = 'breached';
   } else if (
-    account.prop_phase === 'challenge' &&
+    (account.prop_phase ?? (account.account_type === 'demo' ? 'challenge' : 'funded')) === 'challenge' &&
     profitTarget > 0 &&
     profitPnL >= profitTarget &&
     minDaysMet

@@ -64,7 +64,7 @@ function SingleAccountCard({ account, isHe }: { account: Account; isHe: boolean 
   const { trades } = useStore();
   const stats = useMemo(() => calcPropFirmStats(account, trades), [account, trades]);
 
-  const isChallenge = account.prop_phase === 'challenge';
+  const isChallenge = (account.prop_phase ?? (account.account_type === 'demo' ? 'challenge' : 'funded')) === 'challenge';
   const hasTarget   = isChallenge && (account.prop_profit_target ?? 0) > 0;
   const hasDailyLim = (account.prop_daily_limit ?? 0) > 0;
   const hasMaxDays  = isChallenge && (account.prop_max_days ?? 0) > 0;
@@ -223,7 +223,7 @@ export default function PropFirmCard() {
   const isHe = lang === 'he';
 
   const propAccounts = accounts.filter((a) => {
-    if (a.account_type !== 'prop_firm') return false;
+    if (a.account_type !== 'prop_firm' && a.account_type !== 'demo') return false;
     // "all accounts" view — show all prop firm accounts
     if (selectedAccount === 'all') return true;
     // specific account selected — show only if it's this one

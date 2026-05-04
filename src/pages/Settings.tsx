@@ -32,7 +32,18 @@ function AccountForm({ account, onSave, onCancel, lang }: {
         </div>
         <div>
           <label className="form-label">{T.accountType}</label>
-          <select className="form-input" value={form.account_type} onChange={(e) => s('account_type', e.target.value as Account['account_type'])}>
+          <select className="form-input" value={form.account_type} onChange={(e) => {
+            const at = e.target.value as Account['account_type'];
+            if (at === 'demo') {
+              setForm(f => ({ ...f, account_type: at, prop_phase: 'challenge' }));
+              setShowPropFields(true);
+            } else if (at === 'prop_firm') {
+              setForm(f => ({ ...f, account_type: at, prop_phase: 'funded' }));
+              setShowPropFields(true);
+            } else {
+              setForm(f => ({ ...f, account_type: at }));
+            }
+          }}>
             <option value="personal">{T.personal}</option>
             <option value="prop_firm">{T.propFirm}</option>
             <option value="demo">{T.demo}</option>
@@ -58,33 +69,37 @@ function AccountForm({ account, onSave, onCancel, lang }: {
         </div>
       </div>
       {/* ── שדות Prop Firm ── */}
-      {form.account_type === 'prop_firm' && (
+      {(form.account_type === 'prop_firm' || form.account_type === 'demo') && (
         <div style={{ marginTop: 16, padding: '14px 16px', background: 'var(--b-bg)', border: '1px solid var(--b-bd)', borderRadius: 10 }}>
           <div style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--b)', marginBottom: showPropFields ? 14 : 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               {isHe ? 'הגדרות Prop Firm' : 'Prop Firm Settings'}
-              <span style={{ fontSize: '.68rem', fontWeight: 400, color: 'var(--t3)' }}>
-                {isHe ? '(אופציונלי)' : '(optional)'}
-              </span>
+              {form.account_type !== 'demo' && (
+                <span style={{ fontSize: '.68rem', fontWeight: 400, color: 'var(--t3)' }}>
+                  {isHe ? '(אופציונלי)' : '(optional)'}
+                </span>
+              )}
             </div>
-            <button
-              type="button"
-              className="btn btn-ghost"
-              style={{ fontSize: '.72rem', padding: '3px 10px' }}
-              onClick={() => setShowPropFields((v) => !v)}
-            >
-              {showPropFields
-                ? (isHe ? '▲ הסתר' : '▲ Hide')
-                : (isHe ? '▼ הגדר פרמטרים' : '▼ Configure limits')}
-            </button>
+            {form.account_type !== 'demo' && (
+              <button
+                type="button"
+                className="btn btn-ghost"
+                style={{ fontSize: '.72rem', padding: '3px 10px' }}
+                onClick={() => setShowPropFields((v) => !v)}
+              >
+                {showPropFields
+                  ? (isHe ? '▲ הסתר' : '▲ Hide')
+                  : (isHe ? '▼ הגדר פרמטרים' : '▼ Configure limits')}
+              </button>
+            )}
           </div>
 
           {showPropFields && (
             <div className="form-grid">
               <div>
                 <label className="form-label">{isHe ? 'שלב' : 'Phase'}</label>
-                <select className="form-input" value={form.prop_phase ?? 'challenge'}
+                <select className="form-input" value={form.prop_phase ?? (form.account_type === 'prop_firm' ? 'funded' : 'challenge')}
                   onChange={(e) => s('prop_phase', e.target.value as Account['prop_phase'])}>
                   <option value="challenge">{isHe ? 'מבחן (Challenge)' : 'Challenge'}</option>
                   <option value="funded">{isHe ? 'ממומן (Funded)' : 'Funded'}</option>
@@ -124,7 +139,7 @@ function AccountForm({ account, onSave, onCancel, lang }: {
                   onChange={(e) => s('prop_daily_limit', Number(e.target.value))} />
               </div>
 
-              {(form.prop_phase ?? 'challenge') === 'challenge' && (
+              {(form.prop_phase ?? (form.account_type === 'prop_firm' ? 'funded' : 'challenge')) === 'challenge' && (
                 <>
                   <div>
                     <label className="form-label">{isHe ? 'יעד רווח ($)' : 'Profit Target ($)'}</label>
