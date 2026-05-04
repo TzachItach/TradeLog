@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { useT } from '../i18n';
 import { signOut, DEMO_MODE, supabase } from '../lib/supabase';
+import { dbSaveAccount } from '../lib/db';
 import type { Account, Strategy, StrategyField, PropExpense, ExpenseFeeType } from '../types';
 
 const COLORS = ['#4a7dff', '#00c896', '#ff9f43', '#ff3355', '#a855f7', '#06b6d4', '#f59e0b', '#ec4899'];
@@ -363,6 +364,7 @@ function BrokerSection({ lang, accounts, user, addAccount, onSyncSuccess }: { la
   const [pxAccounts, setPxAccounts] = useState<{ id: number; name: string; canTrade: boolean; isVisible: boolean }[]>([]);
   const [selectedPxId, setSelectedPxId] = useState<number | null>(null);
   const [checkedPxIds, setCheckedPxIds] = useState<Set<number>>(new Set());
+  const [alreadyConnectedPxIds, setAlreadyConnectedPxIds] = useState<Set<number>>(new Set());
   const [fetchingPx, setFetchingPx] = useState(false);
   const [autoConnecting, setAutoConnecting] = useState(false);
 
@@ -376,6 +378,7 @@ function BrokerSection({ lang, accounts, user, addAccount, onSyncSuccess }: { la
     setPxAccounts([]);
     setSelectedPxId(null);
     setCheckedPxIds(new Set());
+    setAlreadyConnectedPxIds(new Set());
   };
 
   const fetchPxAccounts = async () => {
@@ -387,16 +390,22 @@ function BrokerSection({ lang, accounts, user, addAccount, onSyncSuccess }: { la
     const anonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY as string;
     setFetchingPx(true);
     try {
-      const res = await fetch(`${supabaseUrl}/functions/v1/broker-oauth`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
-        body: JSON.stringify({ broker: 'topstepx', user_id: user?.id, api_token: topstepKey, api_username: topstepEmail.trim(), step: 'validate' }),
-      });
+      // Fetch PX accounts + existing broker connections in parallel
+      const [res, connRes] = await Promise.all([
+        fetch(`${supabaseUrl}/functions/v1/broker-oauth`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', apikey: anonKey, Authorization: `Bearer ${jwt}` },
+          body: JSON.stringify({ broker: 'topstepx', user_id: user?.id, api_token: topstepKey, api_username: topstepEmail.trim(), step: 'validate' }),
+        }),
+        supabase.from('broker_connections').select('projectx_account_id').eq('user_id', user?.id ?? '').eq('broker', 'topstepx'),
+      ]);
       const data = await res.json();
       if (res.ok && data.accounts?.length > 0) {
+        const already = new Set<number>((connRes.data ?? []).map((c: { projectx_account_id: number }) => c.projectx_account_id));
+        setAlreadyConnectedPxIds(already);
         setPxAccounts(data.accounts);
-        // pre-check all active accounts
-        setCheckedPxIds(new Set((data.accounts as { id: number; canTrade: boolean }[]).filter(a => a.canTrade).map(a => a.id)));
+        // Pre-check only active accounts not already connected
+        setCheckedPxIds(new Set((data.accounts as { id: number; canTrade: boolean }[]).filter(a => a.canTrade && !already.has(a.id)).map(a => a.id)));
         if (data.accounts.length === 1) setSelectedPxId(data.accounts[0].id);
       } else {
         const msg = [data.error, data.detail].filter(Boolean).join(' — ');
@@ -438,7 +447,7 @@ function BrokerSection({ lang, accounts, user, addAccount, onSyncSuccess }: { la
 
   const autoCreateAndConnect = async () => {
     if (!topstepKey.trim() || !user?.id || !supabase) return;
-    const toCreate = pxAccounts.filter(a => checkedPxIds.has(a.id));
+    const toCreate = pxAccounts.filter(a => checkedPxIds.has(a.id) && !alreadyConnectedPxIds.has(a.id));
     if (toCreate.length === 0) return;
     setAutoConnecting(true);
     let connected = 0;
@@ -453,9 +462,12 @@ function BrokerSection({ lang, accounts, user, addAccount, onSyncSuccess }: { la
         currency: 'USD',
         is_active: pxa.canTrade,
       };
-      addAccount(newAcc);
       try {
+        // Save account to DB first so FK constraint on broker_connections is satisfied
+        await dbSaveAccount(newAcc, user.id);
         await connectTopstepX(newAcc.id, pxa.id);
+        // Only add to store after both DB writes succeed
+        addAccount(newAcc);
         connected++;
       } catch (e) {
         failed.push(pxa.name);
@@ -622,24 +634,34 @@ function BrokerSection({ lang, accounts, user, addAccount, onSyncSuccess }: { la
                         : `✓ Found ${pxAccounts.length} account${pxAccounts.length > 1 ? 's' : ''} — select which to create:`}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 10 }}>
-                      {pxAccounts.map((pxa) => (
-                        <label key={pxa.id} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '5px 8px', borderRadius: 6, background: checkedPxIds.has(pxa.id) ? 'rgba(29,185,84,.08)' : 'transparent' }}>
-                          <input
-                            type="checkbox"
-                            checked={checkedPxIds.has(pxa.id)}
-                            onChange={(e) => {
-                              setCheckedPxIds(prev => {
-                                const next = new Set(prev);
-                                e.target.checked ? next.add(pxa.id) : next.delete(pxa.id);
-                                return next;
-                              });
-                            }}
-                            style={{ width: 15, height: 15, accentColor: 'var(--g)', flexShrink: 0 }}
-                          />
-                          <span style={{ fontSize: '.83rem', flex: 1 }}>{pxa.name}</span>
-                          {!pxa.canTrade && <span style={{ fontSize: '.7rem', color: 'var(--r)' }}>{isHe ? 'לא פעיל' : 'inactive'}</span>}
-                        </label>
-                      ))}
+                      {pxAccounts.map((pxa) => {
+                        const isLinked = alreadyConnectedPxIds.has(pxa.id);
+                        return isLinked ? (
+                          <div key={pxa.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 8px', borderRadius: 6, opacity: 0.55 }}>
+                            <span style={{ fontSize: '.83rem', flex: 1 }}>{pxa.name}</span>
+                            <span style={{ fontSize: '.7rem', color: 'var(--g)', fontWeight: 600 }}>
+                              {isHe ? '✓ מחובר' : '✓ Connected'}
+                            </span>
+                          </div>
+                        ) : (
+                          <label key={pxa.id} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '5px 8px', borderRadius: 6, background: checkedPxIds.has(pxa.id) ? 'rgba(29,185,84,.08)' : 'transparent' }}>
+                            <input
+                              type="checkbox"
+                              checked={checkedPxIds.has(pxa.id)}
+                              onChange={(e) => {
+                                setCheckedPxIds(prev => {
+                                  const next = new Set(prev);
+                                  e.target.checked ? next.add(pxa.id) : next.delete(pxa.id);
+                                  return next;
+                                });
+                              }}
+                              style={{ width: 15, height: 15, accentColor: 'var(--g)', flexShrink: 0 }}
+                            />
+                            <span style={{ fontSize: '.83rem', flex: 1 }}>{pxa.name}</span>
+                            {!pxa.canTrade && <span style={{ fontSize: '.7rem', color: 'var(--r)' }}>{isHe ? 'לא פעיל' : 'inactive'}</span>}
+                          </label>
+                        );
+                      })}
                     </div>
                     <button
                       className="btn btn-primary"

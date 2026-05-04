@@ -312,8 +312,8 @@ export default function ProductTour({ onDone }: { onDone: () => void }) {
           popover: {
             title: isHe ? '🔄 ייבוא אוטומטי' : '🔄 Auto Import',
             description: isHe
-              ? 'חבר את Tradovate (email + סיסמה) או TopstepX (API key) כדי לייבא עסקאות אוטומטית — בלי הקלדה ידנית. לחץ "Connect" ואז "Sync Now".'
-              : 'Connect Tradovate (email + password) or TopstepX (API key) to auto-import your trades. Click Connect then Sync Now.',
+              ? 'חבר TopstepX עם API Key — המערכת תמצא את החשבונות שלך ותיצור אותם אוטומטית. בחר אילו חשבונות לייבא ולחץ "צור וסנכרן". אחרי החיבור הגדר את פרמטרי ה-Prop Firm (Drawdown, יעד) בהגדרות החשבון.'
+              : 'Connect TopstepX with your API Key — TraderYo finds your accounts and creates them automatically. Select which to import and click "Create & sync". Then configure Prop Firm parameters (drawdown, target) in the account settings.',
             side: 'top', align: 'start',
           },
         },
